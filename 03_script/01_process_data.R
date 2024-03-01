@@ -1,7 +1,7 @@
 # Analysis script
 
 # Author Caitlin Gaskell
-#inport plant full
+#import plant full
 
 pfull<-read.table("01_data/plant_full.txt",header=T)
 head(pfull,4);dim(pfull)
@@ -30,3 +30,11 @@ soilq<-soilq[which(!soilq==missingq)]
 psoil<-pfull[which(pfull$quadratID %in% soilq),]
 head(psoil);dim(psoil)
 rownames(psoil)<-1:nrow(psoil)
+
+#import test tray data
+
+tdata<-tdata<-read.csv("01_data/tray_data_test.csv",header=T)
+head(tdata);dim(tdata)
+
+#add quadratID collumn to tray data
+tdata$quadratID<-paste(tdata$transect,tdata$quadrat,sep=".")
