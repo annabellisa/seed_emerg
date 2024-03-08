@@ -1,35 +1,18 @@
 # Analysis script
 
 # Author Caitlin Gaskell
-#import plant full
-
-pfull<-read.table("01_data/plant_full.txt",header=T)
-head(pfull,4);dim(pfull)
 
 
-#import site data
+#above-ground data for soil core sites
+soilabove<-read.table("01_data/psoil.txt",header=T)
+head(soilabove,4);dim(soilabove)
+
+#import site data for soil core sites
 
 sdata<-read.csv("01_data/site_data.csv",header=T)
+sdata$quadratID<-paste(sdata$transect,sdata$quadrat,sep=".")
 head(sdata,4);dim(sdata)
 
-sdata$quadratID<-paste(sdata$transect,sdata$quadrat,sep=".")
-
-#extract from pfull unique quadrats
-
-soilq<-unique(sdata$quadratID)
-soilq
-
-
-#check that soilqs exist in pfull
-
-missingq<-sdata[which(!soilq %in% unique(pfull$quadratID)),]$quadratID
-
-soilq<-soilq[which(!soilq==missingq)]
-
-
-psoil<-pfull[which(pfull$quadratID %in% soilq),]
-head(psoil);dim(psoil)
-rownames(psoil)<-1:nrow(psoil)
 
 #import test tray data
 
@@ -38,3 +21,7 @@ head(tdata);dim(tdata)
 
 #add quadratID collumn to tray data
 tdata$quadratID<-paste(tdata$transect,tdata$quadrat,sep=".")
+
+#T45.Q5 
+tdata[which(!tdata$quadratID %in% sdata$quadratID),]
+unique(soilabove$quadratID)
