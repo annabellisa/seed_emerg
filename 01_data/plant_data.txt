@@ -1,0 +1,208 @@
+code	species	origin	life_span	form	family
+Son_ole	"Sonchus oleraceus"	Exotic	Annual	Herb	Asteraceae
+Son_asp	"Sonchus asper"	Exotic	Annual/Biennial	Herb	Asteraceae
+Por_ole	"Portulaca oleracea"	Native	Annual	Herb	Portulacaceae
+Ein_nut	"Einadia nutans"	Native	Perennial	Herb	Chenopodiaceae
+Sen_mad	"Senecio madagascariensis"	Exotic	Annual	Herb	Asteraceae
+Pas_foe	"Passiflora foetida"	Exotic	Perennial	Herb	Passifloraceae
+Gam_cal	"Gamochaeta calviceps"	Exotic	Annual	Herb	Asteraceae
+Cyp_gra	"Cyperus gracilis"	Native	Perennial	Sedge/Rush	Cyperaceae
+Cyp_agg	"Cyperus aggregatus"	Exotic	Perennial	Sedge/Rush	Cyperaceae
+Con_bon	"Conyza bonariensis"	Exotic	Annual	Herb	Asteraceae
+Rum_bro	"Rumex brownii"	Native	Perennial	Herb	Polygonaceae
+Ver_lit	"Verbena litoralis"	Exotic	Annual	Herb	Verbenaceae
+Ver_bon	"Verbena bonariensis"	Exotic	Perennial	Herb	Verbenaceae
+Oxa_cor	"Oxalis corniculata"	Exotic	Perennial	Herb	Oxalidaceae
+Eup_dru	"Euphorbia drummondii"	Native	Perennial	Herb	Euphorbiaceae
+Euc_cre	"Eucalyptus crebra"	Native	Perennial	Tree	Myrtaceae
+Gal_ten	"Galactica tenuifolia"	Native	Perennial	Legume	Fabaceae
+Sol_nig	"Solanum nigrum"	Exotic	Perennial	Herb	Solanaceae
+Lan_cam	"Lantana camara"	Exotic	Perennial	Shrub	Verbenaceae
+Dic_rep	"Dichondra repens"	Native	Perennial	Herb	Convolvulaceae
+Gly_wig	"Glycine wightii"	Exotic	Perennial	Legume	Fabaceae
+Wah_gra	"Wahlenbergia gracilis"	Native	Perennial	Herb	Campanulaceae
+Lob_pur	"Lobelia purpurascens"	Native	Perennial	Herb	Campanulaceae
+Ger_sol	"Geranium solanderi"	Native	Perennial	Herb	Geraniaceae
+Hyd_lax	"Hydrocotyle laxiflora"	Native	Perennial	Herb	Araliaceae
+Euc_sph	"Euchiton sphaericus"	Native	Perennial	Herb	Asteraceae
+Bot_bla	"Bothriochloa bladhii"	Native	Perennial	Grass	Poaceae
+Ari_que	"Aristida queenslandica"	Native	Perennial	Grass	Poaceae
+The_aus	"Thesium australe"	Native	Perennial	Herb	Santalaceae
+Gly_tab	"Glycene tabacina"	Native	Perennial	Legume	Fabaceae
+Sig_ori	"Sigesbeckia orientalis"	Native	Annual	Herb	Asteraceae
+Cyp_dif	"Cyperus difformis"	Native	Perennial	Sedge/Rush	Cyperaceae
+Cyp_bre	"Cyperus brevifolus"	Exotic	Perennial	Sedge/Rush	Cyperaceae
+Dig_par	"Digitaria parviflora"	Native	Perennial	Grass	Poaceae
+Spo_cre	"Sporobolus creber"	Native	Perennial	Grass	Poaceae
+Pas_dis	"Paspalidium distans"	Native	Perennial	Grass	Poaceae
+Pan_eff	"Panicum effusum"	Native	Perennial	Grass	Poaceae
+Mel_rep	"Melinis repens"	Exotic	Perennial	Grass	Poaceae
+Spo_elo	"Sporobolus elongatus "	Native	Perennial	Grass	Poaceae
+Pan_dec	"Panicum decompositum"	Native	Perennial	Grass	Poaceae
+Chl_ven	"Chloris ventricosa"	Native	Perennial	Grass	Poaceae
+Cym_ref	"Cymbopogon refractus"	Native	Perennial	Grass	Poaceae
+Cyp_pol	"Cyperus polystachyos"	Native	Perennial	Sedge/Rush	Cyperaceae
+Cap_spi	"Capillipedium spicigerum"	Native	Perennial	Grass	Poaceae
+Cyn_dac	"Cynodon dactylon"	Exotic	Perennial	Grass	Poaceae
+Bot_dec	"Bothriochloa decipiens"	Native	Perennial	Grass	Poaceae
+Era_lep	"Eragrostis leptostachya"	Native	Perennial	Grass	Poaceae
+Cro_mon	"Crotalaria montana"	Native	Annual	Herb	Fabaceae
+Cro_lan	"Crotalaria lanceolata"	Exotic	Annual	Herb	Fabaceae
+Les_jun	"Lespedeza juncea"	Native	Perennial	Herb	Leguminosae
+Sid_acu	"Sida acuta"	Exotic	Perennial	Herb	Malvaceae
+Hyp_rad	"Hypochaeris radicata"	Exotic	Perennial	Herb	Asteraceae
+Men_sat	"Mentha satureioides"	Native	Perennial	Herb	Lamiaceae
+Mal_ame	"Malvastrum americanum"	Exotic	Perennial	Herb	Malvaceae
+Con_can	"Conyza canadensis"	Exotic	Annual	Herb	Asteraceae
+Lag_gra	"Lagenophora gracilis"	Exotic	Perennial	Herb	Asteraceae
+Cal_cun	"Calotis cuneifolia"	Native	Perennial	Herb	Asteraceae
+Gre_ret	"Grewia retusifolia"	Exotic	Annual	Shrub	Sparrmanniaceae
+Gal_par	"Galinsoga parviflora"	Exotic	Annual	Herb	Asteraceae
+Mec_pro	"Mecardonia procumbens"	Exotic	Perennial	Herb	Plantaginaceae
+Car_hir	"Cardamine hirsuta"	Exotic	Annual	Herb	Brassicaceae
+Cra_cre	"Crassocephalum crepidioides"	Exotic	Annual	Herb	Asteraceae
+Lac_ser	"Lactuca serriola"	Exotic	Annual	Herb	Asteraceae
+Ros_ads	"Rostellularia adscendens"	Native	Perennial	Herb	Acanthaceae
+Cys_pro	"Cystopteris protrusa"	Exotic	Perennial	Herb	Dryopteridaceae
+Nep_cor	"Nephrolepis cordifolia"	Native	Perennial	Herb	Nephrolepidaceae
+Lob_pur	"Lobelia purpurascens"	Native	Perennial	Herb	Campanulaceae
+Cir_vul	"Cirsium vulgare"	Exotic	Biennial	Herb	Asteraceae
+Cor_cit	"Corymbia citriodora"	Native	Perennial	Tree	Myrtaceae
+Poe_001	NA	NA	NA	Grass	Poaceae
+Poe_002	NA	NA	NA	Grass	Poaceae
+Poe_003	NA	NA	NA	Grass	Poaceae
+Poe_004	NA	NA	NA	Grass	Poaceae
+Poe_005	NA	NA	NA	Grass	Poaceae
+Poe_006	NA	NA	NA	Grass	Poaceae
+Poe_007	NA	NA	NA	Grass	Poaceae
+Poe_008	NA	NA	NA	Grass	Poaceae
+Poe_009	NA	NA	NA	Grass	Poaceae
+Poe_010	NA	NA	NA	Grass	Poaceae
+Poe_011	NA	NA	NA	Grass	Poaceae
+Poe_014	NA	NA	NA	Grass	Poaceae
+Poe_017	NA	NA	NA	Grass	Poaceae
+Poe_018	NA	NA	NA	Grass	Poaceae
+Poe_019	NA	NA	NA	Grass	Poaceae
+Poe_020	NA	NA	NA	Grass	Poaceae
+Poe_029	NA	NA	NA	Grass	Poaceae
+Poe_045	NA	NA	NA	Grass	Poaceae
+Poe_048	NA	NA	NA	Grass	Poaceae
+Poe_050	NA	NA	NA	Grass	Poaceae
+Poe_055	NA	NA	NA	Grass	Poaceae
+Poe_057	NA	NA	NA	Grass	Poaceae
+Poe_060	NA	NA	NA	Grass	Poaceae
+Poe_065	NA	NA	NA	Grass	Poaceae
+Poe_068	NA	NA	NA	Grass	Poaceae
+Poe_074	NA	NA	NA	Grass	Poaceae
+Poe_079	NA	NA	NA	Grass	Poaceae
+Poe_082	NA	NA	NA	Grass	Poaceae
+Poe_083	NA	NA	NA	Grass	Poaceae
+Poe_086	NA	NA	NA	Grass	Poaceae
+Poe_091	NA	NA	NA	Grass	Poaceae
+Poe_092	NA	NA	NA	Grass	Poaceae
+Poe_095	NA	NA	NA	Grass	Poaceae
+Poe_105	NA	NA	NA	Grass	Poaceae
+Poe_106	NA	NA	NA	Grass	Poaceae
+Poe_108	NA	NA	NA	Grass	Poaceae
+Poe_110	NA	NA	NA	Grass	Poaceae
+Poe_112	NA	NA	NA	Grass	Poaceae
+Poe_116	NA	NA	NA	Grass	Poaceae
+Poe_117	NA	NA	NA	Grass	Poaceae
+Poe_119	NA	NA	NA	Grass	Poaceae
+Poe_120	NA	NA	NA	Grass	Poaceae
+Poe_122	NA	NA	NA	Grass	Poaceae
+Poe_123	NA	NA	NA	Grass	Poaceae
+Poe_127	NA	NA	NA	Grass	Poaceae
+Poe_131	NA	NA	NA	Grass	Poaceae
+Poe_133	NA	NA	NA	Grass	Poaceae
+Poe_134	NA	NA	NA	Grass	Poaceae
+Poe_135	NA	NA	NA	Grass	Poaceae
+Poe_136	NA	NA	NA	Grass	Poaceae
+Poe_137	NA	NA	NA	Grass	Poaceae
+Poe_138	NA	NA	NA	Grass	Poaceae
+Poe_142	NA	NA	NA	Grass	Poaceae
+Poe_143	NA	NA	NA	Grass	Poaceae
+Poe_144	NA	NA	NA	Grass	Poaceae
+Poe_145	NA	NA	NA	Grass	Poaceae
+Poe_146	NA	NA	NA	Grass	Poaceae
+Poe_147	NA	NA	NA	Grass	Poaceae
+Poe_148	NA	NA	NA	Grass	Poaceae
+Poe_149	NA	NA	NA	Grass	Poaceae
+Poe_150	NA	NA	NA	Grass	Poaceae
+Poe_151	NA	NA	NA	Grass	Poaceae
+Poe_152	NA	NA	NA	Grass	Poaceae
+Poe_153	NA	NA	NA	Grass	Poaceae
+Poe_154	NA	NA	NA	Grass	Poaceae
+Poe_155	NA	NA	NA	Grass	Poaceae
+Poe_156	NA	NA	NA	Grass	Poaceae
+Poe_157	NA	NA	NA	Grass	Poaceae
+Poe_158	NA	NA	NA	Grass	Poaceae
+Poe_159	NA	NA	NA	Grass	Poaceae
+Poe_160	NA	NA	NA	Grass	Poaceae
+Poe_161	NA	NA	NA	Grass	Poaceae
+Poe_162	NA	NA	NA	Grass	Poaceae
+Poe_163	NA	NA	NA	Grass	Poaceae
+Poe_164	NA	NA	NA	Grass	Poaceae
+Poe_165	NA	NA	NA	Grass	Poaceae
+Poe_166	NA	NA	NA	Grass	Poaceae
+For_001	NA	NA	NA	NA	NA
+For_002	NA	NA	NA	NA	Apiaceae
+For_007	NA	NA	NA	NA	NA
+For_008	NA	NA	NA	NA	NA
+For_009	NA	NA	NA	NA	NA
+For_017	NA	NA	NA	NA	NA
+For_021	NA	NA	NA	NA	NA
+For_022	NA	NA	NA	NA	NA
+For_023	NA	NA	NA	NA	NA
+For_024	NA	NA	NA	NA	NA
+For_025	NA	NA	NA	NA	NA
+For_027	NA	NA	NA	NA	NA
+For_029	NA	NA	NA	NA	NA
+For_030	NA	NA	NA	NA	NA
+For_031	NA	NA	NA	NA	NA
+For_035	NA	NA	NA	NA	NA
+For_037	NA	NA	NA	NA	NA
+For_038	NA	NA	NA	NA	NA
+For_039	NA	NA	NA	NA	NA
+For_040	NA	NA	NA	NA	NA
+For_046	NA	NA	NA	NA	Malvaceae
+For_049	NA	NA	NA	NA	NA
+For_050	NA	NA	NA	NA	NA
+For_051	NA	NA	NA	NA	Asteraceae
+For_052	NA	NA	NA	NA	NA
+For_067	NA	NA	NA	NA	NA
+For_073	NA	NA	NA	NA	Lamiaceae
+For_080	NA	NA	NA	NA	NA
+For_082	NA	NA	NA	NA	NA
+For_083	NA	NA	NA	NA	NA
+For_084	NA	NA	NA	NA	NA
+For_085	NA	NA	NA	NA	NA
+For_088	NA	NA	NA	NA	NA
+For_089	NA	NA	NA	NA	NA
+For_092	NA	NA	NA	NA	NA
+For_093	NA	NA	NA	NA	NA
+For_094	NA	NA	NA	NA	NA
+For_097	NA	NA	NA	NA	NA
+For_098	NA	NA	NA	NA	NA
+For_100	NA	NA	NA	NA	NA
+For_101	NA	NA	NA	NA	NA
+For_102	NA	NA	NA	NA	NA
+For_103	NA	NA	NA	NA	NA
+For_105	NA	NA	NA	NA	NA
+For_106	NA	NA	NA	NA	NA
+For_107	NA	NA	NA	NA	NA
+For_108	NA	NA	NA	NA	NA
+For_109	NA	NA	NA	NA	NA
+For_110	NA	NA	NA	NA	NA
+For_111	NA	NA	NA	NA	NA
+For_112	NA	NA	NA	NA	NA
+Cyp_001	NA	NA	NA	Sedge/Rush	Cyperaceae
+Cyp_002	NA	NA	NA	Sedge/Rush	Cyperaceae
+Cyp_003	NA	NA	NA	Sedge/Rush	Cyperaceae
+Cyp_004	NA	NA	NA	Sedge/Rush	Cyperaceae
+Cyp_005	NA	NA	NA	Sedge/Rush	Cyperaceae
+Cyp_006	NA	NA	NA	Sedge/Rush	Cyperaceae
+Cyp_007	NA	NA	NA	Sedge/Rush	Cyperaceae
+Cyp_008	NA	NA	NA	Sedge/Rush	Cyperaceae
+Cyp_009	NA	NA	NA	Sedge/Rush	Cyperaceae
+Cyp_010	NA	NA	NA	Sedge/Rush	Cyperaceae

@@ -16,7 +16,7 @@ head(sdata,4);dim(sdata)
 
 #import test tray data
 
-tdata<-tdata<-read.csv("01_data/tray_data_test.csv",header=T)
+tdata<-tdata<-read.csv("01_data/tray_data.csv",header=T)
 head(tdata);dim(tdata)
 
 #add quadratID collumn to tray data
@@ -25,3 +25,8 @@ tdata$quadratID<-paste(tdata$transect,tdata$quadrat,sep=".")
 #T45.Q5 
 tdata[which(!tdata$quadratID %in% sdata$quadratID),]
 unique(soilabove$quadratID)
+
+#import below-ground data for soil core sites (emergence trial data)
+soilbelow<-read.table("01_data/plant_data.txt",header=T)
+head(soilbelow,4);dim(soilbelow)
+
