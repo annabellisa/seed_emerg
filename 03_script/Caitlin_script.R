@@ -11,11 +11,9 @@ soilq<-unique(sdata$quadratID)
 soilq
 
 
-#check that soilqs exist in pfull
+#check that soilqs exist in pfull - should be 0, none missing
 
 missingq<-sdata[which(!soilq %in% unique(pfull$quadratID)),]$quadratID
-
-soilq<-soilq[which(!soilq==missingq)]
 
 
 psoil<-pfull[which(pfull$quadratID %in% soilq),]

@@ -11,6 +11,8 @@ head(soilabove,4);dim(soilabove)
 
 sdata<-read.csv("01_data/site_data.csv",header=T)
 sdata$quadratID<-paste(sdata$transect,sdata$quadrat,sep=".")
+#below should be 30
+length(unique(sdata$quadratID))
 head(sdata,4);dim(sdata)
 
 
@@ -22,11 +24,28 @@ head(tdata);dim(tdata)
 #add quadratID collumn to tray data
 tdata$quadratID<-paste(tdata$transect,tdata$quadrat,sep=".")
 
-#T45.Q5 
-tdata[which(!tdata$quadratID %in% sdata$quadratID),]
-unique(soilabove$quadratID)
-
 #import below-ground data for soil core sites (emergence trial data)
-soilbelow<-read.table("01_data/plant_data.txt",header=T)
-head(soilbelow,4);dim(soilbelow)
+specieslist<-read.table("01_data/plant_data.txt",header=T)
+which(!is.na(specieslist$species))
+head(specieslist,4);dim(specieslist)
+#species list for species identified so far 21/03/04
+specieslistID<-specieslist[which(!is.na(specieslist$species)),]
+head(specieslistID,4);dim(specieslistID)
+
+#plant data for all sites above ground
+psabove<-read.table("01_data/plantspeciesabove.txt",header=T)
+
+#check that quadratID's match across 4 datasets
+head(soilabove,4);dim(soilabove)
+head(sdata,4);dim(sdata)
+head(tdata);dim(tdata)
+head(specieslist,4);dim(specieslist)
+head(specieslistID,4);dim(specieslistID)
+
+#check soilabove exists in site data
+table(soilabove$quadratID %in% sdata$quadratID)
+#all tray data exists in site data
+table(tdata$quadratID %in% sdata$quadratID)
+
+table(soilabove$sp %in% specieslistID$code)
 
