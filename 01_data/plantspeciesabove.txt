@@ -16,7 +16,7 @@ species	sp	speciesID	origin	duration	func_group	family
 "Asperula conferta"	Asp_con	1	Native	Perennial	Herb	Rubiaceae
 "Asteraceae spp_unknown1 "	Dai_ros	0	NA	NA	Herb	NA
 "Asteraceae_unknown2"	Dai_str	0	NA	NA	Herb	NA
-"Bare ground"	Bare	1	Bare ground	NA	NA	NA
+"Bare ground"	Bare	1	Bare_ground	NA	NA	NA
 "Bidens pilosa"	Bid_pil	1	Exotic	Annual	Herb	Asteraceae
 "Bothriochloa bladhii"	Bot_bla	1	Native	Perennial	Grass	Poaceae
 "Bothriochloa decipiens"	Bot_dec	1	Native	Perennial	Grass	Poaceae

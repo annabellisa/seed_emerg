@@ -41,6 +41,7 @@ head(sdata,4);dim(sdata)
 head(tdata);dim(tdata)
 head(specieslist,4);dim(specieslist)
 head(specieslistID,4);dim(specieslistID)
+head(psabove,4);dim(psabove)
 
 #check soilabove exists in site data
 table(soilabove$quadratID %in% sdata$quadratID)
