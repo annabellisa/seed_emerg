@@ -33,7 +33,11 @@ specieslistID<-specieslist[which(!is.na(specieslist$species)),]
 head(specieslistID,4);dim(specieslistID)
 
 #plant data for all sites above ground
-psabove<-read.table("01_data/plantspeciesabove.txt",header=T)
+psabove_all<-read.table("01_data/plantspeciesabove.txt",header=T)
+
+#plant data for soil site above-ground data
+soilabovesp<-unique(soilabove$sp)
+psabove_soil<-psabove_all[which(psabove_all$sp %in% soilabovesp),]
 
 #check that quadratID's match across 4 datasets
 head(soilabove,4);dim(soilabove)
@@ -41,7 +45,9 @@ head(sdata,4);dim(sdata)
 head(tdata);dim(tdata)
 head(specieslist,4);dim(specieslist)
 head(specieslistID,4);dim(specieslistID)
-head(psabove,4);dim(psabove)
+head(psabove_all,4);dim(psabove_all)
+head(psabove_soil,4);dim(psabove_soil)
+
 
 #check soilabove exists in site data
 table(soilabove$quadratID %in% sdata$quadratID)
@@ -51,4 +57,37 @@ table(tdata$quadratID %in% sdata$quadratID)
 table(soilabove$sp %in% specieslistID$code)
 #all species codes in plant data exist in tray data
 table(specieslist$code %in% tdata$code)
+which(!specieslist$code %in% unique(tdata$code))
+
+#which species codes in plant data exist in above-ground veg data
+table(specieslistID$code %in% psabove$sp)
+which(specieslistID$code %in% unique(psabove$sp))
+#which species codes in below-ground species list exist in above-ground veg data
+specieslistID[which(!specieslistID$code %in% psabove$sp)[11:21],]
+psabove[which(psabove$species=="Sonchus oleraceus"),]
+
+#no. species not in below ground data (false)
+table(psabove_soil$sp %in% specieslistID$code)
+
+# VENN diagram:
+library(VennDiagram)
+
+# Summarise overlap:
+belowonly<-21+47
+aboveonly<-49+47
+overlap<-47
+
+dev.new(width=6,height=4,dpi=160,pointsize=12, noRStudioGD = T)
+
+par(mar=c(4,4,4,4))
+
+venn.plot<-draw.pairwise.venn(belowonly,aboveonly,overlap, category=c("Below","Above"),scaled=F,fill=rgb(0,0,0,0.5),fontfamily="sans",cat.fontfamily="sans",cex=1, cat.pos=c(2,10),lwd=1)
+
+pdf(file="venn.pdf",width=4,height=4,pointsize=12)
+
+par(mar=c(4,4,1,1))
+
+grid.draw(venn.plot)
+
+dev.off()
 
