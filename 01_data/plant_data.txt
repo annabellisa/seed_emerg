@@ -65,7 +65,6 @@ Lac_ser	"Lactuca serriola"	Exotic	Annual	Herb	Asteraceae
 Ros_ads	"Rostellularia adscendens"	Native	Perennial	Herb	Acanthaceae
 Cys_pro	"Cystopteris protrusa"	Exotic	Perennial	Herb	Dryopteridaceae
 Nep_cor	"Nephrolepis cordifolia"	Native	Perennial	Herb	Nephrolepidaceae
-Lob_pur	"Lobelia purpurascens"	Native	Perennial	Herb	Campanulaceae
 Cir_vul	"Cirsium vulgare"	Exotic	Biennial	Herb	Asteraceae
 Cor_cit	"Corymbia citriodora"	Native	Perennial	Tree	Myrtaceae
 Poe_001	NA	NA	NA	Grass	Poaceae

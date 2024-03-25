@@ -49,4 +49,6 @@ table(soilabove$quadratID %in% sdata$quadratID)
 table(tdata$quadratID %in% sdata$quadratID)
 
 table(soilabove$sp %in% specieslistID$code)
+#all species codes in plant data exist in tray data
+table(specieslist$code %in% tdata$code)
 
