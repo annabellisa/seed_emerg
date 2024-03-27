@@ -1,0 +1,307 @@
+code	species	origin	life_span	form	family	speciesID	location
+Imp_cyl	"Imperata cylindrica"	Native	Perennial	Grass	Poaceae	1	2
+Het_con	"Heteropogon contortus"	Native	Perennial	Grass	Poaceae	1	2
+Bid_pil	"Bidens pilosa"	Exotic	Annual	Herb	Asteraceae	1	2
+Son_ole	"Sonchus oleraceus"	Exotic	Annual	Herb	Asteraceae	1	0
+Son_asp	"Sonchus asper"	Exotic	Annual/Biennial	Herb	Asteraceae	1	0
+Por_ole	"Portulaca oleracea"	Native	Annual	Herb	Portulacaceae	1	2
+Ein_nut	"Einadia nutans"	Native	Perennial	Herb	Chenopodiaceae	1	2
+Sen_mad	"Senecio madagascariensis"	Exotic	Annual	Herb	Asteraceae	1	0
+Pas_foe	"Passiflora foetida"	Exotic	Perennial	Herb	Passifloraceae	1	0
+Gam_cal	"Gamochaeta calviceps"	Exotic	Annual	Herb	Asteraceae	1	2
+Cyp_gra	"Cyperus gracilis"	Native	Perennial	Sedge/Rush	Cyperaceae	1	0
+Cyp_agg	"Cyperus aggregatus"	Exotic	Perennial	Sedge/Rush	Cyperaceae	1	2
+Con_bon	"Conyza bonariensis"	Exotic	Annual	Herb	Asteraceae	1	2
+Rum_bro	"Rumex brownii"	Native	Perennial	Herb	Polygonaceae	1	2
+Ver_lit	"Verbena litoralis"	Exotic	Annual	Herb	Verbenaceae	1	0
+Ver_bon	"Verbena bonariensis"	Exotic	Perennial	Herb	Verbenaceae	1	2
+Oxa_cor	"Oxalis corniculata"	Exotic	Perennial	Herb	Oxalidaceae	1	0
+Eup_dru	"Euphorbia drummondii"	Native	Perennial	Herb	Euphorbiaceae	1	2
+Euc_cre	"Eucalyptus crebra"	Native	Perennial	Tree	Myrtaceae	1	0
+Gal_ten	"Galactica tenuifolia"	Native	Perennial	Legume	Fabaceae	1	2
+Sol_nig	"Solanum nigrum"	Exotic	Perennial	Herb	Solanaceae	1	2
+Lan_cam	"Lantana camara"	Exotic	Perennial	Shrub	Verbenaceae	1	2
+Dic_rep	"Dichondra repens"	Native	Perennial	Herb	Convolvulaceae	1	2
+Gly_wig	"Glycine wightii"	Exotic	Perennial	Legume	Fabaceae	1	2
+Wah_gra	"Wahlenbergia gracilis"	Native	Perennial	Herb	Campanulaceae	1	0
+Lob_pur	"Lobelia purpurascens"	Native	Perennial	Herb	Campanulaceae	1	2
+Ger_sol	"Geranium solanderi"	Native	Perennial	Herb	Geraniaceae	1	2
+Hyd_lax	"Hydrocotyle laxiflora"	Native	Perennial	Herb	Araliaceae	1	2
+Euc_sph	"Euchiton sphaericus"	Native	Perennial	Herb	Asteraceae	1	2
+Bot_bla	"Bothriochloa bladhii"	Native	Perennial	Grass	Poaceae	1	2
+Ari_que	"Aristida queenslandica"	Native	Perennial	Grass	Poaceae	1	0
+The_aus	"Thesium australe"	Native	Perennial	Herb	Santalaceae	1	0
+Gly_tab	"Glycene tabacina"	Native	Perennial	Legume	Fabaceae	1	2
+Sig_ori	"Sigesbeckia orientalis"	Native	Annual	Herb	Asteraceae	1	2
+Cyp_dif	"Cyperus difformis"	Native	Perennial	Sedge/Rush	Cyperaceae	1	2
+Cyp_bre	"Cyperus brevifolius"	Exotic	Perennial	Sedge/Rush	Cyperaceae	1	2
+Dig_par	"Digitaria parviflora"	Native	Perennial	Grass	Poaceae	1	2
+Spo_cre	"Sporobolus creber"	Native	Perennial	Grass	Poaceae	1	2
+Pas_dis	"Paspalidium distans"	Native	Perennial	Grass	Poaceae	1	2
+Pan_eff	"Panicum effusum"	Native	Perennial	Grass	Poaceae	1	2
+Mel_rep	"Melinis repens"	Exotic	Perennial	Grass	Poaceae	1	2
+Spo_elo	"Sporobolus elongatus "	Native	Perennial	Grass	Poaceae	1	2
+Pan_dec	"Panicum decompositum"	Native	Perennial	Grass	Poaceae	1	2
+Chl_ven	"Chloris ventricosa"	Native	Perennial	Grass	Poaceae	1	2
+Cym_ref	"Cymbopogon refractus"	Native	Perennial	Grass	Poaceae	1	0
+Cyp_pol	"Cyperus polystachyos"	Native	Perennial	Sedge/Rush	Cyperaceae	1	2
+Cap_spi	"Capillipedium spicigerum"	Native	Perennial	Grass	Poaceae	1	2
+Cyn_dac	"Cynodon dactylon"	Exotic	Perennial	Grass	Poaceae	1	2
+Bot_dec	"Bothriochloa decipiens"	Native	Perennial	Grass	Poaceae	1	2
+Era_lep	"Eragrostis leptostachya"	Native	Perennial	Grass	Poaceae	1	2
+Cro_mon	"Crotalaria montana"	Native	Annual	Herb	Fabaceae	1	2
+Cro_lan	"Crotalaria lanceolata"	Exotic	Annual	Herb	Fabaceae	1	2
+Les_jun	"Lespedeza juncea"	Native	Perennial	Herb	Leguminosae	1	2
+Sid_acu	"Sida acuta"	Exotic	Perennial	Herb	Malvaceae	1	0
+Hyp_rad	"Hypochaeris radicata"	Exotic	Perennial	Herb	Asteraceae	1	2
+Men_sat	"Mentha satureioides"	Native	Perennial	Herb	Lamiaceae	1	2
+Mal_ame	"Malvastrum americanum"	Exotic	Perennial	Herb	Malvaceae	1	0
+Con_can	"Conyza canadensis"	Exotic	Annual	Herb	Asteraceae	1	0
+Lag_gra	"Lagenophora gracilis"	Exotic	Perennial	Herb	Asteraceae	1	0
+Cal_cun	"Calotis cuneifolia"	Native	Perennial	Herb	Asteraceae	1	0
+Gre_ret	"Grewia retusifolia"	Exotic	Annual	Shrub	Sparrmanniaceae	1	2
+Gal_par	"Galinsoga parviflora"	Exotic	Annual	Herb	Asteraceae	1	2
+Mec_pro	"Mecardonia procumbens"	Exotic	Perennial	Herb	Plantaginaceae	1	0
+Car_hir	"Cardamine hirsuta"	Exotic	Annual	Herb	Brassicaceae	1	0
+Cra_cre	"Crassocephalum crepidioides"	Exotic	Annual	Herb	Asteraceae	1	0
+Lac_ser	"Lactuca serriola"	Exotic	Annual	Herb	Asteraceae	1	2
+Ros_ads	"Rostellularia adscendens"	Native	Perennial	Herb	Acanthaceae	1	0
+Cys_pro	"Cystopteris protrusa"	Exotic	Perennial	Herb	Dryopteridaceae	1	0
+Nep_cor	"Nephrolepis cordifolia"	Native	Perennial	Herb	Nephrolepidaceae	1	2
+Cir_vul	"Cirsium vulgare"	Exotic	Biennial	Herb	Asteraceae	1	2
+Cor_cit	"Corymbia citriodora"	Native	Perennial	Tree	Myrtaceae	1	0
+Poe_001	NA	NA	NA	Grass	Poaceae	0	0
+Poe_002	NA	NA	NA	Grass	Poaceae	0	0
+Poe_003	NA	NA	NA	Grass	Poaceae	0	0
+Poe_004	NA	NA	NA	Grass	Poaceae	0	0
+Poe_006	NA	NA	NA	Grass	Poaceae	0	0
+Poe_007	NA	NA	NA	Grass	Poaceae	0	0
+Poe_008	NA	NA	NA	Grass	Poaceae	0	0
+Poe_009	NA	NA	NA	Grass	Poaceae	0	0
+Poe_011	NA	NA	NA	Grass	Poaceae	0	0
+Poe_014	NA	NA	NA	Grass	Poaceae	0	0
+Poe_017	NA	NA	NA	Grass	Poaceae	0	0
+Poe_018	NA	NA	NA	Grass	Poaceae	0	0
+Poe_019	NA	NA	NA	Grass	Poaceae	0	0
+Poe_020	NA	NA	NA	Grass	Poaceae	0	0
+Poe_029	NA	NA	NA	Grass	Poaceae	0	0
+Poe_045	NA	NA	NA	Grass	Poaceae	0	0
+Poe_048	NA	NA	NA	Grass	Poaceae	0	0
+Poe_050	NA	NA	NA	Grass	Poaceae	0	0
+Poe_057	NA	NA	NA	Grass	Poaceae	0	0
+Poe_065	NA	NA	NA	Grass	Poaceae	0	0
+Poe_068	NA	NA	NA	Grass	Poaceae	0	0
+Poe_074	NA	NA	NA	Grass	Poaceae	0	0
+Poe_079	NA	NA	NA	Grass	Poaceae	0	0
+Poe_082	NA	NA	NA	Grass	Poaceae	0	0
+Poe_083	NA	NA	NA	Grass	Poaceae	0	0
+Poe_086	NA	NA	NA	Grass	Poaceae	0	0
+Poe_091	NA	NA	NA	Grass	Poaceae	0	0
+Poe_092	NA	NA	NA	Grass	Poaceae	0	0
+Poe_095	NA	NA	NA	Grass	Poaceae	0	0
+Poe_105	NA	NA	NA	Grass	Poaceae	0	0
+Poe_106	NA	NA	NA	Grass	Poaceae	0	0
+Poe_108	NA	NA	NA	Grass	Poaceae	0	0
+Poe_110	NA	NA	NA	Grass	Poaceae	0	0
+Poe_116	NA	NA	NA	Grass	Poaceae	0	0
+Poe_117	NA	NA	NA	Grass	Poaceae	0	0
+Poe_119	NA	NA	NA	Grass	Poaceae	0	0
+Poe_120	NA	NA	NA	Grass	Poaceae	0	0
+Poe_122	NA	NA	NA	Grass	Poaceae	0	0
+Poe_123	NA	NA	NA	Grass	Poaceae	0	0
+Poe_127	NA	NA	NA	Grass	Poaceae	0	0
+Poe_131	NA	NA	NA	Grass	Poaceae	0	0
+Poe_133	NA	NA	NA	Grass	Poaceae	0	0
+Poe_134	NA	NA	NA	Grass	Poaceae	0	0
+Poe_135	NA	NA	NA	Grass	Poaceae	0	0
+Poe_136	NA	NA	NA	Grass	Poaceae	0	0
+Poe_137	NA	NA	NA	Grass	Poaceae	0	0
+Poe_138	NA	NA	NA	Grass	Poaceae	0	0
+Poe_142	NA	NA	NA	Grass	Poaceae	0	0
+Poe_143	NA	NA	NA	Grass	Poaceae	0	0
+Poe_144	NA	NA	NA	Grass	Poaceae	0	0
+Poe_145	NA	NA	NA	Grass	Poaceae	0	0
+Poe_146	NA	NA	NA	Grass	Poaceae	0	0
+Poe_147	NA	NA	NA	Grass	Poaceae	0	0
+Poe_148	NA	NA	NA	Grass	Poaceae	0	0
+Poe_149	NA	NA	NA	Grass	Poaceae	0	0
+Poe_150	NA	NA	NA	Grass	Poaceae	0	0
+Poe_151	NA	NA	NA	Grass	Poaceae	0	0
+Poe_152	NA	NA	NA	Grass	Poaceae	0	0
+Poe_153	NA	NA	NA	Grass	Poaceae	0	0
+Poe_154	NA	NA	NA	Grass	Poaceae	0	0
+Poe_155	NA	NA	NA	Grass	Poaceae	0	0
+Poe_156	NA	NA	NA	Grass	Poaceae	0	0
+Poe_157	NA	NA	NA	Grass	Poaceae	0	0
+Poe_158	NA	NA	NA	Grass	Poaceae	0	0
+Poe_159	NA	NA	NA	Grass	Poaceae	0	0
+Poe_160	NA	NA	NA	Grass	Poaceae	0	0
+Poe_161	NA	NA	NA	Grass	Poaceae	0	0
+Poe_162	NA	NA	NA	Grass	Poaceae	0	0
+Poe_163	NA	NA	NA	Grass	Poaceae	0	0
+Poe_164	NA	NA	NA	Grass	Poaceae	0	0
+Poe_165	NA	NA	NA	Grass	Poaceae	0	0
+Poe_166	NA	NA	NA	Grass	Poaceae	0	0
+For_002	NA	NA	NA	NA	Apiaceae	0	0
+For_007	NA	NA	NA	NA	NA	0	0
+For_008	NA	NA	NA	NA	NA	0	0
+For_009	NA	NA	NA	NA	NA	0	0
+For_017	NA	NA	NA	NA	NA	0	0
+For_021	NA	NA	NA	NA	NA	0	0
+For_022	NA	NA	NA	NA	NA	0	0
+For_023	NA	NA	NA	NA	NA	0	0
+For_024	NA	NA	NA	NA	NA	0	0
+For_025	NA	NA	NA	NA	NA	0	0
+For_027	NA	NA	NA	NA	NA	0	0
+For_029	NA	NA	NA	NA	NA	0	0
+For_030	NA	NA	NA	NA	NA	0	0
+For_031	NA	NA	NA	NA	NA	0	0
+For_035	NA	NA	NA	NA	NA	0	0
+For_037	NA	NA	NA	NA	NA	0	0
+For_038	NA	NA	NA	NA	NA	0	0
+For_039	NA	NA	NA	NA	NA	0	0
+For_040	NA	NA	NA	NA	NA	0	0
+For_046	NA	NA	NA	NA	Malvaceae	0	0
+For_049	NA	NA	NA	NA	NA	0	0
+For_050	NA	NA	NA	NA	NA	0	0
+For_052	NA	NA	NA	NA	NA	0	0
+For_080	NA	NA	NA	NA	NA	0	0
+For_082	NA	NA	NA	NA	NA	0	0
+For_083	NA	NA	NA	NA	NA	0	0
+For_084	NA	NA	NA	NA	NA	0	0
+For_089	NA	NA	NA	NA	NA	0	0
+For_093	NA	NA	NA	NA	NA	0	0
+For_094	NA	NA	NA	NA	NA	0	0
+For_098	NA	NA	NA	NA	NA	0	0
+For_100	NA	NA	NA	NA	NA	0	0
+For_101	NA	NA	NA	NA	NA	0	0
+For_102	NA	NA	NA	NA	NA	0	0
+For_103	NA	NA	NA	NA	NA	0	0
+For_105	NA	NA	NA	NA	NA	0	0
+For_106	NA	NA	NA	NA	NA	0	0
+For_107	NA	NA	NA	NA	NA	0	0
+For_108	NA	NA	NA	NA	NA	0	0
+For_109	NA	NA	NA	NA	NA	0	0
+For_110	NA	NA	NA	NA	NA	0	0
+For_111	NA	NA	NA	NA	NA	0	0
+For_112	NA	NA	NA	NA	NA	0	0
+Spi_gum	"Fimbristylis spp_unknown_1"	NA	NA	Sedge/Rush	Cyperaceae	0	0
+Cyp_002	NA	NA	NA	Sedge/Rush	Cyperaceae	0	0
+Cyp_003	NA	NA	NA	Sedge/Rush	Cyperaceae	0	0
+Cyp_004	NA	NA	NA	Sedge/Rush	Cyperaceae	0	0
+Cyp_005	NA	NA	NA	Sedge/Rush	Cyperaceae	0	0
+Cyp_006	NA	NA	NA	Sedge/Rush	Cyperaceae	0	0
+Cyp_007	NA	NA	NA	Sedge/Rush	Cyperaceae	0	0
+Cyp_010	NA	NA	NA	Sedge/Rush	Cyperaceae	0	0
+Aca_con	"Acacia concurrens"	Native	Perennial	Tree	Fabaceae	1	1
+Aca_lei	"Acacia leiocalyx"	Native	Perennial	Tree	Fabaceae	1	1
+Aca_mai	"Acacia maidenii"	Native	Perennial	Tree	Fabaceae	1	1
+Aca_neo	"Acacia neobrachycarpa"	Native	Perennial	Shrub	Fabaceae	1	1
+Aca_sal	"Acacia salicina"	Native	Perennial	Tree	Fabaceae	1	1
+Aca_T36	"Acacia spp_T36"	NA	Perennial	Shrub	Fabaceae	0	1
+Ale_con	"Alectryon connatus"	Native	Perennial	Tree	Sapindaceae	1	1
+Ale_pub	"Alectryon pubescens"	Native	Perennial	Tree	Sapindaceae	1	1
+All_lue	"Allocasuarina luehmannii"	Native	Perennial	Tree	Casuarinaceae	1	1
+Alp_exc	"Alphitonia excelsa"	Native	Perennial	Tree	Rhamnaceae	1	1
+Ang_sub	"Angophora subvelutina"	Native	Perennial	Tree	Myrtaceae	1	1
+Ari_cal	"Aristida calycina"	Native	Perennial	Grass	Poaceae	1	1
+Asp_afr	"Asparagus africanus"	Exotic	Perennial	Vine	Asparagaceae	1	1
+Asp_con	"Asperula conferta"	Native	Perennial	Herb	Rubiaceae	1	1
+Dai_ros	"Asteraceae spp_unknown1 "	NA	NA	Herb	NA	0	1
+Dai_str	"Asteraceae_unknown2"	NA	NA	Herb	NA	0	1
+Bare	"Bare ground"	Bare_ground	NA	NA	NA	0	1
+Bra_pop	"Brachychiton populneus"	Native	Perennial	Tree	Malvaceae	1	1
+Bre_obl	"Breynia oblongifolia"	Native	Perennial	Tree	Phyllanthaceae	1	1
+Bru_aca	"Brunoniella acaulis"	Native	Perennial	Herb	Acanthaceae	1	1
+Cha_nom	"Chamaecrista nomame"	Native	Annual	Legume	Fabaceae	1	1
+Chr_api	"Chrysocephalum apiculatum"	Native	Perennial	Herb	Asteraceae	1	1
+Chr_fal	"Chrysopogon fallax"	Native	Perennial	Grass	Poaceae	1	1
+Cor_tri	"Corchorus trilocularis"	Native	Perennial	Herb	Sparrmanniaceae	1	1
+Cor_int	"Corymbia intermedia"	Native	Perennial	Tree	Myrtaceae	1	1
+Cor_tes	"Corymbia tessellaris"	Native	Perennial	Tree	Myrtaceae	1	1
+Cro_inc	"Crotalaria incana"	Exotic	Perennial	Legume	Fabaceae	1	1
+Cus_cam	"Cuscuta campestris"	Exotic	Annual	Vine	Convolvulaceae	1	1
+Cya_cin	"Cyanthillium cinereum"	Native	Perennial	Herb	Asteraceae	1	1
+Des_bra	"Desmodium brachypoda"	Native	Perennial	Legume	Fabaceae	1	1
+Des_gan	"Desmodium gangeticum"	Native	Perennial	Legume	Fabaceae	1	1
+Des_rhy	"Desmodium rhytidophyllum"	Native	Perennial	Legume	Fabaceae	1	1
+Des_var	"Desmodium varians"	Native	Perennial	Legume	Fabaceae	1	1
+Dia_cer	"Dianella caerulea"	Native	Perennial	Herb	Asphodelaceae	1	1
+Dic_ann	"Dichanthium annulatum"	Exotic	Perennial	Grass	Poaceae	1	1
+Dic_ari	"Dichanthium aristatum"	Exotic	Perennial	Grass	Poaceae	1	1
+Dic_ser	"Dichanthium sericeum"	Native	Perennial	Grass	Poaceae	1	1
+Dic_cri	"Dichelachne crinita"	Native	Perennial	Grass	Poaceae	1	1
+Dig_cil	"Digitaria ciliaris"	Exotic	Annual	Grass	Poaceae	1	1
+Dig_div	"Digitaria divaricatissima"	Native	Perennial	Grass	Poaceae	1	1
+Dig_san	"Digitaria sanguinalis"	Exotic	Annual	Grass	Poaceae	1	1
+Don_vis	"Dodonaea viscosa"	Native	Perennial	Shrub	Sapindaceae	1	1
+Ech_ova	"Echinopogon ovatus"	Native	Perennial	Grass	Poaceae	1	1
+Ent_str	"Entolasia stricta"	Native	Perennial	Grass	Poaceae	1	1
+Era_bro	"Eragrostis brownii"	Native	Perennial	Grass	Poaceae	1	1
+Ere_deb	"Eremophila debilis"	Native	Perennial	Herb	Scrophulariaceae	1	1
+Eri_cre	"Eriochloa crebra"	Native	Perennial	Grass	Poaceae	1	1
+Ery_ves	"Erythrina vespertilio"	Native	Perennial	Tree	Fabaceae	1	1
+Euc_melp	"Eucalyptus melanophloia"	Native	Perennial	Tree	Myrtaceae	1	1
+Euc_mell	"Eucalyptus mellidora"	Native	Perennial	Tree	Myrtaceae	1	1
+Euc_ter	"Eucalyptus tereticornis"	Native	Perennial	Tree	Myrtaceae	1	1
+Eus_lat	"Eustrephus latifolius"	Native	Perennial	Vine	Asparagaceae	1	1
+Exo_cup	"Exocarpos cupressiformis"	Native	Perennial	Tree	Santalaceae	1	1
+Fic_cor	"Ficus coronata"	Native	Perennial	Tree	Moraceae	1	1
+Fim_dic	"Fimbristylis dichotoma"	Native	Perennial	Sedge/Rush	Cyperaceae	1	1
+Fle_pau	"Flemingia parviflora"	Native	Perennial	Legume	Fabaceae	1	1
+Gah_asp	"Gahnia aspera"	Native	Perennial	Sedge/Rush	Cyperaceae	1	1
+Gly_tom	"Glycine tomentella"	Native	Perennial	Legume	Fabaceae	1	1
+Gom_fru	"Gomphocarpus fruticosus"	Exotic	Perennial	Herb	Apocynaceae	1	1
+Gre_str	"Grevillea striata"	Native	Perennial	Tree	Proteaceae	1	1
+Har_vio	"Hardenbergia violacea"	Native	Perennial	Legume	Fabaceae	1	1
+Hyb_ste	"Hybanthus stellarioides"	Exotic	Annual	Herb	Violaceae	1	1
+Hyp_fil	"Hyparrhenia filipendula"	Native	Perennial	Grass	Poaceae	1	1
+Hyp_gra	"Hypericum gramineum"	Native	Perennial	Herb	Hypericaceae	1	1
+Ind_hir	"Indigofera hirsuta"	Native	Perennial	Legume	Fabaceae	1	1
+Ind_lini	"Indigofera linifolia"	Native	Perennial	Legume	Fabaceae	1	1
+Ind_linn	"Indigofera linnaei"	Native	Perennial	Legume	Fabaceae	1	1
+Jac_mim	"Jacaranda mimosifolia"	Exotic	Perennial	Tree	Bignoniaceae	1	1
+Jas_dia	"Jasminum dianthifolia"	Native	Perennial	Herb	Oleaceae	1	1
+Lig_vul	"Ligustrum vulgare "	Exotic	Perennial	Tree	Oleaceae	1	1
+Litter	"Litter"	Litter	NA	NA	NA	0	1
+Lob_con	"Lobelia concolor"	Native	Perennial	Herb	Campanulaceae	1	1
+Lom_con	"Lomandra confertifolia"	Native	Perennial	Sedge/Rush	Asparagaceae	1	1
+Lom_lon	"Lomandra longifolia"	Native	Perennial	Sedge/Rush	Asparagaceae	1	1
+Lom_mul	"Lomandra multiflora"	Native	Perennial	Sedge/Rush	Asparagaceae	1	1
+Mac_coc	"Maclura cochinchinensis"	Native	Perennial	Vine	Moraceae	1	1
+Mac_atr	"Macroptilium atropurpureum"	Exotic	Perennial	Legume	Fabaceae	1	1
+Mar_vul	"Marrubium vulgare"	Exotic	Perennial	Herb	Lamiaceae	1	1
+Meg_max	"Megathyrsus maximus"	Exotic	Perennial	Grass	Poaceae	1	1
+Mic_sti	"Microlaena stipoides"	Native	Perennial	Grass	Poaceae	1	1
+Nep_gra	"Neptunia gracilis"	Native	Perennial	Legume	Fabaceae	1	1
+Opu_tom	"Opuntia tomentosa"	Exotic	Perennial	Shrub	Cactaceae	1	1
+Pas_dia	"Paspalum dilatatum"	Exotic	Perennial	Grass	Poaceae	1	1
+Pas_sub	"Passiflora suberosa"	Exotic	Perennial	Vine	Passifloraceae	1	1
+Phy_vir	"Phyllanthus virgatus"	Native	Perennial	Herb	Phyllanthaceae	1	1
+Pol_cal	"Polymeria calycina"	Native	Perennial	Herb	Convolvulaceae	1	1
+Psy_odo	"Psydrax odorata"	Native	Perennial	Tree	Rubiaceae	1	1
+Pul_euc	"Pultenaea euchila"	Native	Perennial	Shrub	Fabaceae	1	1
+Rhy_min	"Rhynchosia minima"	Native	Annual	Legume	Fabaceae	1	1
+Rock	"Rock"	Rock	NA	NA	NA	0	1
+Rub_par	"Rubus parvifolius"	Native	Perennial	Shrub	Rosaceae	1	1
+Scl_mac	"Scleria mackaviensis"	Native	Perennial	Sedge/Rush	Cyperaceae	1	1
+Seh_ner	"Sehima nervosum"	Native	Perennial	Grass	Poaceae	1	1
+Sen_occ	"Senna occidentalis"	Exotic	Perennial	Shrub	Fabaceae	1	1
+Sen_sop	"Senna sophera var. sophera"	Native	Perennial	Legume	Fabaceae	1	1
+Sid_cord	"Sida cordifolia"	Exotic	Perennial	Herb	Malvaceae	1	1
+Sid_corr	"Sida corrugata"	Native	Perennial	Herb	Malvaceae	1	1
+Sid_hac	"Sida hackettiana"	Native	Perennial	Herb	Malvaceae	1	1
+Sid_rho	"Sida rhombifolia"	Exotic	Perennial	Herb	Malvaceae	1	1
+Smi_aus	"Smilax australis"	Native	Perennial	Vine	Smilacaceae	1	1
+Sor_lei	"Sorghum leiocladum"	Native	Perennial	Grass	Poaceae	1	1
+Ste_jap	"Stephania japonica"	Native	Perennial	Herb	Menispermaceae	1	1
+Tag_min	"Tagetes minuta"	Exotic	Annual	Herb	Asteraceae	1	1
+The_tri	"Themeda triandra"	Native	Perennial	Grass	Poaceae	1	1
+Clu_lik	"Unknown_weed"	NA	NA	Herb	NA	0	1
+Uro_pan	"Urochloa panicoides var panicoides"	Exotic	Perennial	Grass	Poaceae	1	1
+Vio_hed	"Viola hederacea"	Native	Perennial	Herb	Violaceae	1	1
+Vit_pus	"Vittadinia pustulata"	Native	Perennial	Herb	Asteraceae	1	1
+Vit_sul	"Vittadinia sulcata"	Native	Perennial	Herb	Asteraceae	1	1
+Xan_gla	"Xanthorrhoea glauca"	Native	Perennial	Tree	Asphodelaceae	1	1
+Zin_per	"Zinnia peruviana"	Exotic	Annual	Herb	Asteraceae	1	1
+Zor_dyc	"Zornia dyctiocarpa"	Native	Perennial	Legume	Fabaceae	1	1

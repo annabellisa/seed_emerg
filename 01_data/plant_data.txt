@@ -1,4 +1,7 @@
 code	species	origin	life_span	form	family
+Imp_cyl	"Imperata cylindrica"	Native	Perennial	Grass	Poaceae
+Het_con	"Heteropogon contortus"	Native	Perennial	Grass	Poaceae
+Bid_pil	"Bidens pilosa"	Exotic	Annual	Herb	Asteraceae
 Son_ole	"Sonchus oleraceus"	Exotic	Annual	Herb	Asteraceae
 Son_asp	"Sonchus asper"	Exotic	Annual/Biennial	Herb	Asteraceae
 Por_ole	"Portulaca oleracea"	Native	Annual	Herb	Portulacaceae
@@ -182,7 +185,7 @@ For_109	NA	NA	NA	NA	NA
 For_110	NA	NA	NA	NA	NA
 For_111	NA	NA	NA	NA	NA
 For_112	NA	NA	NA	NA	NA
-Cyp_001	NA	NA	NA	Sedge/Rush	Cyperaceae
+Spi_gum	Fimbristylis	NA	NA	Sedge/Rush	Cyperaceae
 Cyp_002	NA	NA	NA	Sedge/Rush	Cyperaceae
 Cyp_003	NA	NA	NA	Sedge/Rush	Cyperaceae
 Cyp_004	NA	NA	NA	Sedge/Rush	Cyperaceae
