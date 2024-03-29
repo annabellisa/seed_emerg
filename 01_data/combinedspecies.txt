@@ -207,7 +207,7 @@ Ang_sub	"Angophora subvelutina"	Native	Perennial	Tree	Myrtaceae	1	1
 Ari_cal	"Aristida calycina"	Native	Perennial	Grass	Poaceae	1	1
 Asp_afr	"Asparagus africanus"	Exotic	Perennial	Vine	Asparagaceae	1	1
 Asp_con	"Asperula conferta"	Native	Perennial	Herb	Rubiaceae	1	1
-Dai_ros	"Asteraceae spp_unknown1 "	NA	NA	Herb	NA	0	1
+Dai_ros	"Asteraceae spp_unknown1"	NA	NA	Herb	NA	0	1
 Dai_str	"Asteraceae_unknown2"	NA	NA	Herb	NA	0	1
 Bare	"Bare ground"	Bare_ground	NA	NA	NA	0	1
 Bra_pop	"Brachychiton populneus"	Native	Perennial	Tree	Malvaceae	1	1

@@ -39,6 +39,10 @@ psabove_all<-read.table("01_data/plantspeciesabove.txt",header=T)
 soilabovesp<-unique(soilabove$sp)
 psabove_soil<-psabove_all[which(psabove_all$sp %in% soilabovesp),]
 
+#combined species list of above and below ground, including non identified
+combospec<-read.table("01_data/combinedspecies.txt",header=T)
+head(combospec,4);dim(combospec)
+
 #check that quadratID's match across 4 datasets
 head(soilabove,4);dim(soilabove)
 head(sdata,4);dim(sdata)
@@ -47,7 +51,7 @@ head(specieslist,4);dim(specieslist)
 head(specieslistID,4);dim(specieslistID)
 head(psabove_all,4);dim(psabove_all)
 head(psabove_soil,4);dim(psabove_soil)
-
+head(combospec,4);dim(combospec)
 
 #check soilabove exists in site data
 table(soilabove$quadratID %in% sdata$quadratID)
@@ -91,3 +95,28 @@ grid.draw(venn.plot)
 
 dev.off()
 
+#site by species matrix?
+site.species_matrix <-cast(tdata, quadratID ~ code, value='count', fun.aggregate=sum)
+site.species_matrix
+
+#above-ground (AG) site by species matrix id - species or code - code includes NA?, code as tdata doesn't have species?
+AG_id<-combospec$code[which(combospec$location == "1" | combospec$location =="2" & combospec$speciesID == "1")]
+#above-ground (AG) sitexspec matrix all
+AG<-combospec$code[which(combospec$location == "1" | combospec$location =="2")]
+
+#below-ground (BG) site by species matrix id - whats with the NA's -same as all
+BG_id<-combospec$species[which(combospec$location == "0" | combospec$location == "2" & combospec$speciesID == "1")]
+#below-ground sitexspec matrix all
+BG<-combospec$species[which(combospec$location == "0" | combospec$location == "2")]
+
+#formatting?
+#
+AG.code <- which(colnames(site.species_matrix) %in% AG)
+AG.sm <- site.species_matrix[,c(1,AG.code)]
+head(AG.sm[,1:10]);dim(AG.sm)
+head(site.species_matrix[,1:10]);dim(site.species_matrix)
+#
+AG_id.code <- which(colnames(site.species_matrix) %in% AG_id)
+AG_id.sm <- site.species_matrix[,c(1,AG_id.code)]
+head(AG_id.sm[,1:10]);dim(AG_id.sm)
+head(site.species_matrix[,1:10]);dim(site.species_matrix)
