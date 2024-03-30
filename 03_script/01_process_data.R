@@ -95,19 +95,30 @@ grid.draw(venn.plot)
 
 dev.off()
 
-#site by species matrix?
+#site by species matrix? attempted to use tdata and add species names from combospec, however matrix used codes as collumns - reformatting using pivot_longer returned confusing result
 site.species_matrix <-cast(tdata, quadratID ~ code, value='count', fun.aggregate=sum)
 site.species_matrix
+named_ssm <- merge(site.species_matrix, combospec, by = "code", all.x = TRUE)
+#aforementioned reformatting attempt:
+long_ssm <- pivot_longer(site.species_matrix,
+                         + cols = quadratID,
+                         + names_to = "code",
+                         + values_to = "count")
+long_ssm
+named_ssm <- merge(long_ssm,combospec, by = "code", all.x = TRUE)
+print(named_ssm)
 
-#above-ground (AG) site by species matrix id - species or code - code includes NA?, code as tdata doesn't have species?
-AG_id<-combospec$code[which(combospec$location == "1" | combospec$location =="2" & combospec$speciesID == "1")]
-#above-ground (AG) sitexspec matrix all
-AG<-combospec$code[which(combospec$location == "1" | combospec$location =="2")]
-
-#below-ground (BG) site by species matrix id - whats with the NA's -same as all
-BG_id<-combospec$species[which(combospec$location == "0" | combospec$location == "2" & combospec$speciesID == "1")]
-#below-ground sitexspec matrix all
-BG<-combospec$species[which(combospec$location == "0" | combospec$location == "2")]
+#----------------------
+#merging datasets
+merged_data <- merge(tdata, combospec, by = "code", all.x = TRUE)
+merged_data <- merge(merged_data, sdata, by = "quadratID", all.x = TRUE)
+#merged sitexspec matrix
+merged_ssm <- pivot_wider(merged_data,
+                          id_cols = c("code", "location.x", "quadrat.y", "burn_trt"),
+names_from = "species",
+values_from = "count",
+values_fn = list(count = sum), #using quadratID results in duplicates due to separate entries for trays A and B, have summed
+values_fill = list(count = 0))
 
 #formatting?
 #
@@ -120,3 +131,43 @@ AG_id.code <- which(colnames(site.species_matrix) %in% AG_id)
 AG_id.sm <- site.species_matrix[,c(1,AG_id.code)]
 head(AG_id.sm[,1:10]);dim(AG_id.sm)
 head(site.species_matrix[,1:10]);dim(site.species_matrix)
+
+
+#merged_id
+mergedID_data <-merged_data[merged_data$speciesID == 1, ]
+mergedID_ssm <- pivot_wider(mergedID_data,
+                            id_cols = c("code", "location.x", "quadrat.y", "burn_trt"),
+                            names_from = "species",
+                            values_from = "count",
+                            values_fn = list(count = sum),
+                            values_fill = list(count = 0))
+#AG mergedID 
+AGmergedID_data <- mergedID_data[mergedID_data$location.y == 1 | mergedID_data$location.y ==2, ]
+AGmergedID_ssm <- pivot_wider(AGmergedID_data,
+                              id_cols = c("code", "location.x", "quadrat.y", "burn_trt"),
+                              names_from = "species",
+                              values_from = "count",
+                              values_fn = list(count = sum),
+                              values_fill = list(count = 0))
+
+#BG mergedID
+BGmergedID_data <- mergedID_data[mergedID_data$location.y == 0 | mergedID_data$location.y == 2, ]
+BGmergedID_ssm <- pivot_wider(AGmergedID_data,
+                              id_cols = c("code", "location.x", "quadrat.y", "burn_trt"),
+                              names_from = "species",
+                              values_from = "count",
+                              values_fn = list(count = sum),
+                              values_fill = list(count = 0))
+
+#above-ground (AG) site by species matrix id - species or code - code includes NA?, code as tdata doesn't have species?
+AG_id<-combospec$code[which(combospec$location == "1" | combospec$location =="2" & combospec$speciesID == "1")]
+#above-ground (AG) sitexspec matrix all
+AG<-combospec$code[which(combospec$location == "1" | combospec$location =="2")]
+
+#below-ground (BG) site by species matrix id - whats with the NA's -same as all
+BG_id<-combospec$species[which(combospec$location == "0" | combospec$location == "2" & combospec$speciesID == "1")]
+#below-ground sitexspec matrix all
+BG<-combospec$species[which(combospec$location == "0" | combospec$location == "2")]
+
+
+
