@@ -108,18 +108,6 @@ long_ssm
 named_ssm <- merge(long_ssm,combospec, by = "code", all.x = TRUE)
 print(named_ssm)
 
-#----------------------
-#merging datasets
-merged_data <- merge(tdata, combospec, by = "code", all.x = TRUE)
-merged_data <- merge(merged_data, sdata, by = "quadratID", all.x = TRUE)
-#merged sitexspec matrix
-merged_ssm <- pivot_wider(merged_data,
-                          id_cols = c("code", "location.x", "quadrat.y", "burn_trt"),
-names_from = "species",
-values_from = "count",
-values_fn = list(count = sum), #using quadratID results in duplicates due to separate entries for trays A and B, have summed
-values_fill = list(count = 0))
-
 #formatting?
 #
 AG.code <- which(colnames(site.species_matrix) %in% AG)
@@ -131,6 +119,18 @@ AG_id.code <- which(colnames(site.species_matrix) %in% AG_id)
 AG_id.sm <- site.species_matrix[,c(1,AG_id.code)]
 head(AG_id.sm[,1:10]);dim(AG_id.sm)
 head(site.species_matrix[,1:10]);dim(site.species_matrix)
+
+#----------------------
+#merging datasets
+merged_data <- merge(tdata, combospec, by = "code", all.x = TRUE)
+merged_data <- merge(merged_data, sdata, by = "quadratID", all.x = TRUE)
+#merged sitexspec matrix - code and species in different forms?
+merged_ssm <- pivot_wider(merged_data,
+                          id_cols = c("code", "location.x", "quadrat.y", "burn_trt"),
+names_from = "species",
+values_from = "count",
+values_fn = list(count = sum), #using quadratID results in duplicates due to separate entries for trays A and B, have summed
+values_fill = list(count = 0))
 
 
 #merged_id
@@ -159,6 +159,14 @@ BGmergedID_ssm <- pivot_wider(AGmergedID_data,
                               values_fn = list(count = sum),
                               values_fill = list(count = 0))
 
+#species richness? wait this sums above and below data (1 and 2 or 0 and 2) wait but its based on tray data counts not plant data - so its only BG
+AG.id_sr <- aggregate(count ~ species, data = AGmergedID_data, FUN = sum)
+BG.id_sr <- aggregate(count ~ species, data = BGmergedID_data, FUN = sum)
+
+#transect richness
+transectAG.id_sr <-aggregate(count ~ transect.x + species, data = AGmergedID_data, FUN = sum)
+transectBG.id_sr <- aggregate(count ~ transect.x + species, data = BGmergedID_data, FUN = sum)
+  
 #above-ground (AG) site by species matrix id - species or code - code includes NA?, code as tdata doesn't have species?
 AG_id<-combospec$code[which(combospec$location == "1" | combospec$location =="2" & combospec$speciesID == "1")]
 #above-ground (AG) sitexspec matrix all
