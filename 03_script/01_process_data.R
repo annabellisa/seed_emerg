@@ -96,6 +96,7 @@ grid.draw(venn.plot)
 dev.off()
 
 #site by species matrix? attempted to use tdata and add species names from combospec, however matrix used codes as collumns - reformatting using pivot_longer returned confusing result
+library(reshape)
 site.species_matrix <-cast(tdata, quadratID ~ code, value='count', fun.aggregate=sum)
 site.species_matrix
 named_ssm <- merge(site.species_matrix, combospec, by = "code", all.x = TRUE)
@@ -122,6 +123,7 @@ head(site.species_matrix[,1:10]);dim(site.species_matrix)
 
 #----------------------
 #merging datasets
+library(tidyr)
 merged_data <- merge(tdata, combospec, by = "code", all.x = TRUE)
 merged_data <- merge(merged_data, sdata, by = "quadratID", all.x = TRUE)
 #merged sitexspec matrix - code and species in different forms?
@@ -166,7 +168,12 @@ BG.id_sr <- aggregate(count ~ species, data = BGmergedID_data, FUN = sum)
 #transect richness
 transectAG.id_sr <-aggregate(count ~ transect.x + species, data = AGmergedID_data, FUN = sum)
 transectBG.id_sr <- aggregate(count ~ transect.x + species, data = BGmergedID_data, FUN = sum)
+
+#shannon?
+library(vegan)
+BG_shannons <- data.frame(species = transectBG.id_sr$species, BG_shannons = diversity(transectBG.id_sr$count[,2:ncol(transectBG.id_sr)]))
   
+
 #above-ground (AG) site by species matrix id - species or code - code includes NA?, code as tdata doesn't have species?
 AG_id<-combospec$code[which(combospec$location == "1" | combospec$location =="2" & combospec$speciesID == "1")]
 #above-ground (AG) sitexspec matrix all
