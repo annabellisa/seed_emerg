@@ -169,10 +169,28 @@ BG.id_sr <- aggregate(count ~ species, data = BGmergedID_data, FUN = sum)
 transectAG.id_sr <-aggregate(count ~ transect.x + species, data = AGmergedID_data, FUN = sum)
 transectBG.id_sr <- aggregate(count ~ transect.x + species, data = BGmergedID_data, FUN = sum)
 
+#quadrat richness
+quadratBG.id_sr <- aggregate(count ~ quadratID +species, data = BGmergedID_data, FUN = sum)
+
 #shannon?
 library(vegan)
-BG_shannons <- data.frame(species = transectBG.id_sr$species, BG_shannons = diversity(transectBG.id_sr$count[,2:ncol(transectBG.id_sr)]))
-  
+#transect shannon
+calc_shannons <- function(data) {
+  shannons <-diversity(data, index = "shannon") 
+  return (shannons)
+  }
+shannon_transect <- tapply(transectBG.id_sr$count, transectBG.id_sr$transect.x, calc_shannons)
+
+shannon_df <- data.frame(transect = names(shannon_transect), shannons_diversity = unname(shannon_transect))
+
+print(shannon_df)
+#quadrat shannon
+shannon_quadrat <- tapply(quadratBG.id_sr$count, quadratBG.id_sr$quadratID, calc_shannons)
+shannonq_df <- data.frame(quadrat = names(shannon_quadrat), shannons_diversity = unname(shannon_quadrat))
+print(shannonq_df)
+#just produced one shannon index level:
+transectBG.id_shannon <- diversity(matrix(transectBG.id_sr$count), index = "shannon")
+transectBG.id_shannon
 
 #above-ground (AG) site by species matrix id - species or code - code includes NA?, code as tdata doesn't have species?
 AG_id<-combospec$code[which(combospec$location == "1" | combospec$location =="2" & combospec$speciesID == "1")]
