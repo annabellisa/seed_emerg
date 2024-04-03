@@ -249,12 +249,17 @@ BG<-combospec$species[which(combospec$location == "0" | combospec$location == "2
 library(divo)
 
 calc_sorensen <- function(data1, data2) {
-  similarity <- li(data1$species, data2$species) 
+  similarity <- li(data1, data2) 
   return(similarity)
   }
-similarity_index <- sapply(unique(quadburn_BG.id_sr$quadratID), function(qid) [
-  burn_quad <-quadburn_BG.id_sr[quadburn_BG.id_sr$quadratID == qid, ]
-  control_quad <- quadcntrl_BG.id_sr[quadcntrl_BG.id_sr$quadratID == qid, ]
-  similarity <- calculate_sorensen(burn_quad, control_quad)
-  return(similarity)
-])
+#adding burn_trt columns to quadrat species info
+quadratBG.id_sr$burn_trt <- ifelse(quadratBG.id_sr$quadratID %in% BG.idburn_data$quadratID, "burn", "control")
+
+quadcntrl_BG.id_sr <- subset(quadratBG.id_sr, burn_trt == "control")
+quadburn_BG.id_sr <- subset(quadratBG.id_sr, burn_trt == "burn")
+
+quad_sim <- apply(quadcntrl_BG.id_sr$count, 1, function(cntrl_count) {
+  sapply(quadburn_BG.id_sr$count, function(burn_count) {
+    calc_sorensen(cntrl_count, burn_count)
+  })
+})
