@@ -169,8 +169,18 @@ BG.id_sr <- aggregate(count ~ species, data = BGmergedID_data, FUN = sum)
 transectAG.id_sr <-aggregate(count ~ transect.x + species, data = AGmergedID_data, FUN = sum)
 transectBG.id_sr <- aggregate(count ~ transect.x + species, data = BGmergedID_data, FUN = sum)
 
+#cntrl vs burn richness transect
+BG.idburn_data <- BGmergedID_data[BGmergedID_data$burn_trt == 'Burn', ]
+transburn_BG.id_sr <- aggregate(count ~ transect.x + species, data = BG.idburn_data, FUN = sum)
+BG.idcntrl_data <- BGmergedID_data[BGmergedID_data$burn_trt == 'Control', ]
+transcntrl_BG.id_sr <- aggregate(count ~ transect.x + species, data = BG.idcntrl_data, FUN = sum)
+
 #quadrat richness
 quadratBG.id_sr <- aggregate(count ~ quadratID +species, data = BGmergedID_data, FUN = sum)
+
+quadcntrl_BG.id_sr <- aggregate(count ~ quadratID + species, data = BG.idcntrl_data, FUN = sum)
+
+quadburn_BG.id_sr <- aggregate(count ~ quadratID + species, data = BG.idburn_data, FUN = sum)
 
 #shannon?
 library(vegan)
@@ -184,13 +194,46 @@ shannon_transect <- tapply(transectBG.id_sr$count, transectBG.id_sr$transect.x, 
 shannon_df <- data.frame(transect = names(shannon_transect), shannons_diversity = unname(shannon_transect))
 
 print(shannon_df)
-#quadrat shannon
+
+#transect burn/trt shannon
+burn.shannon_transect <- tapply(transburn_BG.id_sr$count, transburn_BG.id_sr$transect.x, calc_shannons)
+transburn.shannon_df <- data.frame(
+  transect = names(burn.shannon_transect),
+  shannons_diversity = unname(burn.shannon_transect)
+)
+
+cntrl.shannon_transect <- tapply(transcntrl_BG.id_sr$count, transcntrl_BG.id_sr$transect.x, calc_shannons)
+transcntrl.shannon_df <- data.frame(
+  transect = names(cntrl.shannon_transect),
+  shannons_diversity = unname(cntrl.shannon_transect)
+)
+
+#quadrat shannon id
 shannon_quadrat <- tapply(quadratBG.id_sr$count, quadratBG.id_sr$quadratID, calc_shannons)
 shannonq_df <- data.frame(quadrat = names(shannon_quadrat), shannons_diversity = unname(shannon_quadrat))
 print(shannonq_df)
+
+#quadrat burn shannon id
+quadburn_BG.id_sr
+burn.shannon_quadrat <- tapply(quadburn_BG.id_sr$count, quadburn_BG.id_sr$quadratID, calc_shannons)
+quadburn.shannon_df <- data.frame(
+  quadratID = names(burn.shannon_quadrat),
+  shannons_diversity = unname(burn.shannon_quadrat)
+)
+
+#quadrat cntrl shannon id 
+cntrl.shannon_quadrat <- tapply(quadcntrl_BG.id_sr$count, quadcntrl_BG.id_sr$quadratID, calc_shannons)
+quadcntrl.shannon_df <- data.frame(
+  quadratID = names(cntrl.shannon_quadrat),
+  shannons_diversity = unname(cntrl.shannon_quadrat)
+)
+
+
+
 #just produced one shannon index level:
 transectBG.id_shannon <- diversity(matrix(transectBG.id_sr$count), index = "shannon")
 transectBG.id_shannon
+
 
 #above-ground (AG) site by species matrix id - species or code - code includes NA?, code as tdata doesn't have species?
 AG_id<-combospec$code[which(combospec$location == "1" | combospec$location =="2" & combospec$speciesID == "1")]
