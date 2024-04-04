@@ -230,21 +230,6 @@ quadcntrl.shannon_df <- data.frame(
 
 
 
-#just produced one shannon index level:
-transectBG.id_shannon <- diversity(matrix(transectBG.id_sr$count), index = "shannon")
-transectBG.id_shannon
-
-
-#above-ground (AG) site by species matrix id - species or code - code includes NA?, code as tdata doesn't have species?
-AG_id<-combospec$code[which(combospec$location == "1" | combospec$location =="2" & combospec$speciesID == "1")]
-#above-ground (AG) sitexspec matrix all
-AG<-combospec$code[which(combospec$location == "1" | combospec$location =="2")]
-
-#below-ground (BG) site by species matrix id - whats with the NA's -same as all
-BG_id<-combospec$species[which(combospec$location == "0" | combospec$location == "2" & combospec$speciesID == "1")]
-#below-ground sitexspec matrix all
-BG<-combospec$species[which(combospec$location == "0" | combospec$location == "2")]
-
 #sorensen
 library(divo)
 
