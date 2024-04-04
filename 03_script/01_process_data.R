@@ -6,7 +6,7 @@
 #above-ground data for soil core sites
 soilabove<-read.table("01_data/psoil.txt",header=T)
 head(soilabove,4);dim(soilabove)
-
+length(unique(soilabove$sp))
 #import site data for soil core sites
 
 sdata<-read.csv("01_data/site_data.csv",header=T)
@@ -121,45 +121,38 @@ AG_id.sm <- site.species_matrix[,c(1,AG_id.code)]
 head(AG_id.sm[,1:10]);dim(AG_id.sm)
 head(site.species_matrix[,1:10]);dim(site.species_matrix)
 
+#AG
+head(psoil); dim(psoil)
+length(unique(psoil$quadratID))
+AGmat <- as.data.frame.matrix(xtabs(cover~quadratID + sp, data=psoil))
+head(AGmat[, 1:10]);dim(AGmat)
+
+
+#BG ssm
+head(combospec); dim(combospec)
+head(tdata); dim(tdata)
+
+BGmat <- as.data.frame.matrix(xtabs(count~quadratID + code, data=tdata))
+head(BGmat[, 1:10]);dim(BGmat)
+
+#these should all be true:
+table(rownames(AGmat) %in% rownames(BGmat))
+
+head(sdata,4);dim(sdata)
+
+div1 <- sdata
+head(div1);dim(div1)
+
+div1$agsr <- apply(AGmat, MARGIN = 1, FUN = function(x) length(which(x > 0)))
+xx <- AGmat[, 3]
+length(which(xx > 0))
+
+boxplot(div1$agsr ~ div1$burn_trt)
+
+#bgsr, agsimps, bgsimps
+
 #----------------------
-#merging datasets
-library(tidyr)
-merged_data <- merge(tdata, combospec, by = "code", all.x = TRUE)
-merged_data <- merge(merged_data, sdata, by = "quadratID", all.x = TRUE)
-#merged sitexspec matrix - code and species in different forms?
-merged_ssm <- pivot_wider(merged_data,
-                          id_cols = c("code", "location.x", "quadrat.y", "burn_trt"),
-names_from = "species",
-values_from = "count",
-values_fn = list(count = sum), #using quadratID results in duplicates due to separate entries for trays A and B, have summed
-values_fill = list(count = 0))
 
-
-#merged_id
-mergedID_data <-merged_data[merged_data$speciesID == 1, ]
-mergedID_ssm <- pivot_wider(mergedID_data,
-                            id_cols = c("code", "location.x", "quadrat.y", "burn_trt"),
-                            names_from = "species",
-                            values_from = "count",
-                            values_fn = list(count = sum),
-                            values_fill = list(count = 0))
-#AG mergedID 
-AGmergedID_data <- mergedID_data[mergedID_data$location.y == 1 | mergedID_data$location.y ==2, ]
-AGmergedID_ssm <- pivot_wider(AGmergedID_data,
-                              id_cols = c("code", "location.x", "quadrat.y", "burn_trt"),
-                              names_from = "species",
-                              values_from = "count",
-                              values_fn = list(count = sum),
-                              values_fill = list(count = 0))
-
-#BG mergedID
-BGmergedID_data <- mergedID_data[mergedID_data$location.y == 0 | mergedID_data$location.y == 2, ]
-BGmergedID_ssm <- pivot_wider(AGmergedID_data,
-                              id_cols = c("code", "location.x", "quadrat.y", "burn_trt"),
-                              names_from = "species",
-                              values_from = "count",
-                              values_fn = list(count = sum),
-                              values_fill = list(count = 0))
 
 #species richness? wait this sums above and below data (1 and 2 or 0 and 2) wait but its based on tray data counts not plant data - so its only BG
 AG.id_sr <- aggregate(count ~ species, data = AGmergedID_data, FUN = sum)
