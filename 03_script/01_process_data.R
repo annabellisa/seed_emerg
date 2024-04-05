@@ -3,72 +3,76 @@
 # Author Caitlin Gaskell
 
 
-#above-ground data for soil core sites
-soilabove<-read.table("01_data/psoil.txt",header=T)
-head(soilabove,4);dim(soilabove)
-length(unique(soilabove$sp))
+#t37-46 above-ground data 
+AGdata<-read.table("01_data/psoil.txt",header=T)
+head(AGdata,4);dim(AGdata)
+length(unique(AGdata$sp))
 #import site data for soil core sites
 
+#t37-46 site data, add quadratID column
 sdata<-read.csv("01_data/site_data.csv",header=T)
 sdata$quadratID<-paste(sdata$transect,sdata$quadrat,sep=".")
 #below should be 30
 length(unique(sdata$quadratID))
 head(sdata,4);dim(sdata)
 
-
-#import test tray data
-
+#t37-46 emergence trial tray data, add quadratID column
 tdata<-tdata<-read.csv("01_data/tray_data.csv",header=T)
+tdata$quadratID<-paste(tdata$transect,tdata$quadrat,sep=".")
 head(tdata);dim(tdata)
 
-#add quadratID collumn to tray data
-tdata$quadratID<-paste(tdata$transect,tdata$quadrat,sep=".")
+#t37-46 below-ground species list including morphospecies
+BGspec<-read.table("01_data/plant_data.txt",header=T)
+which(!is.na(BGspec$species))
+head(BGspec,4);dim(BGspec)
+#alt
+BGspec <- combospec[combospec$location == "0" | combospec$location == "2",]
 
-#import below-ground data for soil core sites (emergence trial data)
-specieslist<-read.table("01_data/plant_data.txt",header=T)
-which(!is.na(specieslist$species))
-head(specieslist,4);dim(specieslist)
-#species list for species identified so far 21/03/04
-specieslistID<-specieslist[which(!is.na(specieslist$species)),]
-head(specieslistID,4);dim(specieslistID)
+#t37-46 below-ground species list excluding morphospecies (species identified as of 21/03/04)
+BGspecid<-BGspec[which(!is.na(BGspec$species)),]
+head(BGspecid,4);dim(BGspecid)
 
-#plant data for all sites above ground
-psabove_all<-read.table("01_data/plantspeciesabove.txt",header=T)
+#alt - smth wrong with combospec$speciesID
+BGspecid <- combospec[combospec$location == "0" | combospec$location == "2" & combospec$speciesID == "1",]
+BGspecid <- BGspec[BGspec$speciesID == "1",]
 
-#plant data for soil site above-ground data
-soilabovesp<-unique(soilabove$sp)
-psabove_soil<-psabove_all[which(psabove_all$sp %in% soilabovesp),]
+#t01-46 AG species list
+AGspecall<-read.table("01_data/alltransectspeciesag.txt",header=T)
+
+#t37-46 AG species list
+AGspec <-AGspecall[AGspecall$location == "1" | AGspecall$location == "2",]
+
 
 #combined species list of above and below ground, including non identified
 combospec<-read.table("01_data/combinedspecies.txt",header=T)
 head(combospec,4);dim(combospec)
 
 #check that quadratID's match across 4 datasets
-head(soilabove,4);dim(soilabove)
+head(AGdata,4);dim(AGdata)
 head(sdata,4);dim(sdata)
 head(tdata);dim(tdata)
-head(specieslist,4);dim(specieslist)
-head(specieslistID,4);dim(specieslistID)
+head(BGspec,4);dim(BGspec)
+head(BGspecid,4);dim(BGspecid)
 head(psabove_all,4);dim(psabove_all)
 head(psabove_soil,4);dim(psabove_soil)
 head(combospec,4);dim(combospec)
 
-#check soilabove exists in site data
-table(soilabove$quadratID %in% sdata$quadratID)
+#check Agdata exists in site data
+table(AGdata$quadratID %in% sdata$quadratID)
 #all tray data exists in site data
 table(tdata$quadratID %in% sdata$quadratID)
 
-table(soilabove$sp %in% specieslistID$code)
+table(AGdata$sp %in% specieslistID$code)
 #all species codes in plant data exist in tray data
-table(specieslist$code %in% tdata$code)
+table(BGspec$code %in% tdata$code)
 which(!specieslist$code %in% unique(tdata$code))
 
 #which species codes in plant data exist in above-ground veg data
-table(specieslistID$code %in% psabove$sp)
-which(specieslistID$code %in% unique(psabove$sp))
+table(BGspecid$code %in% AGdata$sp)
+which(BGspecid$code %in% unique(AGdata$sp))
 #which species codes in below-ground species list exist in above-ground veg data
-specieslistID[which(!specieslistID$code %in% psabove$sp)[11:21],]
-psabove[which(psabove$species=="Sonchus oleraceus"),]
+BGspecid[which(!BGspecid$code %in% AGdata$sp)[11:21],]
+Agdata[which(Agdata$species=="Sonchus oleraceus"),]
 
 #no. species not in below ground data (false)
 table(psabove_soil$sp %in% specieslistID$code)
@@ -138,11 +142,13 @@ head(BGmat[, 1:10]);dim(BGmat)
 #these should all be true:
 table(rownames(AGmat) %in% rownames(BGmat))
 
+#constructing 
 head(sdata,4);dim(sdata)
 
 div1 <- sdata
 head(div1);dim(div1)
 
+#AG species richness
 div1$agsr <- apply(AGmat, MARGIN = 1, FUN = function(x) length(which(x > 0)))
 xx <- AGmat[, 3]
 length(which(xx > 0))
@@ -150,7 +156,24 @@ length(which(xx > 0))
 boxplot(div1$agsr ~ div1$burn_trt)
 
 #bgsr, agsimps, bgsimps
+#BG species richness
+div1$bgsr <- apply(BGmat, MARGIN = 1, FUN = function(x) length(which(x>0)))
+xxx <- BGmat[, 1]
+length(which(xxx > 0))
 
+bwplot(div1$bgsr ~ div1$burn_trt)
+
+#AG shannon
+div1$agshan <- diversity(AGmat, index = "shannon")
+div1$agsimp <- diversity(AGmat, index = "invsimpson")
+
+bwplot(div1$agsimp ~ div1$burn_trt)
+
+#BG shannon
+div1$bgshan <- diversity(BGmat, index = "shannon")
+div1$bgsimp <- diversity(BGmat, index = "invsimpson")
+
+bwplot(div1$bgsimp ~ div1$burn_trt)
 #----------------------
 
 
