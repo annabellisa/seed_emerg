@@ -22,42 +22,49 @@ tdata$quadratID<-paste(tdata$transect,tdata$quadrat,sep=".")
 head(tdata);dim(tdata)
 
 #t37-46 below-ground species list including morphospecies
-BGspec<-read.table("01_data/plant_data.txt",header=T)
-which(!is.na(BGspec$species))
+BGspec <- combospec[combospec$location == "0" | combospec$location == "2",]
 head(BGspec,4);dim(BGspec)
 #alt
-BGspec <- combospec[combospec$location == "0" | combospec$location == "2",]
+#BGspec<-read.table("01_data/plant_data.txt",header=T)
+#which(!is.na(BGspec$species))
+
 
 #t37-46 below-ground species list excluding morphospecies (species identified as of 21/03/04)
-BGspecid<-BGspec[which(!is.na(BGspec$species)),]
+BGspecid <- combospec[(combospec$location == "0" | combospec$location == "2") & combospec$speciesID == "1",]
 head(BGspecid,4);dim(BGspecid)
 
 #alt - smth wrong with combospec$speciesID
-BGspecid <- combospec[combospec$location == "0" | combospec$location == "2" & combospec$speciesID == "1",]
-BGspecid <- BGspec[BGspec$speciesID == "1",]
+#BGspecid<-BGspec[which(!is.na(BGspec$species)),]
+#BGspecid <- BGspec[BGspec$speciesID == "1",]
 
-#t01-46 AG species list
+
+#t01-46 AG species list incl. morphospecies
 AGspecall<-read.table("01_data/alltransectspeciesag.txt",header=T)
 
-#t37-46 AG species list
+#t37-46 AG species list incl. morphospecies
 AGspec <-AGspecall[AGspecall$location == "1" | AGspecall$location == "2",]
+head(AGspec,4);dim(AGspec)
 
+#t37-46 AG species list excl. morphospecies
+AGspecid <- AGspecall[(AGspecall$location == "1" | AGspecall$location == "2") & AGspecall$speciesID == "1",]
+head(AGspecid,4);dim(AGspecid)
 
 #combined species list of above and below ground, including non identified
 combospec<-read.table("01_data/combinedspecies.txt",header=T)
 head(combospec,4);dim(combospec)
 
 #check that quadratID's match across 4 datasets
-head(AGdata,4);dim(AGdata)
-head(sdata,4);dim(sdata)
-head(tdata);dim(tdata)
-head(BGspec,4);dim(BGspec)
-head(BGspecid,4);dim(BGspecid)
-head(psabove_all,4);dim(psabove_all)
-head(psabove_soil,4);dim(psabove_soil)
-head(combospec,4);dim(combospec)
+head(AGdata,4);dim(AGdata) #t37-46 AG data
+head(sdata,4);dim(sdata) #t37-46 site data
+head(tdata);dim(tdata) #t37-46 emergence(BG) data
+head(BGspec,4);dim(BGspec) #t37-46 BG species list incl. morphospecies
+head(BGspecid,4);dim(BGspecid) #t37-46 BG species list excl. morphospecies
+head(AGspecall,4);dim(AGspecall) #t01-46 AG species list incl. morphospecies
+head(AGspec,4);dim(AGspec) #t37-46 AG species list incl. morphospecies
+head(AGspecid,4);dim(AGspecid) #t37-46 AG species list excl. morphospecies
+head(combospec,4);dim(combospec) #t37-46 combined species list of above and below ground, incl morphospecies
 
-#check Agdata exists in site data
+#check AGdata exists in site data
 table(AGdata$quadratID %in% sdata$quadratID)
 #all tray data exists in site data
 table(tdata$quadratID %in% sdata$quadratID)
@@ -65,7 +72,7 @@ table(tdata$quadratID %in% sdata$quadratID)
 table(AGdata$sp %in% specieslistID$code)
 #all species codes in plant data exist in tray data
 table(BGspec$code %in% tdata$code)
-which(!specieslist$code %in% unique(tdata$code))
+which(!BGspec$code %in% unique(tdata$code))
 
 #which species codes in plant data exist in above-ground veg data
 table(BGspecid$code %in% AGdata$sp)
@@ -75,7 +82,7 @@ BGspecid[which(!BGspecid$code %in% AGdata$sp)[11:21],]
 Agdata[which(Agdata$species=="Sonchus oleraceus"),]
 
 #no. species not in below ground data (false)
-table(psabove_soil$sp %in% specieslistID$code)
+table(AGspec$sp %in% BGspecid$code)
 
 # VENN diagram:
 library(VennDiagram)
