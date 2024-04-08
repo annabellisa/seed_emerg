@@ -69,7 +69,10 @@ table(AGdata$quadratID %in% sdata$quadratID)
 #all tray data exists in site data
 table(tdata$quadratID %in% sdata$quadratID)
 
-table(AGdata$sp %in% specieslistID$code)
+table(AGdata$sp %in% BGspecid$code) #includes duplicates in AGdata
+which(!AGdata$sp %in% unique(BGspecid$code))
+intersection <- intersect(AGdata$sp, BGspecid$code) # doesn't include duplicates
+print(intersection)
 #all species codes in plant data exist in tray data
 table(BGspec$code %in% tdata$code)
 which(!BGspec$code %in% unique(tdata$code))
@@ -79,7 +82,7 @@ table(BGspecid$code %in% AGdata$sp)
 which(BGspecid$code %in% unique(AGdata$sp))
 #which species codes in below-ground species list exist in above-ground veg data
 BGspecid[which(!BGspecid$code %in% AGdata$sp)[11:21],]
-Agdata[which(Agdata$species=="Sonchus oleraceus"),]
+AGdata[which(AGdata$species=="Sonchus oleraceus"),]
 
 #no. species not in below ground data (false)
 table(AGspec$sp %in% BGspecid$code)
@@ -88,9 +91,12 @@ table(AGspec$sp %in% BGspecid$code)
 library(VennDiagram)
 
 # Summarise overlap:
-belowonly<-21+47
-aboveonly<-49+47
-overlap<-47
+#belowonly<-21+47
+#aboveonly<-49+47
+#overlap<-47
+belowonly <- sum((combospec$location == "0" & combospec$speciesID == "1") + (combospec$location == "2" & combospec$speciesID == "1"))
+aboveonly <- sum((combospec$location == "1" & combospec$speciesID == "1") + (combospec$location == "2" & combospec$speciesID == "1"))
+overlap <- sum(combospec$location == "2" & combospec$speciesID == "1")
 
 dev.new(width=6,height=4,dpi=160,pointsize=12, noRStudioGD = T)
 
