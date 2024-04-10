@@ -64,3 +64,6 @@ BGmergedID_ssm <- pivot_wider(AGmergedID_data,
                               values_from = "count",
                               values_fn = list(count = sum),
                               values_fill = list(count = 0))
+
+#remove columns
+#div1 <- subset(div1, select = -agmarg)

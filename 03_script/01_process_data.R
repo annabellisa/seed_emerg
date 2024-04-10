@@ -137,6 +137,7 @@ AG_id.code <- which(colnames(site.species_matrix) %in% AG_id)
 AG_id.sm <- site.species_matrix[,c(1,AG_id.code)]
 head(AG_id.sm[,1:10]);dim(AG_id.sm)
 head(site.species_matrix[,1:10]);dim(site.species_matrix)
+#-------
 
 #AG
 head(psoil); dim(psoil)
@@ -176,17 +177,37 @@ length(which(xxx > 0))
 
 bwplot(div1$bgsr ~ div1$burn_trt)
 
-#AG shannon
+#AG shannon and simpson
+library(vegan)
+library(abdiv)
 div1$agshan <- diversity(AGmat, index = "shannon")
 div1$agsimp <- diversity(AGmat, index = "invsimpson")
 
+
 bwplot(div1$agsimp ~ div1$burn_trt)
 
-#BG shannon
+#BG shannon and simpson
 div1$bgshan <- diversity(BGmat, index = "shannon")
 div1$bgsimp <- diversity(BGmat, index = "invsimpson")
 
+
 bwplot(div1$bgsimp ~ div1$burn_trt)
+
+#margalef?
+#div1$agmarg <- margalef(AGmat) doesn't work as for community level comparison only
+AGmarg <- margalef(AGmat)
+Bgmarg <- margalef(BGmat)
+
+
+#?? singular error either due to collinearity (variables being linear combinations of others), so likely not enough variability?
+library(lme4)
+BGmodel_data <- data.frame(
+  burn_trt = div1$burn_trt,
+  transect = factor(div1$transect),
+  bgsr = div1$bgsr
+)
+BGmodel_glmm <- glmer(bgsr ~ burn_trt + (1 | transect), data = BGmodel_data, family = poisson)
+
 #----------------------
 
 
