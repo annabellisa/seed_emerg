@@ -2,6 +2,9 @@
 
 # Author Caitlin Gaskell
 
+#combined species list of above and below ground, including non identified
+combospec<-read.table("01_data/combinedspecies.txt",header=T)
+head(combospec,4);dim(combospec)
 
 #t37-46 above-ground data 
 AGdata<-read.table("01_data/psoil.txt",header=T)
@@ -49,9 +52,7 @@ head(AGspec,4);dim(AGspec)
 AGspecid <- AGspecall[(AGspecall$location == "1" | AGspecall$location == "2") & AGspecall$speciesID == "1",]
 head(AGspecid,4);dim(AGspecid)
 
-#combined species list of above and below ground, including non identified
-combospec<-read.table("01_data/combinedspecies.txt",header=T)
-head(combospec,4);dim(combospec)
+
 
 #check that quadratID's match across 4 datasets
 head(AGdata,4);dim(AGdata) #t37-46 AG data
@@ -112,37 +113,12 @@ grid.draw(venn.plot)
 
 dev.off()
 
-#site by species matrix? attempted to use tdata and add species names from combospec, however matrix used codes as collumns - reformatting using pivot_longer returned confusing result
-library(reshape)
-site.species_matrix <-cast(tdata, quadratID ~ code, value='count', fun.aggregate=sum)
-site.species_matrix
-named_ssm <- merge(site.species_matrix, combospec, by = "code", all.x = TRUE)
-#aforementioned reformatting attempt:
-long_ssm <- pivot_longer(site.species_matrix,
-                         + cols = quadratID,
-                         + names_to = "code",
-                         + values_to = "count")
-long_ssm
-named_ssm <- merge(long_ssm,combospec, by = "code", all.x = TRUE)
-print(named_ssm)
-
-#formatting?
-#
-AG.code <- which(colnames(site.species_matrix) %in% AG)
-AG.sm <- site.species_matrix[,c(1,AG.code)]
-head(AG.sm[,1:10]);dim(AG.sm)
-head(site.species_matrix[,1:10]);dim(site.species_matrix)
-#
-AG_id.code <- which(colnames(site.species_matrix) %in% AG_id)
-AG_id.sm <- site.species_matrix[,c(1,AG_id.code)]
-head(AG_id.sm[,1:10]);dim(AG_id.sm)
-head(site.species_matrix[,1:10]);dim(site.species_matrix)
-#-------
+#------
 
 #AG
-head(psoil); dim(psoil)
-length(unique(psoil$quadratID))
-AGmat <- as.data.frame.matrix(xtabs(cover~quadratID + sp, data=psoil))
+head(AGdata); dim(AGdata)
+length(unique(AGdata$quadratID))
+AGmat <- as.data.frame.matrix(xtabs(cover~quadratID + sp, data=AGdata))
 head(AGmat[, 1:10]);dim(AGmat)
 
 
@@ -150,13 +126,25 @@ head(AGmat[, 1:10]);dim(AGmat)
 head(combospec); dim(combospec)
 head(tdata); dim(tdata)
 
-BGmat <- as.data.frame.matrix(xtabs(count~quadratID + code, data=tdata))
+head(BGspecid,4);dim(BGspecid)
+
+tdataID <- tdata[which(tdata$code %in% BGspecid$code), ]
+head(tdataID,4);dim(tdataID)
+
+length(unique(tdataID$code))
+
+BGmat <- as.data.frame.matrix(xtabs(count~quadratID + code, data=tdataID))
 head(BGmat[, 1:10]);dim(BGmat)
+
+which(duplicated(colnames(BGmat)))
+colnames(BGmat)
+
+
 
 #these should all be true:
 table(rownames(AGmat) %in% rownames(BGmat))
 
-#constructing 
+#constructing ssm
 head(sdata,4);dim(sdata)
 
 div1 <- sdata
@@ -177,6 +165,41 @@ length(which(xxx > 0))
 
 bwplot(div1$bgsr ~ div1$burn_trt)
 
+#bwplot sr 
+div2 <- div1[, 1:7]
+head(div2);dim(div2)
+
+div3 <- div2[,1:(ncol(div2)-1)]
+div3$ab <- "above"
+colnames(div3) [which(colnames(div3) == "agsr")] <- "sr"
+
+head(div3);dim(div3)
+
+div4 <- div2[,c(1:5,ncol(div2))]
+div4$ab <- "below"
+colnames(div4) [which(colnames(div4) == "bgsr")] <- "sr"
+head(div4);dim(div4)
+
+div5 <- rbind(div3,div4)
+div5$burn_trt <- factor(div5$burn_trt, levels = c("Control","Burn"))
+div5$ab <- factor(div5$ab, levels = c("above","below"))
+
+head(div5);dim(div5)
+str(div5)
+#bwplot
+dev.new(width=10,height=4,dpi=160,pointsize=12, noRStudioGD = T)
+
+par(mfrow = c(1, 2),mar=c(4,4,1,1))
+boxplot(sr ~ ab, data = div5, las = 1, ylab = "species richness", xlab = "")
+
+boxplot(sr ~ ab + burn_trt, data = div5, las = 1, ylab = "species richness", xlab = "", cex.axis = 0.7)
+
+library(lme4)
+sr_mod1<-glmer(sr~ab*burn_trt+(1|transect), family="poisson", data=div5) 
+summary(sr_mod1)
+sr_mod2<-glmer(sr~ab+burn_trt+(1|transect), family="poisson", data=div5)
+summary(sr_mod2)
+
 #AG shannon and simpson
 library(vegan)
 library(abdiv)
@@ -193,6 +216,11 @@ div1$bgsimp <- diversity(BGmat, index = "invsimpson")
 
 bwplot(div1$bgsimp ~ div1$burn_trt)
 
+#sorensen
+library(divo)
+div1$bgsoren <- li(BGmat)
+div1 <- subset(div1, select = -bgsoren)
+
 #margalef?
 #div1$agmarg <- margalef(AGmat) doesn't work as for community level comparison only
 AGmarg <- margalef(AGmat)
@@ -208,6 +236,8 @@ BGmodel_data <- data.frame(
 )
 BGmodel_glmm <- glmer(bgsr ~ burn_trt + (1 | transect), data = BGmodel_data, family = poisson)
 
+var(div1)
+head(div1);dim(div1)
 #----------------------
 
 
@@ -278,7 +308,32 @@ quadcntrl.shannon_df <- data.frame(
   shannons_diversity = unname(cntrl.shannon_quadrat)
 )
 
+#site by species matrix? attempted to use tdata and add species names from combospec, however matrix used codes as collumns - reformatting using pivot_longer returned confusing result
+library(reshape)
+site.species_matrix <-cast(tdata, quadratID ~ code, value='count', fun.aggregate=sum)
+site.species_matrix
+named_ssm <- merge(site.species_matrix, combospec, by = "code", all.x = TRUE)
+#aforementioned reformatting attempt:
+long_ssm <- pivot_longer(site.species_matrix,
+                         + cols = quadratID,
+                         + names_to = "code",
+                         + values_to = "count")
+long_ssm
+named_ssm <- merge(long_ssm,combospec, by = "code", all.x = TRUE)
+print(named_ssm)
 
+#formatting?
+#
+AG.code <- which(colnames(site.species_matrix) %in% AG)
+AG.sm <- site.species_matrix[,c(1,AG.code)]
+head(AG.sm[,1:10]);dim(AG.sm)
+head(site.species_matrix[,1:10]);dim(site.species_matrix)
+#
+AG_id.code <- which(colnames(site.species_matrix) %in% AG_id)
+AG_id.sm <- site.species_matrix[,c(1,AG_id.code)]
+head(AG_id.sm[,1:10]);dim(AG_id.sm)
+head(site.species_matrix[,1:10]);dim(site.species_matrix)
+#-------
 
 #sorensen
 library(divo)
