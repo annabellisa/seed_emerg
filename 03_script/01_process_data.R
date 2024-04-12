@@ -198,11 +198,23 @@ boxplot(sr ~ ab, data = div5, las = 1, ylab = "species richness", xlab = "")
 
 boxplot(sr ~ ab + burn_trt, data = div5, las = 1, ylab = "species richness", xlab = "", cex.axis = 0.7)
 
-
+#sr glmer
+#with interaction
 sr_mod1<-glmer(sr~ab*burn_trt+(1|transect), family="poisson", data=div5) 
 summary(sr_mod1)
+#without interaction
 sr_mod2<-glmer(sr~ab+burn_trt+(1|transect), family="poisson", data=div5)
 summary(sr_mod2)
+
+hist(div5$sr)
+plot(div5$sr, div5$ab)
+
+
+#
+library(AICcmodavg)
+nd1 <- data.frame(treatment = factor(c("control", "burn"), levels = c("control", "burn")))
+sr_mod3 <- predictSE(mod=sr_mod2,newdata=nd1,type="response",se.fit = T)
+
 
 #AG shannon and simpson
 
