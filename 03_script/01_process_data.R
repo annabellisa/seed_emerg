@@ -8,6 +8,7 @@ library(lme4)
 library(vegan)
 library(abdiv)
 library(divo)
+library(AICcmodavg)
 
 #---- loading data
 
@@ -206,16 +207,40 @@ summary(sr_mod1)
 sr_mod2<-glmer(sr~ab+burn_trt+(1|transect), family="poisson", data=div5)
 summary(sr_mod2)
 
-hist(div5$sr)
-plot(div5$sr, div5$ab)
+#hist(div5$sr)
+#plot(div5$sr, div5$ab)
 
 
 #
-library(AICcmodavg)
-nd1 <- data.frame(treatment = factor(c("control", "burn"), levels = c("control", "burn")))
+#nd1 <- data.frame(treatment = factor(c("control", "burn"), levels = c("control", "burn")))
+#nd1 <- expand.grid(ab = factor(c("above", "below"), levels = c("above", "below"), burn_trt = factor("Control", "Burn"), levels = c("Control", "Burn")), ab = factor(c("above", "below"), levels = c("above", "below")))
+nd1 <- expand.grid(ab = factor(c("above", "below"), levels = c("above", "below")),
+                   burn_trt = factor(c("Control", "Burn"), levels = c("Control", "Burn")))
 sr_mod3 <- predictSE(mod=sr_mod2,newdata=nd1,type="response",se.fit = T)
+sr_mod3 <- data.frame(nd1, fit = sr_mod3$fit, se = sr_mod3$se.fit)
+sr_mod3$lci <- sr_mod3$fit-(sr_mod3$se*1.96)
+sr_mod3$uci <- sr_mod3$fit+(sr_mod3$se*1.96)
+#view sr_mod3
+head(sr_mod3)
+summary(sr_mod2)$coefficients
 
+#plot sr_mod3 - old, only above/below
+#dev.new(width=10,height=4,dpi=160,pointsize=12, noRStudioGD = T)
+#jpeg(sr1.jpeg)
+#par(mfrow=c(2,2), mar=c(4.5,4,1,1), mgp=c(2.8,0.8,0), oma=c(0,0,1,6))
+#plot(c(1:4),sr_mod3$fit, xlim=c(0.5,2.5), pch=20, xaxt="n",ylim=c((min(sr_mod3$lci)),max(sr_mod3$uci)),ylab="Species Richness",xlab="", las = 1, cex = 2.5)
+#arrows(c(1:2),sr_mod3$lci,c(1:2),sr_mod3$uci,length=0.03,code=3,angle=90)
+#axis(1,at=c(1:2),labels=F)
+#axis(side = 1,at=c(1:4),labels=sr_mod3$ab,tick=F, cex.axis=1)
+#mtext(paste("p = ",round(summary(sr_mod3)$coefficients["burn_trt",2],3)), side=3,line=0.1,adj=1, cex=1)
 
+x_labels <- with(sr_mod3, interaction(ab, burn_trt))
+
+dev.new(width=10,height=4,dpi=160,pointsize=12, noRStudioGD = T)
+plot(c(1:4), sr_mod3$fit, xlim=c(0.5,4.5), pch=20, xaxt="n", ylim=c((min(sr_mod3$lci)), max(sr_mod3$uci)), ylab="Species Richness", xlab="", las=1, cex=2.5)
+arrows(c(1:4), sr_mod3$lci, c(1:4), sr_mod3$uci, length=0.3, code=3, angle=90)
+axis(side=1, at=c(1:4), labels=x_labels, tick=F, cex.axis=1)
+     
 #AG shannon and simpson
 
 div1$agshan <- diversity(AGmat, index = "shannon")
@@ -233,8 +258,8 @@ bwplot(div1$bgsimp ~ div1$burn_trt)
 
 #sorensen
 
-div1$bgsoren <- li(BGmat)
-div1 <- subset(div1, select = -bgsoren)
+#div1$bgsoren <- li(BGmat)
+#div1 <- subset(div1, select = -bgsoren)
 
 #margalef?
 #div1$agmarg <- margalef(AGmat) doesn't work as for community level comparison only
