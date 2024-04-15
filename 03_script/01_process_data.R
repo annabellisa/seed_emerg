@@ -57,7 +57,12 @@ head(AGspec,4);dim(AGspec)
 
 #t37-46 AG species list excl. morphospecies
 AGspecid <- AGspecall[(AGspecall$location == "1" | AGspecall$location == "2") & AGspecall$speciesID == "1",]
+AGspecid <- combospec[(combospec$location == "1") | combospec$location == "2" & combospec$speciesID == "1", ]
 head(AGspecid,4);dim(AGspecid)
+AGspecid <- combospec[(combospec$location %in% c("1", "2")) & combospec$speciesID == "1", ]
+
+table(AGspecid$code %in% AGdata$sp)
+which(!AGspecid$code %in% unique(AGdata$sp))
 
 #check that quadratID's match across 4 datasets
 head(AGdata,4);dim(AGdata) #t37-46 AG data
