@@ -29,6 +29,7 @@ head(psoil);dim(psoil)
 #merging datasets
 library(tidyr)
 merged_data <- merge(tdata, combospec, by = "code", all.x = TRUE)
+merged_data <- merge(AGdata, combospec, by.x = "sp", by.y = "code", all.x = T)
 merged_data <- merge(merged_data, sdata, by = "quadratID", all.x = TRUE)
 #merged sitexspec matrix - code and species in different forms?
 merged_ssm <- pivot_wider(merged_data,
@@ -182,3 +183,16 @@ quad_sim <- apply(quadcntrl_BG.id_sr$count, 1, function(cntrl_count) {
     calc_sorensen(cntrl_count, burn_count)
   })
 })
+
+
+
+div3 <- div2[,1:(ncol(div2)-1)]
+div3$ab <- "above"
+colnames(div3) [which(colnames(div3) == "agsr")] <- "sr"
+
+head(div3);dim(div3)
+
+div4 <- div2[,c(1:5,ncol(div2))]
+div4$ab <- "below"
+colnames(div4) [which(colnames(div4) == "bgsr")] <- "sr"
+head(div4);dim(div4)

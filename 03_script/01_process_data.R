@@ -50,14 +50,16 @@ head(BGspecid,4);dim(BGspecid)
 
 #t01-46 AG species list incl. morphospecies
 AGspecall<-read.table("01_data/alltransectspeciesag.txt",header=T)
+head(AGspecall);dim(AGspecall)
 
 #t37-46 AG species list incl. morphospecies
-AGspec <-AGspecall[AGspecall$location == "1" | AGspecall$location == "2",]
+#AGspec <-AGspecall[AGspecall$location == "1" | AGspecall$location == "2",]
 head(AGspec,4);dim(AGspec)
+AGspec <-combospec[combospec$location == "1" | combospec$location == "2",]
 
 #t37-46 AG species list excl. morphospecies
-AGspecid <- AGspecall[(AGspecall$location == "1" | AGspecall$location == "2") & AGspecall$speciesID == "1",]
-AGspecid <- combospec[(combospec$location == "1") | combospec$location == "2" & combospec$speciesID == "1", ]
+#AGspecid <- AGspecall[(AGspecall$location == "1" | AGspecall$location == "2") & AGspecall$speciesID == "1",]
+#AGspecid <- combospec[(combospec$location == "1") | combospec$location == "2" & combospec$speciesID == "1", ]
 head(AGspecid,4);dim(AGspecid)
 AGspecid <- combospec[(combospec$location %in% c("1", "2")) & combospec$speciesID == "1", ]
 
@@ -76,6 +78,9 @@ head(AGspecid,4);dim(AGspecid) #t37-46 AG species list excl. morphospecies
 head(combospec,4);dim(combospec) #t37-46 combined species list of above and below ground, incl morphospecies
 
 #---- checking data
+#discrepancy between AGdata (psoil) and species list (combospec) - 15 less species in psoil
+print(AGspecid$code[which(!AGspecid$code %in% unique(AGdata$sp))])
+
 #check AGdata exists in site data
 table(AGdata$quadratID %in% sdata$quadratID)
 #all tray data exists in site data
@@ -125,6 +130,112 @@ grid.draw(venn.plot)
 
 dev.off()
 
+belowonly <- sum((combospec$location == "0" & combospec$speciesID == "1") + (combospec$location == "2" & combospec$speciesID == "1"))
+aboveonly <- sum((combospec$location == "1" & combospec$speciesID == "1") + (combospec$location == "2" & combospec$speciesID == "1"))
+overlap <- sum(combospec$location == "2" & combospec$speciesID == "1")
+
+#merging datasets
+library(tidyr)
+library(dplyr)
+#venn2 <- merge(combospec, AGdata, by.x = "code", by.y = "sp", all.x = TRUE)
+#venn2 <- merge(combospec, tdata, by = "code", all.x = TRUE)
+head(venn2);dim(venn2)
+
+combospec$burn <- ifelse(is.na(combospec$burn_trt.x), 0, ifelse(is.na(combospec$burn_trt.y), 1, 2))
+
+AGdata$code <- AGdata$sp
+AGdata <- subset(AGdata, select = -sp)
+
+merged_data <- merge(tdata, combospec, by = "code", all.x = TRUE)
+merged_data <- merge(AGdata, combospec, by = "code", all.x = T)
+
+merged_data$burn <- ifelse(merged_data$burn_trt == "Control", 0, 
+                           ifelse(merged_data$burn_trt == "Burn", 1, 2))
+
+merged_data_summary <- merged_data %>%
+  group_by(code) %>%
+  summarize(burn = case_when(
+    all(burn == 0) ~ 0,   # If all burns are 0, assign 0
+    all(burn == 1) ~ 1,   # If all burns are 1, assign 1
+    TRUE ~ 2              # Otherwise, assign 2
+  ))
+
+merged_data <- merged_data %>%
+  distinct(code, species.x, life_span, form, family, speciesID, location.y, burn)
+
+#define functional groups
+head(BGspecid,4);dim(BGspecid)
+head(AGspecid,4);dim(AGspecid)
+
+#groups to analyse:
+#all
+#native
+#exotic
+#annual
+#perennial
+#tree
+#shrub
+#forb
+#grass
+#sedges
+#exotic grasses
+#native grasses
+
+BG.native <- BGspecid$code[which(BGspecid$origin == "Native")]
+BG.exotic <- BGspecid$code[which(BGspecid$origin == "Exotic")]
+BG.annual <- BGspecid$code[which(BGspecid$life_span == "Annual")]
+BG.perr <- BGspecid$code[which(BGspecid$life_span == "Perennial")]
+BG.tree <- BGspecid$code[which(BGspecid$form == "Tree")]
+BG.shrub <- BGspecid$code[which(BGspecid$form == "Shrub")]
+BG.forb <- BGspecid$code[which(BGspecid$form == "Herb")]
+BG.grass <- BGspecid$code[which(BGspecid$form == "Grass")]
+BG.sedge <- BGspecid$code[which(BGspecid$form == "Sedge/Rush")]
+BG.native_grass <- BGspecid$code[which(BGspecid$form == "Grass" & BGspecid$origin == "Native")]
+BG.exotic_grass <- BGspecid$code[which(BGspecid$form == "Grass" & BGspecid$origin == "Exotic")]
+
+AG.native <- AGspecid$code[which(AGspecid$origin == "Native")]
+AG.exotic <- AGspecid$code[which(AGspecid$origin == "Exotic")]
+AG.annual <- AGspecid$code[which(AGspecid$life_span == "Annual")]
+AG.perr <- AGspecid$code[which(AGspecid$life_span == "Perennial")]
+AG.tree <- AGspecid$code[which(AGspecid$form == "Tree")]
+AG.shrub <- AGspecid$code[which(AGspecid$form == "Shrub")]
+AG.forb <- AGspecid$code[which(AGspecid$form == "Herb")]
+AG.grass <- AGspecid$code[which(AGspecid$form == "Grass")]
+AG.sedge <- AGspecid$code[which(AGspecid$form == "Sedge/Rush")]
+AG.native_grass <- AGspecid$code[which(AGspecid$form == "Grass" & AGspecid$origin == "Native")]
+AG.exotic_grass <- AGspecid$code[which(AGspecid$form == "Grass" & AGspecid$origin == "Exotic")]
+
+#put AGshrub back in group when 5x5 data added
+#"AG.shrub",
+#make a df of functional groups:
+group.df <- data.frame(group = c("BG.native","BG.exotic","BG.annual","BG.perr","BG.tree","BG.shrub","BG.forb","BG.grass","BG.sedge","BG.native_grass","BG.exotic_grass","AG.native","AG.exotic","AG.annual","AG.perr","AG.tree","AG.forb","AG.grass","AG.sedge","AG.native_grass","AG.exotic_grass"))
+
+rich.data<-list()
+#shan.data<-list()
+
+head(AGmat); dim(AGmat)
+head(BGmat); dim(BGmat)
+
+for (i in 1:nrow(group.df)){
+  
+  name.thisrun<-as.character(group.df$group[i])
+  vec.thisrun<-get(name.thisrun)
+  
+  if(substr(name.thisrun,1,3)=="BG.") data.thisrun<-BGmat[,colnames(BGmat) %in% vec.thisrun]
+  if(substr(name.thisrun,1,3)=="AG.") data.thisrun<-AGmat[,colnames(AGmat) %in% vec.thisrun]
+  head(data.thisrun); dim(data.thisrun)
+  
+  rich.data[[i]]<-apply(data.thisrun,1,function(x)length(which(x>0)))
+  
+  #shan.data[[i]]<-diversity(data.thisrun,index="shannon")
+  
+} # close i for
+
+rich.res<-data.frame(do.call(cbind,rich.data))
+colnames(rich.res)<-group.df$group
+
+
+
 #------ ssm contstruction
 
 #AG ssm
@@ -157,7 +268,7 @@ table(rownames(AGmat) %in% rownames(BGmat))
 head(sdata,4);dim(sdata)
 
 div1 <- sdata
-head(div1);dim(div1)
+
 
 #AG species richness
 div1$agsr <- apply(AGmat, MARGIN = 1, FUN = function(x) length(which(x > 0)))
@@ -172,24 +283,81 @@ div1$bgsr <- apply(BGmat, MARGIN = 1, FUN = function(x) length(which(x>0)))
 #xxx <- BGmat[, 1]
 #length(which(xxx > 0))
 
+head(div1);dim(div1)
+head(rich.res); dim(rich.res)
+rownames(rich.res) == div1$quadratID
+
+rich.res <- data.frame(quadratID = rownames(rich.res),rich.res)
+
+cnt_rich<-merge(div1,rich.res, by="quadratID", all.x = T, all.y = F)
+
+#shan.res<-data.frame(do.call(cbind,shan.data))
+#colnames(shan.res)<-group_df$group
+#cnt_shan<-cbind(cnt,shan.res)
+
+head(cnt_rich,3); dim(cnt_rich)
+#head(cnt_shan,3)
+head(group.df)
+
+
+colnames(cnt_rich)[which(colnames(cnt_rich) %in% c("agsr","bgsr"))] <- c("AG.all", "BG.all")
+
+AG.all <- colnames(AGmat)
+BG.all <- colnames(BGmat)
+
+
+group.df <- data.frame(group=c("AG.all", "BG.all", group.df$group))
+
+# Summarise the number of species in each group:
+group.df$no_species<-NA
+for (i in 1:nrow(group.df)){
+  var.thisrun<-as.character(group.df$group[i])
+  group.df$no_species[i]<-length(get(var.thisrun))
+}
+
+#
+gdf<-group.df
+gdf
+
+gdf$ylab<-c("AG all","BG all","BG Native","Important","Indicator","Important + Indicator","Increaser","Native forb","Exotic forb","Exotic annual forb","Exotic perennial forb","Native annual forb","Native perennial forb","Native non-leg. forb","Exotic non-leg. forb","Native leg. forb","Exotic leg. forb","Native grass","Exotic grass","Exotic annual grass","Exotic perennial grass","C3 grass","C4 grass","Native C3 grass","Native C4 grass","Exotic C3 grass","Sedge/Rush")
+
+
 #bwplot(div1$bgsr ~ div1$burn_trt)
 
 #bwplot sr 
-div2 <- div1[, 1:7]
+div2 <- cnt_rich[, 1:5]
 head(div2);dim(div2)
 
-div3 <- div2[,1:(ncol(div2)-1)]
-div3$ab <- "above"
-colnames(div3) [which(colnames(div3) == "agsr")] <- "sr"
-
+div3<-rbind(div2,div2)
+div3$ab<-c(rep("above",30),rep("below",30))
 head(div3);dim(div3)
 
-div4 <- div2[,c(1:5,ncol(div2))]
-div4$ab <- "below"
-colnames(div4) [which(colnames(div4) == "bgsr")] <- "sr"
-head(div4);dim(div4)
 
-div5 <- rbind(div3,div4)
+head(cnt_rich,3); dim(cnt_rich)
+
+AG.sr<-cnt_rich[,grep("AG.",colnames(cnt_rich))]
+AG.sr<-data.frame(AG.sr[,which(colnames(AG.sr)=="AG.all"):which(colnames(AG.sr)=="AG.tree")],AG.shrub=rep(0,30),AG.sr[,which(colnames(AG.sr)=="AG.forb"):which(colnames(AG.sr)=="AG.exotic_grass")])
+
+colnames(AG.sr)<-substr(colnames(AG.sr),4,nchar(colnames(AG.sr)))
+
+BG.sr<-cnt_rich[,grep("BG.",colnames(cnt_rich))]
+colnames(BG.sr)<-substr(colnames(BG.sr),4,nchar(colnames(BG.sr)))
+
+head(AG.sr,3); dim(AG.sr)
+head(BG.sr,3); dim(BG.sr)
+
+length(colnames(AG.sr))
+length(colnames(BG.sr))
+
+#should all be true
+colnames(AG.sr)==colnames(BG.sr)
+
+all.sr<-rbind(AG.sr,BG.sr)
+head(all.sr,3); dim(all.sr)
+
+div4<-cbind(div3,all.sr)
+head(div4,3); dim(div4)
+
 div5$burn_trt <- factor(div5$burn_trt, levels = c("Control","Burn"))
 div5$ab <- factor(div5$ab, levels = c("above","below"))
 
