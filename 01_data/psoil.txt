@@ -1,4 +1,4 @@
-transect	quadrat	location	burn_trt	year	quadratID	survey_date	cover	plot_size		species	sp
+transect	quadrat	location	burn_trt	year	quadratID	survey_date	cover	plot_size	species	sp
 T37	Q1	SP3	Burn	2023	T37.Q1	21/05/2023	30	1	"Bothriochloa bladhii"	Bot_bla
 T37	Q1	SP3	Burn	2023	T37.Q1	21/05/2023	25	1	"Dichanthium aristatum"	Dic_ari
 T37	Q1	SP3	Burn	2023	T37.Q1	21/05/2023	1.5	1	"Bidens pilosa"	Bid_pil

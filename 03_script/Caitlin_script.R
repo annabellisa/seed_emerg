@@ -15,11 +15,15 @@ soilq
 
 missingq<-sdata[which(!soilq %in% unique(pfull$quadratID)),]$quadratID
 
+pfull <-read.table("01_data/plant_full.txt",header=T)
 
-psoil<-pfull[which(pfull$quadratID %in% soilq),]
+psoil<-pfull[which(pfull$quadratID %in% soilq),] #AG data for t37-46 quadratID's, including 1m and 5m quadrats
+psoil1 <- subset(pfull, quadratID %in% soilq & cover == 1) #AG data for t37-46 quadratID's, excluding 5m quadrats
 rownames(psoil)<-1:nrow(psoil)
 #above-ground plant data for soil core sites
 head(psoil);dim(psoil)
+length(unique(psoil$sp))
+
 
 #if need to write table, just run once below:
 #write.table(psoil,file="01_data/psoil.txt",sep="\t",quote = F,row.names = F)

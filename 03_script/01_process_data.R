@@ -18,16 +18,18 @@ head(combospec,4);dim(combospec)
 
 #t37-46 above-ground data 
 AGdata<-read.table("01_data/psoil.txt",header=T)
+AGdata <- AGdata[!(AGdata$code %in% c("Rock", "Litter", "Bare")), ]
 head(AGdata,4);dim(AGdata)
-length(unique(AGdata$sp))
+length(unique(AGdata$code))
+
 #import site data for soil core sites
 
 #t37-46 site data, add quadratID column
 sdata<-read.csv("01_data/site_data.csv",header=T)
 sdata$quadratID<-paste(sdata$transect,sdata$quadrat,sep=".")
+head(sdata,4);dim(sdata)
 #below should be 30
 length(unique(sdata$quadratID))
-head(sdata,4);dim(sdata)
 
 #t37-46 emergence trial tray data, add quadratID column
 tdata<-tdata<-read.csv("01_data/tray_data.csv",header=T)
@@ -51,6 +53,7 @@ head(BGspecid,4);dim(BGspecid)
 #t01-46 AG species list incl. morphospecies
 AGspecall<-read.table("01_data/alltransectspeciesag.txt",header=T)
 head(AGspecall);dim(AGspecall)
+#AGspecall <- combospec[(combospec$location == "1" | combospec4location == "2")]
 
 #t37-46 AG species list incl. morphospecies
 #AGspec <-AGspecall[AGspecall$location == "1" | AGspecall$location == "2",]
@@ -79,8 +82,8 @@ head(combospec,4);dim(combospec) #t37-46 combined species list of above and belo
 
 #---- checking data
 #discrepancy between AGdata (psoil) and species list (combospec) - 15 less species in psoil
-print(AGspecid$code[which(!AGspecid$code %in% unique(AGdata$sp))])
-
+print(AGspecid$code[which(!AGspecid$code %in% unique(AGdata$code))])
+print(AGdata$code)
 #check AGdata exists in site data
 table(AGdata$quadratID %in% sdata$quadratID)
 #all tray data exists in site data
@@ -146,8 +149,9 @@ combospec$burn <- ifelse(is.na(combospec$burn_trt.x), 0, ifelse(is.na(combospec$
 AGdata$code <- AGdata$sp
 AGdata <- subset(AGdata, select = -sp)
 
-merged_data <- merge(tdata, combospec, by = "code", all.x = TRUE)
-merged_data <- merge(AGdata, combospec, by = "code", all.x = T)
+merged_tdata <- merge(combospec, tdata, by = "code", all.x = TRUE)
+merged_AGdata <- merge(combospec, AGdata, by = "code", all.x = T)
+merged_data <- merge(merged_tdata, merged_AGdata, by = "code", all = TRUE)
 
 merged_data$burn <- ifelse(merged_data$burn_trt == "Control", 0, 
                            ifelse(merged_data$burn_trt == "Burn", 1, 2))
@@ -158,7 +162,22 @@ merged_data_summary <- merged_data %>%
     all(burn == 0) ~ 0,   # If all burns are 0, assign 0
     all(burn == 1) ~ 1,   # If all burns are 1, assign 1
     TRUE ~ 2              # Otherwise, assign 2
-  ))
+  ),
+  species.x = first(species.x),
+  origin.x = first(origin.x),
+  life_span.x = first(life_span.x),
+  form.x = first(form.x),
+  family.x = first(family.x),
+  speciesID.x = case_when(
+    all(speciesID.x == 1) ~ 1,
+    all(speciesID.x == 0) ~ 0,),
+  location.x.y = case_when(
+    all(location.x.y == 1) ~ 0,
+    all(location.x.y == 1) ~ 1,
+    all(location.x.y == 2) ~ 1
+  )  )
+  
+merged_data_sum <- as.data.frame(merged_data_summary)
 
 merged_data <- merged_data %>%
   distinct(code, species.x, life_span, form, family, speciesID, location.y, burn)
