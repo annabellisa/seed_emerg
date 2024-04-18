@@ -18,6 +18,8 @@ head(combospec,4);dim(combospec)
 
 #t37-46 above-ground data 
 AGdata<-read.table("01_data/psoil.txt",header=T)
+AGdata$code <- AGdata$sp
+AGdata <- subset(AGdata, select = -sp)
 AGdata <- AGdata[!(AGdata$code %in% c("Rock", "Litter", "Bare")), ]
 head(AGdata,4);dim(AGdata)
 length(unique(AGdata$code))
@@ -57,14 +59,14 @@ head(AGspecall);dim(AGspecall)
 
 #t37-46 AG species list incl. morphospecies
 #AGspec <-AGspecall[AGspecall$location == "1" | AGspecall$location == "2",]
-head(AGspec,4);dim(AGspec)
 AGspec <-combospec[combospec$location == "1" | combospec$location == "2",]
+head(AGspec,4);dim(AGspec)
 
 #t37-46 AG species list excl. morphospecies
 #AGspecid <- AGspecall[(AGspecall$location == "1" | AGspecall$location == "2") & AGspecall$speciesID == "1",]
 #AGspecid <- combospec[(combospec$location == "1") | combospec$location == "2" & combospec$speciesID == "1", ]
-head(AGspecid,4);dim(AGspecid)
 AGspecid <- combospec[(combospec$location %in% c("1", "2")) & combospec$speciesID == "1", ]
+head(AGspecid,4);dim(AGspecid) 
 
 table(AGspecid$code %in% AGdata$sp)
 which(!AGspecid$code %in% unique(AGdata$sp))
@@ -146,8 +148,6 @@ head(venn2);dim(venn2)
 
 combospec$burn <- ifelse(is.na(combospec$burn_trt.x), 0, ifelse(is.na(combospec$burn_trt.y), 1, 2))
 
-AGdata$code <- AGdata$sp
-AGdata <- subset(AGdata, select = -sp)
 
 merged_tdata <- merge(combospec, tdata, by = "code", all.x = TRUE)
 merged_AGdata <- merge(combospec, AGdata, by = "code", all.x = T)
@@ -202,8 +202,9 @@ head(AGspecid,4);dim(AGspecid)
 
 BG.native <- BGspecid$code[which(BGspecid$origin == "Native")]
 BG.exotic <- BGspecid$code[which(BGspecid$origin == "Exotic")]
-BG.annual <- BGspecid$code[which(BGspecid$life_span == "Annual")]
+BG.annual <- BGspecid$code[which(BGspecid$life_span == "Annual" | BGspecid$life_span == "Biennial" | BGspecid$life_span == "Annual/Biennial")]
 BG.perr <- BGspecid$code[which(BGspecid$life_span == "Perennial")]
+BG.leg <- BGspecid$code[which(BGspecid$form == "Legume")]
 BG.tree <- BGspecid$code[which(BGspecid$form == "Tree")]
 BG.shrub <- BGspecid$code[which(BGspecid$form == "Shrub")]
 BG.forb <- BGspecid$code[which(BGspecid$form == "Herb")]
@@ -214,11 +215,12 @@ BG.exotic_grass <- BGspecid$code[which(BGspecid$form == "Grass" & BGspecid$origi
 
 AG.native <- AGspecid$code[which(AGspecid$origin == "Native")]
 AG.exotic <- AGspecid$code[which(AGspecid$origin == "Exotic")]
-AG.annual <- AGspecid$code[which(AGspecid$life_span == "Annual")]
+AG.annual <- AGspecid$code[which(AGspecid$life_span == "Annual" | AGspecid$life_span == "Biennial")]
 AG.perr <- AGspecid$code[which(AGspecid$life_span == "Perennial")]
+AG.leg <- AGspecid$code[which(AGspecid$form == "Legume")]
 AG.tree <- AGspecid$code[which(AGspecid$form == "Tree")]
 AG.shrub <- AGspecid$code[which(AGspecid$form == "Shrub")]
-AG.forb <- AGspecid$code[which(AGspecid$form == "Herb")]
+AG.forb <- AGspecid$code[which(AGspecid$form == "Herb" | AGspecid$form == "Vine")]
 AG.grass <- AGspecid$code[which(AGspecid$form == "Grass")]
 AG.sedge <- AGspecid$code[which(AGspecid$form == "Sedge/Rush")]
 AG.native_grass <- AGspecid$code[which(AGspecid$form == "Grass" & AGspecid$origin == "Native")]
@@ -227,7 +229,7 @@ AG.exotic_grass <- AGspecid$code[which(AGspecid$form == "Grass" & AGspecid$origi
 #put AGshrub back in group when 5x5 data added
 #"AG.shrub",
 #make a df of functional groups:
-group.df <- data.frame(group = c("BG.native","BG.exotic","BG.annual","BG.perr","BG.tree","BG.shrub","BG.forb","BG.grass","BG.sedge","BG.native_grass","BG.exotic_grass","AG.native","AG.exotic","AG.annual","AG.perr","AG.tree","AG.forb","AG.grass","AG.sedge","AG.native_grass","AG.exotic_grass"))
+group.df <- data.frame(group = c("BG.native","BG.exotic","BG.annual","BG.perr", "BG.leg", "BG.tree","BG.shrub","BG.forb","BG.grass","BG.sedge","BG.native_grass", "BG.exotic_grass","AG.native","AG.exotic","AG.annual","AG.perr","AG.leg", "AG.tree","AG.forb","AG.grass","AG.sedge", "AG.native_grass","AG.exotic_grass"))
 
 rich.data<-list()
 #shan.data<-list()
@@ -260,7 +262,7 @@ colnames(rich.res)<-group.df$group
 #AG ssm
 head(AGdata); dim(AGdata)
 length(unique(AGdata$quadratID))
-AGmat <- as.data.frame.matrix(xtabs(cover~quadratID + sp, data=AGdata))
+AGmat <- as.data.frame.matrix(xtabs(cover~quadratID + code, data=AGdata))
 head(AGmat[, 1:10]);dim(AGmat)
 
 #BG ssm
@@ -398,6 +400,70 @@ summary(sr_mod1)
 #without interaction
 sr_mod2<-glmer(sr~ab+burn_trt+(1|transect), family="poisson", data=div5)
 summary(sr_mod2)
+
+
+#gamma glmer
+#without interaction
+srmod_all<-glmer(all~ab+burn_trt+(1|transect), family="poisson", data=div4)
+summary(srmod_all)
+
+#native
+srmod_nat<-glmer(native~ab+burn_trt+(1|transect), family="poisson", data=div4)
+summary(srmod_nat)
+
+nd3 <- expand.grid(ab = factor(c("above", "below"), levels = c("above", "below")),
+                   burn_trt = factor(c("Control", "Burn"), levels = c("Control", "Burn")))
+srmod_nat1 <- predictSE(mod=srmod_nat,newdata=nd3,type="response",se.fit = T)
+srmod_nat1 <- data.frame(nd3, fit = srmod_nat1$fit, se = srmod_nat1$se.fit)
+srmod_nat1$lci <- srmod_nat1$fit-(srmod_nat1$se*1.96)
+srmod_nat13$uci <- srmod_nat1$fit+(srmod_nat1$se*1.96)
+#view srmod_nat1
+head(srmod_nat1)
+summary(srmod_nat1)$coefficients
+
+#exotic
+srmod_exo<-glmer(exotic~ab+burn_trt+(1|transect), family="poisson", data=div4)
+summary(srmod_exo)
+
+#annual
+srmod_ann<-glmer(annual~ab+burn_trt+(1|transect), family="poisson", data=div4)
+summary(srmod_ann)
+
+#perennial
+srmod_perr<-glmer(perr~ab+burn_trt+(1|transect), family="poisson", data=div4)
+summary(srmod_perr)
+
+#legume
+srmod_leg<-glmer(leg~ab+burn_trt+(1|transect), family="poisson", data=div4)
+summary(srmod_leg)
+
+#tree #no isSingular error?
+srmod_tree<-glmer(tree~ab+burn_trt+(1|transect), family="poisson", data=div4)
+summary(srmod_tree)
+
+#shrub
+srmod_shrub<-glmer(shrub~ab+burn_trt+(1|transect), family="poisson", data=div4)
+summary(srmod_shrub)
+
+#forb
+srmod_forb<-glmer(forb~ab+burn_trt+(1|transect), family="poisson", data=div4)
+summary(srmod_forb)
+
+#grass
+srmod_grass<-glmer(grass~ab+burn_trt+(1|transect), family="poisson", data=div4)
+summary(srmod_grass)
+
+#sedge
+srmod_sedge<-glmer(sedge~ab+burn_trt+(1|transect), family="poisson", data=div4)
+summary(srmod_sedge)
+
+#native_grass
+srmod_nat.grass<-glmer(native_grass~ab+burn_trt+(1|transect), family="poisson", data=div4)
+summary(srmod_leg)
+
+#exotic_grass
+srmod_exo.grass<-glmer(exotic_grass~ab+burn_trt+(1|transect), family="poisson", data=div4)
+summary(srmod_leg)
 
 #hist(div5$sr)
 #plot(div5$sr, div5$ab)
