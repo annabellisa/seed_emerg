@@ -149,7 +149,7 @@ head(venn2);dim(venn2)
 combospec$burn <- ifelse(is.na(combospec$burn_trt.x), 0, ifelse(is.na(combospec$burn_trt.y), 1, 2))
 
 
-merged_tdata <- merge(combospec, tdata, by = "code", all.x = TRUE)
+merged_tdata <- merge(combospec, tdata, by = "code", all.x = T)
 merged_AGdata <- merge(combospec, AGdata, by = "code", all.x = T)
 merged_data <- merge(merged_tdata, merged_AGdata, by = "code", all = TRUE)
 
@@ -179,8 +179,27 @@ merged_data_summary <- merged_data %>%
   
 merged_data_sum <- as.data.frame(merged_data_summary)
 
-merged_data <- merged_data %>%
-  distinct(code, species.x, life_span, form, family, speciesID, location.y, burn)
+venmat <- table(merged_data_sum$burn, merged_data_sum$location.x.y)
+venlab_burn <- c("Burn: 0", "Burn: 1", "Burn: 2")
+venlab_loc <- c("Below Ground: 0", "Above Ground: 1", "Both: 2")
+
+
+draw.quad.venn(area1, area2, area3, area4, n12, n13, n14, n23, n24,
+               n34, n123, n124, n134, n234, n1234, category = rep("",
+                                                                  4), lwd = rep(2, 4), lty = rep("solid", 4), col =
+                 rep("black", 4), fill = NULL, alpha = rep(0.5, 4),
+               label.col = rep("black", 15), cex = rep(1, 15),
+               fontface = rep("plain", 15), fontfamily = rep("serif",
+                                                             15), cat.pos = c(-15, 15, 0, 0), cat.dist = c(0.22,
+                                                                                                           0.22, 0.11, 0.11), cat.col = rep("black", 4), cat.cex
+               = rep(1, 4), cat.fontface = rep("plain", 4),
+               cat.fontfamily = rep("serif", 4), cat.just =
+                 rep(list(c(0.5, 0.5)), 4), rotation.degree = 0,
+               rotation.centre = c(0.5, 0.5), ind = TRUE, cex.prop =
+                 NULL, print.mode = "raw", sigdigs = 3, direct.area =
+                 FALSE, area.vector = 0, ...)
+
+
 
 #define functional groups
 head(BGspecid,4);dim(BGspecid)
@@ -340,7 +359,7 @@ for (i in 1:nrow(group.df)){
 gdf<-group.df
 gdf
 
-gdf$ylab<-c("AG all","BG all","BG Native","Important","Indicator","Important + Indicator","Increaser","Native forb","Exotic forb","Exotic annual forb","Exotic perennial forb","Native annual forb","Native perennial forb","Native non-leg. forb","Exotic non-leg. forb","Native leg. forb","Exotic leg. forb","Native grass","Exotic grass","Exotic annual grass","Exotic perennial grass","C3 grass","C4 grass","Native C3 grass","Native C4 grass","Exotic C3 grass","Sedge/Rush")
+gdf$ylab<-c("AG all","BG all","BG Native","BG Exotic","BG Annual","BG Perennial","BG Legume","BG Tree","BG Shrub","BG Forb","BG Grass","BG Sedge","BG Native Grass","BG Exotic Grass","AG Native","AG Exotic","AG Annual","AG Perennial","AG Legume","AG Tree","AG Shrub","AG Forb","AG Grass","AG Sedge","AG Native Grass","AG Exotic Grass")
 
 
 #bwplot(div1$bgsr ~ div1$burn_trt)
@@ -378,6 +397,8 @@ head(all.sr,3); dim(all.sr)
 
 div4<-cbind(div3,all.sr)
 head(div4,3); dim(div4)
+div4$burn_trt <- factor(div4$burn_trt, levels = c("Control","Burn"))
+div4$ab <- factor(div4$ab, levels = c("above","below"))
 
 div5$burn_trt <- factor(div5$burn_trt, levels = c("Control","Burn"))
 div5$ab <- factor(div5$ab, levels = c("above","below"))
@@ -407,63 +428,197 @@ summary(sr_mod2)
 srmod_all<-glmer(all~ab+burn_trt+(1|transect), family="poisson", data=div4)
 summary(srmod_all)
 
+ndall <- expand.grid(ab = factor(c("above", "below"), levels = c("above", "below")),
+                     burn_trt = factor(c("Control", "Burn"), levels = c("Control", "Burn")))
+srmod_all1 <- predictSE(mod=srmod_all,newdata=ndall,type="response",se.fit = T)
+srmod_allt1 <- data.frame(ndall, fit = srmod_all1$fit, se = srmod_all1$se.fit)
+srmod_all1$lci <- srmod_all1$fit-(srmod_all1$se*1.96)
+srmod_all1$uci <- srmod_all1$fit+(srmod_all1$se*1.96)
+
+#view srmod_nat1
+head(srmod_nat1)
+summary(srmod_nat)$coefficients
+
 #native
 srmod_nat<-glmer(native~ab+burn_trt+(1|transect), family="poisson", data=div4)
 summary(srmod_nat)
 
-nd3 <- expand.grid(ab = factor(c("above", "below"), levels = c("above", "below")),
+ndnat <- expand.grid(ab = factor(c("above", "below"), levels = c("above", "below")),
                    burn_trt = factor(c("Control", "Burn"), levels = c("Control", "Burn")))
-srmod_nat1 <- predictSE(mod=srmod_nat,newdata=nd3,type="response",se.fit = T)
-srmod_nat1 <- data.frame(nd3, fit = srmod_nat1$fit, se = srmod_nat1$se.fit)
+srmod_nat1 <- predictSE(mod=srmod_nat,newdata=ndnat,type="response",se.fit = T)
+srmod_nat1 <- data.frame(ndnat, fit = srmod_nat1$fit, se = srmod_nat1$se.fit)
 srmod_nat1$lci <- srmod_nat1$fit-(srmod_nat1$se*1.96)
-srmod_nat13$uci <- srmod_nat1$fit+(srmod_nat1$se*1.96)
+srmod_nat1$uci <- srmod_nat1$fit+(srmod_nat1$se*1.96)
+
 #view srmod_nat1
 head(srmod_nat1)
-summary(srmod_nat1)$coefficients
+summary(srmod_nat)$coefficients
 
 #exotic
 srmod_exo<-glmer(exotic~ab+burn_trt+(1|transect), family="poisson", data=div4)
 summary(srmod_exo)
 
+ndexo <- expand.grid(ab = factor(c("above", "below"), levels = c("above", "below")),
+                     burn_trt = factor(c("Control", "Burn"), levels = c("Control", "Burn")))
+srmod_exo1 <- predictSE(mod=srmod_nat,newdata=ndexo,type="response",se.fit = T)
+srmod_exo1 <- data.frame(ndnat, fit = srmod_exo1$fit, se = srmod_exo1$se.fit)
+srmod_exo1$lci <- srmod_exo1$fit-(srmod_exo1$se*1.96)
+srmod_exo1$uci <- srmod_exo1$fit+(srmod_exo1$se*1.96)
+
+#view srmod_exo1
+head(srmod_exo1)
+summary(srmod_exo)$coefficients
+
 #annual
 srmod_ann<-glmer(annual~ab+burn_trt+(1|transect), family="poisson", data=div4)
 summary(srmod_ann)
 
+ndann <- expand.grid(ab = factor(c("above", "below"), levels = c("above", "below")),
+                     burn_trt = factor(c("Control", "Burn"), levels = c("Control", "Burn")))
+srmod_ann1 <- predictSE(mod=srmod_ann,newdata=ndann,type="response",se.fit = T)
+srmod_ann1 <- data.frame(ndnat, fit = srmod_ann1$fit, se = srmod_ann1$se.fit)
+srmod_ann1$lci <- srmod_ann1$fit-(srmod_ann1$se*1.96)
+srmod_ann1$uci <- srmod_ann1$fit+(srmod_ann1$se*1.96)
+
+#view srmod_ann1
+head(srmod_ann1)
+summary(srmod_ann)$coefficients
+
 #perennial
-srmod_perr<-glmer(perr~ab+burn_trt+(1|transect), family="poisson", data=div4)
-summary(srmod_perr)
+srmod_per<-glmer(perr~ab+burn_trt+(1|transect), family="poisson", data=div4)
+summary(srmod_per)
+
+ndper <- expand.grid(ab = factor(c("above", "below"), levels = c("above", "below")),
+                     burn_trt = factor(c("Control", "Burn"), levels = c("Control", "Burn")))
+srmod_per1 <- predictSE(mod=srmod_per,newdata=ndper,type="response",se.fit = T)
+srmod_per1 <- data.frame(ndper, fit = srmod_per1$fit, se = srmod_per1$se.fit)
+srmod_per1$lci <- srmod_per1$fit-(srmod_per1$se*1.96)
+srmod_per1$uci <- srmod_per1$fit+(srmod_per1$se*1.96)
+
+#view srmod_exo1
+head(srmod_per1)
+summary(srmod_per)$coefficients
 
 #legume
 srmod_leg<-glmer(leg~ab+burn_trt+(1|transect), family="poisson", data=div4)
 summary(srmod_leg)
 
+ndleg <- expand.grid(ab = factor(c("above", "below"), levels = c("above", "below")),
+                     burn_trt = factor(c("Control", "Burn"), levels = c("Control", "Burn")))
+srmod_leg1 <- predictSE(mod=srmod_leg,newdata=ndleg,type="response",se.fit = T)
+srmod_leg1 <- data.frame(ndleg, fit = srmod_leg1$fit, se = srmod_leg1$se.fit)
+srmod_leg1$lci <- srmod_leg1$fit-(srmod_leg1$se*1.96)
+srmod_leg1$uci <- srmod_leg1$fit+(srmod_leg1$se*1.96)
+
+#view srmod_exo1
+head(srmod_leg1)
+summary(srmod_leg)$coefficients
+
 #tree #no isSingular error?
 srmod_tree<-glmer(tree~ab+burn_trt+(1|transect), family="poisson", data=div4)
 summary(srmod_tree)
 
-#shrub
-srmod_shrub<-glmer(shrub~ab+burn_trt+(1|transect), family="poisson", data=div4)
-summary(srmod_shrub)
+ndtree <- expand.grid(ab = factor(c("above", "below"), levels = c("above", "below")),
+                     burn_trt = factor(c("Control", "Burn"), levels = c("Control", "Burn")))
+srmod_tree1 <- predictSE(mod=srmod_tree,newdata=ndtree,type="response",se.fit = T)
+srmod_tree1 <- data.frame(ndtree, fit = srmod_tree1$fit, se = srmod_tree1$se.fit)
+srmod_tree1$lci <- srmod_tree1$fit-(srmod_tree1$se*1.96)
+srmod_tree1$uci <- srmod_tree1$fit+(srmod_tree1$se*1.96)
+
+#view srmod_exo1
+head(srmod_tree1)
+summary(srmod_tree)$coefficients
+
+
+#shrub #negative lci?
+srmod_shr<-glmer(shrub~ab+burn_trt+(1|transect), family="poisson", data=div4)
+summary(srmod_shr)
+
+ndshr <- expand.grid(ab = factor(c("above", "below"), levels = c("above", "below")),
+                      burn_trt = factor(c("Control", "Burn"), levels = c("Control", "Burn")))
+srmod_shr1 <- predictSE(mod=srmod_shr,newdata=ndshr,type="response",se.fit = T)
+srmod_shr1 <- data.frame(ndshr, fit = srmod_shr1$fit, se = srmod_shr1$se.fit)
+srmod_shr1$lci <- srmod_shr1$fit-(srmod_shr1$se*1.96)
+srmod_shr1$uci <- srmod_shr1$fit+(srmod_shr1$se*1.96)
+
+#view srmod_shr1
+head(srmod_shr1)
+summary(srmod_shr)$coefficients
 
 #forb
-srmod_forb<-glmer(forb~ab+burn_trt+(1|transect), family="poisson", data=div4)
-summary(srmod_forb)
+srmod_for<-glmer(forb~ab+burn_trt+(1|transect), family="poisson", data=div4)
+summary(srmod_for)
+
+ndfor <- expand.grid(ab = factor(c("above", "below"), levels = c("above", "below")),
+                     burn_trt = factor(c("Control", "Burn"), levels = c("Control", "Burn")))
+srmod_for1 <- predictSE(mod=srmod_for,newdata=ndfor,type="response",se.fit = T)
+srmod_for1 <- data.frame(ndfor, fit = srmod_for1$fit, se = srmod_for1$se.fit)
+srmod_for1$lci <- srmod_for1$fit-(srmod_for1$se*1.96)
+srmod_for1$uci <- srmod_for1$fit+(srmod_for1$se*1.96)
+
+#view srmod_shr1
+head(srmod_for1)
+summary(srmod_for)$coefficients
 
 #grass
-srmod_grass<-glmer(grass~ab+burn_trt+(1|transect), family="poisson", data=div4)
-summary(srmod_grass)
+srmod_gra<-glmer(grass~ab+burn_trt+(1|transect), family="poisson", data=div4)
+summary(srmod_gra)
+
+ndgra <- expand.grid(ab = factor(c("above", "below"), levels = c("above", "below")),
+                     burn_trt = factor(c("Control", "Burn"), levels = c("Control", "Burn")))
+srmod_gra1 <- predictSE(mod=srmod_gra,newdata=ndgra,type="response",se.fit = T)
+srmod_gra1 <- data.frame(ndgra, fit = srmod_gra1$fit, se = srmod_gra1$se.fit)
+srmod_gra1$lci <- srmod_gra1$fit-(srmod_gra1$se*1.96)
+srmod_gra1$uci <- srmod_gra1$fit+(srmod_gra1$se*1.96)
+
+#view srmod_shr1
+head(srmod_gra1)
+summary(srmod_gra)$coefficients
 
 #sedge
-srmod_sedge<-glmer(sedge~ab+burn_trt+(1|transect), family="poisson", data=div4)
-summary(srmod_sedge)
+srmod_sed<-glmer(sedge~ab+burn_trt+(1|transect), family="poisson", data=div4)
+summary(srmod_sed)
+
+ndsed <- expand.grid(ab = factor(c("above", "below"), levels = c("above", "below")),
+                     burn_trt = factor(c("Control", "Burn"), levels = c("Control", "Burn")))
+srmod_sed1 <- predictSE(mod=srmod_sed,newdata=ndsed,type="response",se.fit = T)
+srmod_sed1 <- data.frame(ndsed, fit = srmod_sed1$fit, se = srmod_sed1$se.fit)
+srmod_sed1$lci <- srmod_sed1$fit-(srmod_sed1$se*1.96)
+srmod_sed1$uci <- srmod_sed1$fit+(srmod_sed1$se*1.96)
+
+#view srmod_shr1
+head(srmod_sed1)
+summary(srmod_sed)$coefficients
 
 #native_grass
-srmod_nat.grass<-glmer(native_grass~ab+burn_trt+(1|transect), family="poisson", data=div4)
-summary(srmod_leg)
+srmod_natgra<-glmer(native_grass~ab+burn_trt+(1|transect), family="poisson", data=div4)
+summary(srmod_natgra)
+
+ndnatgra <- expand.grid(ab = factor(c("above", "below"), levels = c("above", "below")),
+                     burn_trt = factor(c("Control", "Burn"), levels = c("Control", "Burn")))
+srmod_natgra1 <- predictSE(mod=srmod_natgra,newdata=ndnatgra,type="response",se.fit = T)
+srmod_natgra1 <- data.frame(ndnatgra, fit = srmod_natgra1$fit, se = srmod_natgra1$se.fit)
+srmod_natgra1$lci <- srmod_natgra1$fit-(srmod_natgra1$se*1.96)
+srmod_natgra1$uci <- srmod_natgra1$fit+(srmod_natgra1$se*1.96)
+
+#view srmod_shr1
+head(srmod_natgra1)
+summary(srmod_natgra)$coefficients
 
 #exotic_grass
-srmod_exo.grass<-glmer(exotic_grass~ab+burn_trt+(1|transect), family="poisson", data=div4)
-summary(srmod_leg)
+srmod_exogra<-glmer(exotic_grass~ab+burn_trt+(1|transect), family="poisson", data=div4)
+summary(srmod_exogra)
+
+ndexogra <- expand.grid(ab = factor(c("above", "below"), levels = c("above", "below")),
+                        burn_trt = factor(c("Control", "Burn"), levels = c("Control", "Burn")))
+srmod_exogra1 <- predictSE(mod=srmod_exogra,newdata=ndexogra,type="response",se.fit = T)
+srmod_exogra1 <- data.frame(ndexogra, fit = srmod_exogra1$fit, se = srmod_exogra1$se.fit)
+srmod_exogra1$lci <- srmod_exogra1$fit-(srmod_exogra1$se*1.96)
+srmod_exogra1$uci <- srmod_exogra1$fit+(srmod_exogra1$se*1.96)
+
+#view srmod_shr1
+head(srmod_exogra1)
+summary(srmod_exogra)$coefficients
 
 #hist(div5$sr)
 #plot(div5$sr, div5$ab)
