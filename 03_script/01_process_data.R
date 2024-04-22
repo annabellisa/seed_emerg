@@ -178,13 +178,17 @@ merged_data_summary <- merged_data %>%
   )  )
   
 merged_data_sum <- as.data.frame(merged_data_summary)
+merged_data_sum <- merge(merged_data_sum, combospec, by = "code", all.x = T)
+remove_columns <- c("species.x", "origin.x", "life_span.x", "form.x", "family.x", "speciesID.x", "location.x.y")
+merged_data_sum <- merged_data_sum[, !(names(merged_data_sum) %in% remove_columns)]
 
-venmat <- table(merged_data_sum$burn, merged_data_sum$location.x.y)
-venlab_burn <- c("Burn: 0", "Burn: 1", "Burn: 2")
-venlab_loc <- c("Below Ground: 0", "Above Ground: 1", "Both: 2")
+merged_data_sumID <- merged_data_sum[merged_data_sum$speciesID == 1, ]
 
 
-draw.quad.venn(area1, area2, area3, area4, n12, n13, n14, n23, n24,
+
+
+draw.quad.venn(
+  area1 = sum((dimv4$location=="" combospec$location == "0" & combospec$speciesID == "1") + (combospec$location == "2" & combospec$speciesID == "1")) , area2, area3, area4, n12, n13, n14, n23, n24,
                n34, n123, n124, n134, n234, n1234, category = rep("",
                                                                   4), lwd = rep(2, 4), lty = rep("solid", 4), col =
                  rep("black", 4), fill = NULL, alpha = rep(0.5, 4),
@@ -198,9 +202,55 @@ draw.quad.venn(area1, area2, area3, area4, n12, n13, n14, n23, n24,
                rotation.centre = c(0.5, 0.5), ind = TRUE, cex.prop =
                  NULL, print.mode = "raw", sigdigs = 3, direct.area =
                  FALSE, area.vector = 0, ...)
+#-----
+library(venneuler)
+area_0_0 <- sum(merged_data_sum$burn == 0 & merged_data_sum$location == 0)
+area_0_1 <- sum(merged_data_sum$burn == 0 & merged_data_sum$location == 1)
+area_1_0 <- sum(merged_data_sum$burn == 1 & merged_data_sum$location == 0)
+area_1_1 <- sum(merged_data_sum$burn == 1 & merged_data_sum$location == 1)
 
+# Define the intersection sizes
+n_00_00 <- sum(merged_data_sum$burn == 0 & merged_data_sum$location == 0)
+n_00_01 <- sum(merged_data_sum$burn == 0 & merged_data_sum$location == 1)
+n_00_10 <- sum(merged_data_sum$burn == 0 & merged_data_sum$location == 0)
+n_00_11 <- sum(merged_data_sum$burn == 0 & merged_data_sum$location == 1)
+n_00_12 <- sum(merged_data_sum$burn == 0 & merged_data_sum$location == 2)
+n_00_20 <- sum(merged_data_sum$burn == 0 & merged_data_sum$location == 0)
+n_00_21 <- sum(merged_data_sum$burn == 0 & merged_data_sum$location == 1)
+n_00_22 <- sum(merged_data_sum$burn == 0 & merged_data_sum$location == 2)
 
+# Draw the Venn diagram
+venn_plot <- draw.quad.venn(
+  area1 = area_0_0,
+  area2 = area_0_1,
+  area3 = area_1_0,
+  area4 = area_1_1,
+  n12 = n_00_00,
+  n13 = n_00_01,
+  n14 = n_00_10,
+  n23 = n_00_02,
+  n24 = n_00_11,
+  n34 = n_00_12,
+  n123 = n_00_20,
+  n124 = n_00_21,
+  n134 = n_00_22,
+  n234 = 0,  # No data for this intersection
+  n1234 = 0, # No data for this intersection
+  category = c("Control", "Control above", "Treatment", "Treatment above"),
+  fill = c("blue", "red", "green", "yellow"),
+  label.col = rep("black", 15),
+  cex = rep(1, 15),
+  fontface = rep("plain", 15),
+  cat.dist = c(0.15, 0.15, 0.15, 0.15), # Adjust label distance
+  cat.cex = 1.5, # Adjust label size
+  cat.fontface = 1, # Adjust label fontface
+  cat.just = list(c(0.5, 0.5), c(0.5, 0.5), c(0.5, 0.5), c(0.5, 0.5)) # Center label text
+)
 
+# Plot the Venn diagram
+grid.draw(venn_plot)
+
+#----
 #define functional groups
 head(BGspecid,4);dim(BGspecid)
 head(AGspecid,4);dim(AGspecid)
@@ -422,211 +472,6 @@ summary(sr_mod1)
 sr_mod2<-glmer(sr~ab+burn_trt+(1|transect), family="poisson", data=div5)
 summary(sr_mod2)
 
-
-#gamma glmer
-#without interaction
-srmod_all<-glmer(all~ab+burn_trt+(1|transect), family="poisson", data=div4)
-summary(srmod_all)
-
-ndall <- expand.grid(ab = factor(c("above", "below"), levels = c("above", "below")),
-                     burn_trt = factor(c("Control", "Burn"), levels = c("Control", "Burn")))
-srmod_all1 <- predictSE(mod=srmod_all,newdata=ndall,type="response",se.fit = T)
-srmod_allt1 <- data.frame(ndall, fit = srmod_all1$fit, se = srmod_all1$se.fit)
-srmod_all1$lci <- srmod_all1$fit-(srmod_all1$se*1.96)
-srmod_all1$uci <- srmod_all1$fit+(srmod_all1$se*1.96)
-
-#view srmod_nat1
-head(srmod_nat1)
-summary(srmod_nat)$coefficients
-
-#native
-srmod_nat<-glmer(native~ab+burn_trt+(1|transect), family="poisson", data=div4)
-summary(srmod_nat)
-
-ndnat <- expand.grid(ab = factor(c("above", "below"), levels = c("above", "below")),
-                   burn_trt = factor(c("Control", "Burn"), levels = c("Control", "Burn")))
-srmod_nat1 <- predictSE(mod=srmod_nat,newdata=ndnat,type="response",se.fit = T)
-srmod_nat1 <- data.frame(ndnat, fit = srmod_nat1$fit, se = srmod_nat1$se.fit)
-srmod_nat1$lci <- srmod_nat1$fit-(srmod_nat1$se*1.96)
-srmod_nat1$uci <- srmod_nat1$fit+(srmod_nat1$se*1.96)
-
-#view srmod_nat1
-head(srmod_nat1)
-summary(srmod_nat)$coefficients
-
-#exotic
-srmod_exo<-glmer(exotic~ab+burn_trt+(1|transect), family="poisson", data=div4)
-summary(srmod_exo)
-
-ndexo <- expand.grid(ab = factor(c("above", "below"), levels = c("above", "below")),
-                     burn_trt = factor(c("Control", "Burn"), levels = c("Control", "Burn")))
-srmod_exo1 <- predictSE(mod=srmod_nat,newdata=ndexo,type="response",se.fit = T)
-srmod_exo1 <- data.frame(ndnat, fit = srmod_exo1$fit, se = srmod_exo1$se.fit)
-srmod_exo1$lci <- srmod_exo1$fit-(srmod_exo1$se*1.96)
-srmod_exo1$uci <- srmod_exo1$fit+(srmod_exo1$se*1.96)
-
-#view srmod_exo1
-head(srmod_exo1)
-summary(srmod_exo)$coefficients
-
-#annual
-srmod_ann<-glmer(annual~ab+burn_trt+(1|transect), family="poisson", data=div4)
-summary(srmod_ann)
-
-ndann <- expand.grid(ab = factor(c("above", "below"), levels = c("above", "below")),
-                     burn_trt = factor(c("Control", "Burn"), levels = c("Control", "Burn")))
-srmod_ann1 <- predictSE(mod=srmod_ann,newdata=ndann,type="response",se.fit = T)
-srmod_ann1 <- data.frame(ndnat, fit = srmod_ann1$fit, se = srmod_ann1$se.fit)
-srmod_ann1$lci <- srmod_ann1$fit-(srmod_ann1$se*1.96)
-srmod_ann1$uci <- srmod_ann1$fit+(srmod_ann1$se*1.96)
-
-#view srmod_ann1
-head(srmod_ann1)
-summary(srmod_ann)$coefficients
-
-#perennial
-srmod_per<-glmer(perr~ab+burn_trt+(1|transect), family="poisson", data=div4)
-summary(srmod_per)
-
-ndper <- expand.grid(ab = factor(c("above", "below"), levels = c("above", "below")),
-                     burn_trt = factor(c("Control", "Burn"), levels = c("Control", "Burn")))
-srmod_per1 <- predictSE(mod=srmod_per,newdata=ndper,type="response",se.fit = T)
-srmod_per1 <- data.frame(ndper, fit = srmod_per1$fit, se = srmod_per1$se.fit)
-srmod_per1$lci <- srmod_per1$fit-(srmod_per1$se*1.96)
-srmod_per1$uci <- srmod_per1$fit+(srmod_per1$se*1.96)
-
-#view srmod_exo1
-head(srmod_per1)
-summary(srmod_per)$coefficients
-
-#legume
-srmod_leg<-glmer(leg~ab+burn_trt+(1|transect), family="poisson", data=div4)
-summary(srmod_leg)
-
-ndleg <- expand.grid(ab = factor(c("above", "below"), levels = c("above", "below")),
-                     burn_trt = factor(c("Control", "Burn"), levels = c("Control", "Burn")))
-srmod_leg1 <- predictSE(mod=srmod_leg,newdata=ndleg,type="response",se.fit = T)
-srmod_leg1 <- data.frame(ndleg, fit = srmod_leg1$fit, se = srmod_leg1$se.fit)
-srmod_leg1$lci <- srmod_leg1$fit-(srmod_leg1$se*1.96)
-srmod_leg1$uci <- srmod_leg1$fit+(srmod_leg1$se*1.96)
-
-#view srmod_exo1
-head(srmod_leg1)
-summary(srmod_leg)$coefficients
-
-#tree #no isSingular error?
-srmod_tree<-glmer(tree~ab+burn_trt+(1|transect), family="poisson", data=div4)
-summary(srmod_tree)
-
-ndtree <- expand.grid(ab = factor(c("above", "below"), levels = c("above", "below")),
-                     burn_trt = factor(c("Control", "Burn"), levels = c("Control", "Burn")))
-srmod_tree1 <- predictSE(mod=srmod_tree,newdata=ndtree,type="response",se.fit = T)
-srmod_tree1 <- data.frame(ndtree, fit = srmod_tree1$fit, se = srmod_tree1$se.fit)
-srmod_tree1$lci <- srmod_tree1$fit-(srmod_tree1$se*1.96)
-srmod_tree1$uci <- srmod_tree1$fit+(srmod_tree1$se*1.96)
-
-#view srmod_exo1
-head(srmod_tree1)
-summary(srmod_tree)$coefficients
-
-
-#shrub #negative lci?
-srmod_shr<-glmer(shrub~ab+burn_trt+(1|transect), family="poisson", data=div4)
-summary(srmod_shr)
-
-ndshr <- expand.grid(ab = factor(c("above", "below"), levels = c("above", "below")),
-                      burn_trt = factor(c("Control", "Burn"), levels = c("Control", "Burn")))
-srmod_shr1 <- predictSE(mod=srmod_shr,newdata=ndshr,type="response",se.fit = T)
-srmod_shr1 <- data.frame(ndshr, fit = srmod_shr1$fit, se = srmod_shr1$se.fit)
-srmod_shr1$lci <- srmod_shr1$fit-(srmod_shr1$se*1.96)
-srmod_shr1$uci <- srmod_shr1$fit+(srmod_shr1$se*1.96)
-
-#view srmod_shr1
-head(srmod_shr1)
-summary(srmod_shr)$coefficients
-
-#forb
-srmod_for<-glmer(forb~ab+burn_trt+(1|transect), family="poisson", data=div4)
-summary(srmod_for)
-
-ndfor <- expand.grid(ab = factor(c("above", "below"), levels = c("above", "below")),
-                     burn_trt = factor(c("Control", "Burn"), levels = c("Control", "Burn")))
-srmod_for1 <- predictSE(mod=srmod_for,newdata=ndfor,type="response",se.fit = T)
-srmod_for1 <- data.frame(ndfor, fit = srmod_for1$fit, se = srmod_for1$se.fit)
-srmod_for1$lci <- srmod_for1$fit-(srmod_for1$se*1.96)
-srmod_for1$uci <- srmod_for1$fit+(srmod_for1$se*1.96)
-
-#view srmod_shr1
-head(srmod_for1)
-summary(srmod_for)$coefficients
-
-#grass
-srmod_gra<-glmer(grass~ab+burn_trt+(1|transect), family="poisson", data=div4)
-summary(srmod_gra)
-
-ndgra <- expand.grid(ab = factor(c("above", "below"), levels = c("above", "below")),
-                     burn_trt = factor(c("Control", "Burn"), levels = c("Control", "Burn")))
-srmod_gra1 <- predictSE(mod=srmod_gra,newdata=ndgra,type="response",se.fit = T)
-srmod_gra1 <- data.frame(ndgra, fit = srmod_gra1$fit, se = srmod_gra1$se.fit)
-srmod_gra1$lci <- srmod_gra1$fit-(srmod_gra1$se*1.96)
-srmod_gra1$uci <- srmod_gra1$fit+(srmod_gra1$se*1.96)
-
-#view srmod_shr1
-head(srmod_gra1)
-summary(srmod_gra)$coefficients
-
-#sedge
-srmod_sed<-glmer(sedge~ab+burn_trt+(1|transect), family="poisson", data=div4)
-summary(srmod_sed)
-
-ndsed <- expand.grid(ab = factor(c("above", "below"), levels = c("above", "below")),
-                     burn_trt = factor(c("Control", "Burn"), levels = c("Control", "Burn")))
-srmod_sed1 <- predictSE(mod=srmod_sed,newdata=ndsed,type="response",se.fit = T)
-srmod_sed1 <- data.frame(ndsed, fit = srmod_sed1$fit, se = srmod_sed1$se.fit)
-srmod_sed1$lci <- srmod_sed1$fit-(srmod_sed1$se*1.96)
-srmod_sed1$uci <- srmod_sed1$fit+(srmod_sed1$se*1.96)
-
-#view srmod_shr1
-head(srmod_sed1)
-summary(srmod_sed)$coefficients
-
-#native_grass
-srmod_natgra<-glmer(native_grass~ab+burn_trt+(1|transect), family="poisson", data=div4)
-summary(srmod_natgra)
-
-ndnatgra <- expand.grid(ab = factor(c("above", "below"), levels = c("above", "below")),
-                     burn_trt = factor(c("Control", "Burn"), levels = c("Control", "Burn")))
-srmod_natgra1 <- predictSE(mod=srmod_natgra,newdata=ndnatgra,type="response",se.fit = T)
-srmod_natgra1 <- data.frame(ndnatgra, fit = srmod_natgra1$fit, se = srmod_natgra1$se.fit)
-srmod_natgra1$lci <- srmod_natgra1$fit-(srmod_natgra1$se*1.96)
-srmod_natgra1$uci <- srmod_natgra1$fit+(srmod_natgra1$se*1.96)
-
-#view srmod_shr1
-head(srmod_natgra1)
-summary(srmod_natgra)$coefficients
-
-#exotic_grass
-srmod_exogra<-glmer(exotic_grass~ab+burn_trt+(1|transect), family="poisson", data=div4)
-summary(srmod_exogra)
-
-ndexogra <- expand.grid(ab = factor(c("above", "below"), levels = c("above", "below")),
-                        burn_trt = factor(c("Control", "Burn"), levels = c("Control", "Burn")))
-srmod_exogra1 <- predictSE(mod=srmod_exogra,newdata=ndexogra,type="response",se.fit = T)
-srmod_exogra1 <- data.frame(ndexogra, fit = srmod_exogra1$fit, se = srmod_exogra1$se.fit)
-srmod_exogra1$lci <- srmod_exogra1$fit-(srmod_exogra1$se*1.96)
-srmod_exogra1$uci <- srmod_exogra1$fit+(srmod_exogra1$se*1.96)
-
-#view srmod_shr1
-head(srmod_exogra1)
-summary(srmod_exogra)$coefficients
-
-#hist(div5$sr)
-#plot(div5$sr, div5$ab)
-
-
-#
-#nd1 <- data.frame(treatment = factor(c("control", "burn"), levels = c("control", "burn")))
-#nd1 <- expand.grid(ab = factor(c("above", "below"), levels = c("above", "below"), burn_trt = factor("Control", "Burn"), levels = c("Control", "Burn")), ab = factor(c("above", "below"), levels = c("above", "below")))
 nd1 <- expand.grid(ab = factor(c("above", "below"), levels = c("above", "below")),
                    burn_trt = factor(c("Control", "Burn"), levels = c("Control", "Burn")))
 sr_mod3 <- predictSE(mod=sr_mod2,newdata=nd1,type="response",se.fit = T)
@@ -637,22 +482,274 @@ sr_mod3$uci <- sr_mod3$fit+(sr_mod3$se*1.96)
 head(sr_mod3)
 summary(sr_mod2)$coefficients
 
-#plot sr_mod3 - old, only above/below
-#dev.new(width=10,height=4,dpi=160,pointsize=12, noRStudioGD = T)
-#jpeg(sr1.jpeg)
-#par(mfrow=c(2,2), mar=c(4.5,4,1,1), mgp=c(2.8,0.8,0), oma=c(0,0,1,6))
-#plot(c(1:4),sr_mod3$fit, xlim=c(0.5,2.5), pch=20, xaxt="n",ylim=c((min(sr_mod3$lci)),max(sr_mod3$uci)),ylab="Species Richness",xlab="", las = 1, cex = 2.5)
-#arrows(c(1:2),sr_mod3$lci,c(1:2),sr_mod3$uci,length=0.03,code=3,angle=90)
-#axis(1,at=c(1:2),labels=F)
-#axis(side = 1,at=c(1:4),labels=sr_mod3$ab,tick=F, cex.axis=1)
-#mtext(paste("p = ",round(summary(sr_mod3)$coefficients["burn_trt",2],3)), side=3,line=0.1,adj=1, cex=1)
-
 x_labels <- with(sr_mod3, interaction(ab, burn_trt))
-
 dev.new(width=10,height=4,dpi=160,pointsize=12, noRStudioGD = T)
 plot(c(1:4), sr_mod3$fit, xlim=c(0.5,4.5), pch=20, xaxt="n", ylim=c((min(sr_mod3$lci)), max(sr_mod3$uci)), ylab="Species Richness", xlab="", las=1, cex=2.5)
 arrows(c(1:4), sr_mod3$lci, c(1:4), sr_mod3$uci, length=0.3, code=3, angle=90)
 axis(side=1, at=c(1:4), labels=x_labels, tick=F, cex.axis=1)
+title(main = "Species Richness by Treatment")
+
+#gamma glmer
+#without interaction
+srmod_all<-glmer(all~ab+burn_trt+(1|transect), family="poisson", data=div4)
+summary(srmod_all)
+ndall <- expand.grid(ab = factor(c("above", "below"), levels = c("above", "below")),
+                     burn_trt = factor(c("Control", "Burn"), levels = c("Control", "Burn")))
+srmod_all1 <- predictSE(mod=srmod_all,newdata=ndall,type="response",se.fit = T)
+srmod_all1 <- data.frame(ndall, fit = srmod_all1$fit, se = srmod_all1$se.fit)
+srmod_all1$lci <- srmod_all1$fit-(srmod_all1$se*1.96)
+srmod_all1$uci <- srmod_all1$fit+(srmod_all1$se*1.96)
+#view srmod_nat1
+head(srmod_all1)
+summary(srmod_all)$coefficients
+xall_labels <- with(srmod_all1, interaction(ab, burn_trt))
+xall_labels <- str_replace_all(xall_labels, c("above\\.Control" = "Above Control", "below\\.Control" = "Below Control", "above\\.Burn" = "Above Burn", "below\\.Burn" = "Below Burn"))dev.new(width=10,height=4,dpi=160,pointsize=12, noRStudioGD = T)dev.new(width=10,height=4,dpi=160,pointsize=12, noRStudioGD = T)dev.new(width=10,height=4,dpi=160,pointsize=12, noRStudioGD = T)
+plot(c(1:4), srmod_all1$fit, xlim=c(0.5,4.5), pch=20, xaxt="n", ylim=c((min(srmod_all1$lci)), max(srmod_all1$uci)), ylab="Species Richness", xlab="", las=1, cex=2.5)
+arrows(c(1:4), srmod_all1$lci, c(1:4), srmod_all1$uci, length=0.3, code=3, angle=90)
+axis(side=1, at=c(1:4), labels=xall_labels, tick=F, cex.axis=1)
+title(main = "Gamma Species Richness")
+
+
+#native
+srmod_nat<-glmer(native~ab+burn_trt+(1|transect), family="poisson", data=div4)
+summary(srmod_nat)
+ndnat <- expand.grid(ab = factor(c("above", "below"), levels = c("above", "below")),
+                   burn_trt = factor(c("Control", "Burn"), levels = c("Control", "Burn")))
+srmod_nat1 <- predictSE(mod=srmod_nat,newdata=ndnat,type="response",se.fit = T)
+srmod_nat1 <- data.frame(ndnat, fit = srmod_nat1$fit, se = srmod_nat1$se.fit)
+srmod_nat1$lci <- srmod_nat1$fit-(srmod_nat1$se*1.96)
+srmod_nat1$uci <- srmod_nat1$fit+(srmod_nat1$se*1.96)
+#view srmod_nat1
+head(srmod_nat1)
+summary(srmod_nat)$coefficients
+xnat_labels <- with(srmod_nat1, interaction(ab, burn_trt))
+xnat_labels <- str_replace_all(xnat_labels, c("above\\.Control" = "Above Control", "below\\.Control" = "Below Control", "above\\.Burn" = "Above Burn", "below\\.Burn" = "Below Burn"))dev.new(width=10,height=4,dpi=160,pointsize=12, noRStudioGD = T)dev.new(width=10,height=4,dpi=160,pointsize=12, noRStudioGD = T)dev.new(width=10,height=4,dpi=160,pointsize=12, noRStudioGD = T)
+plot(c(1:4), srmod_nat1$fit, xlim=c(0.5,4.5), pch=20, xaxt="n", ylim=c((min(srmod_nat1$lci)), max(srmod_nat1$uci)), ylab="Species Richness", xlab="", las=1, cex=2.5)
+arrows(c(1:4), srmod_nat1$lci, c(1:4), srmod_nat1$uci, length=0.3, code=3, angle=90)
+axis(side=1, at=c(1:4), labels=xnat_labels, tick=F, cex.axis=1)
+title(main = "Native Species Richness")
+
+
+#exotic
+srmod_exo<-glmer(exotic~ab+burn_trt+(1|transect), family="poisson", data=div4)
+summary(srmod_exo)
+ndexo <- expand.grid(ab = factor(c("above", "below"), levels = c("above", "below")),
+                     burn_trt = factor(c("Control", "Burn"), levels = c("Control", "Burn")))
+srmod_exo1 <- predictSE(mod=srmod_nat,newdata=ndexo,type="response",se.fit = T)
+srmod_exo1 <- data.frame(ndnat, fit = srmod_exo1$fit, se = srmod_exo1$se.fit)
+srmod_exo1$lci <- srmod_exo1$fit-(srmod_exo1$se*1.96)
+srmod_exo1$uci <- srmod_exo1$fit+(srmod_exo1$se*1.96)
+#view srmod_exo1
+head(srmod_exo1)
+summary(srmod_exo)$coefficients
+xexo_labels <- with(srmod_exo1, interaction(ab, burn_trt))
+xexo_labels <- str_replace_all(xexo_labels, c("above\\.Control" = "Above Control", "below\\.Control" = "Below Control", "above\\.Burn" = "Above Burn", "below\\.Burn" = "Below Burn"))dev.new(width=10,height=4,dpi=160,pointsize=12, noRStudioGD = T)dev.new(width=10,height=4,dpi=160,pointsize=12, noRStudioGD = T)dev.new(width=10,height=4,dpi=160,pointsize=12, noRStudioGD = T)
+plot(c(1:4), srmod_exo1$fit, xlim=c(0.5,4.5), pch=20, xaxt="n", ylim=c((min(srmod_exo1$lci)), max(srmod_exo1$uci)), ylab="Species Richness", xlab="", las=1, cex=2.5)
+arrows(c(1:4), srmod_exo1$lci, c(1:4), srmod_exo1$uci, length=0.3, code=3, angle=90)
+axis(side=1, at=c(1:4), labels=xexo_labels, tick=F, cex.axis=1)
+title(main = "Exotic Species Richness")
+
+
+#annual
+srmod_ann<-glmer(annual~ab+burn_trt+(1|transect), family="poisson", data=div4)
+summary(srmod_ann)
+ndann <- expand.grid(ab = factor(c("above", "below"), levels = c("above", "below")),
+                     burn_trt = factor(c("Control", "Burn"), levels = c("Control", "Burn")))
+srmod_ann1 <- predictSE(mod=srmod_ann,newdata=ndann,type="response",se.fit = T)
+srmod_ann1 <- data.frame(ndnat, fit = srmod_ann1$fit, se = srmod_ann1$se.fit)
+srmod_ann1$lci <- srmod_ann1$fit-(srmod_ann1$se*1.96)
+srmod_ann1$uci <- srmod_ann1$fit+(srmod_ann1$se*1.96)
+#view srmod_ann1
+head(srmod_ann1)
+summary(srmod_ann)$coefficients
+head(srmod_ann1)
+summary(srmod_ann)$coefficients
+xann_labels <- with(srmod_ann1, interaction(ab, burn_trt))
+xann_labels <- str_replace_all(xann_labels, c("above\\.Control" = "Above Control", "below\\.Control" = "Below Control", "above\\.Burn" = "Above Burn", "below\\.Burn" = "Below Burn"))dev.new(width=10,height=4,dpi=160,pointsize=12, noRStudioGD = T)dev.new(width=10,height=4,dpi=160,pointsize=12, noRStudioGD = T)dev.new(width=10,height=4,dpi=160,pointsize=12, noRStudioGD = T)
+plot(c(1:4), srmod_ann1$fit, xlim=c(0.5,4.5), pch=20, xaxt="n", ylim=c((min(srmod_ann1$lci)), max(srmod_ann1$uci)), ylab="Species Richness", xlab="", las=1, cex=2.5)
+arrows(c(1:4), srmod_ann1$lci, c(1:4), srmod_ann1$uci, length=0.3, code=3, angle=90)
+axis(side=1, at=c(1:4), labels=xann_labels, tick=F, cex.axis=1)
+title(main = "Annual Species Richness")
+
+#perennial
+srmod_per<-glmer(perr~ab+burn_trt+(1|transect), family="poisson", data=div4)
+summary(srmod_per)
+ndper <- expand.grid(ab = factor(c("above", "below"), levels = c("above", "below")),
+                     burn_trt = factor(c("Control", "Burn"), levels = c("Control", "Burn")))
+srmod_per1 <- predictSE(mod=srmod_per,newdata=ndper,type="response",se.fit = T)
+srmod_per1 <- data.frame(ndper, fit = srmod_per1$fit, se = srmod_per1$se.fit)
+srmod_per1$lci <- srmod_per1$fit-(srmod_per1$se*1.96)
+srmod_per1$uci <- srmod_per1$fit+(srmod_per1$se*1.96)
+#view srmod_per1
+head(srmod_per1)
+summary(srmod_per)$coefficients
+xper_labels <- with(srmod_per1, interaction(ab, burn_trt))
+xper_labels <- str_replace_all(xper_labels, c("above\\.Control" = "Above Control", "below\\.Control" = "Below Control", "above\\.Burn" = "Above Burn", "below\\.Burn" = "Below Burn"))dev.new(width=10,height=4,dpi=160,pointsize=12, noRStudioGD = T)dev.new(width=10,height=4,dpi=160,pointsize=12, noRStudioGD = T)dev.new(width=10,height=4,dpi=160,pointsize=12, noRStudioGD = T)
+plot(c(1:4), srmod_per1$fit, xlim=c(0.5,4.5), pch=20, xaxt="n", ylim=c((min(srmod_per1$lci)), max(srmod_per1$uci)), ylab="Species Richness", xlab="", las=1, cex=2.5)
+arrows(c(1:4), srmod_per1$lci, c(1:4), srmod_per1$uci, length=0.3, code=3, angle=90)
+axis(side=1, at=c(1:4), labels=xper_labels, tick=F, cex.axis=1)
+title(main = "Perennial Species Richness")
+
+
+#legume
+srmod_leg<-glmer(leg~ab+burn_trt+(1|transect), family="poisson", data=div4)
+summary(srmod_leg)
+ndleg <- expand.grid(ab = factor(c("above", "below"), levels = c("above", "below")),
+                     burn_trt = factor(c("Control", "Burn"), levels = c("Control", "Burn")))
+srmod_leg1 <- predictSE(mod=srmod_leg,newdata=ndleg,type="response",se.fit = T)
+srmod_leg1 <- data.frame(ndleg, fit = srmod_leg1$fit, se = srmod_leg1$se.fit)
+srmod_leg1$lci <- srmod_leg1$fit-(srmod_leg1$se*1.96)
+srmod_leg1$uci <- srmod_leg1$fit+(srmod_leg1$se*1.96)
+#view srmod_leg1
+head(srmod_leg1)
+summary(srmod_leg)$coefficients
+xleg_labels <- with(srmod_leg1, interaction(ab, burn_trt))
+xleg_labels <- str_replace_all(xleg_labels, c("above\\.Control" = "Above Control", "below\\.Control" = "Below Control", "above\\.Burn" = "Above Burn", "below\\.Burn" = "Below Burn"))dev.new(width=10,height=4,dpi=160,pointsize=12, noRStudioGD = T)dev.new(width=10,height=4,dpi=160,pointsize=12, noRStudioGD = T)dev.new(width=10,height=4,dpi=160,pointsize=12, noRStudioGD = T)
+plot(c(1:4), srmod_leg1$fit, xlim=c(0.5,4.5), pch=20, xaxt="n", ylim=c((min(srmod_leg1$lci)), max(srmod_leg1$uci)), ylab="Species Richness", xlab="", las=1, cex=2.5)
+arrows(c(1:4), srmod_leg1$lci, c(1:4), srmod_leg1$uci, length=0.3, code=3, angle=90)
+axis(side=1, at=c(1:4), labels=xleg_labels, tick=F, cex.axis=1)
+title(main = "Legume Species Richness")
+
+#tree #no isSingular error?
+srmod_tree<-glmer(tree~ab+burn_trt+(1|transect), family="poisson", data=div4)
+summary(srmod_tree)
+ndtree <- expand.grid(ab = factor(c("above", "below"), levels = c("above", "below")),
+                     burn_trt = factor(c("Control", "Burn"), levels = c("Control", "Burn")))
+srmod_tree1 <- predictSE(mod=srmod_tree,newdata=ndtree,type="response",se.fit = T)
+srmod_tree1 <- data.frame(ndtree, fit = srmod_tree1$fit, se = srmod_tree1$se.fit)
+srmod_tree1$lci <- srmod_tree1$fit-(srmod_tree1$se*1.96)
+srmod_tree1$uci <- srmod_tree1$fit+(srmod_tree1$se*1.96)
+#view srmod_tree1
+head(srmod_tree1)
+summary(srmod_tree)$coefficients
+xtree_labels <- with(srmod_tree1, interaction(ab, burn_trt))
+xtree_labels <- str_replace_all(xtree_labels, c("above\\.Control" = "Above Control", "below\\.Control" = "Below Control", "above\\.Burn" = "Above Burn", "below\\.Burn" = "Below Burn"))dev.new(width=10,height=4,dpi=160,pointsize=12, noRStudioGD = T)dev.new(width=10,height=4,dpi=160,pointsize=12, noRStudioGD = T)dev.new(width=10,height=4,dpi=160,pointsize=12, noRStudioGD = T)
+plot(c(1:4), srmod_tree1$fit, xlim=c(0.5,4.5), pch=20, xaxt="n", ylim=c((min(srmod_tree1$lci)), max(srmod_tree1$uci)), ylab="Species Richness", xlab="", las=1, cex=2.5)
+arrows(c(1:4), srmod_tree1$lci, c(1:4), srmod_tree1$uci, length=0.3, code=3, angle=90)
+axis(side=1, at=c(1:4), labels=xtree_labels, tick=F, cex.axis=1)
+title(main = "Tree Species Richness")
+
+#shrub #negative lci?
+srmod_shr<-glmer(shrub~ab+burn_trt+(1|transect), family="poisson", data=div4)
+summary(srmod_shr)
+ndshr <- expand.grid(ab = factor(c("above", "below"), levels = c("above", "below")),
+                      burn_trt = factor(c("Control", "Burn"), levels = c("Control", "Burn")))
+srmod_shr1 <- predictSE(mod=srmod_shr,newdata=ndshr,type="response",se.fit = T)
+srmod_shr1 <- data.frame(ndshr, fit = srmod_shr1$fit, se = srmod_shr1$se.fit)
+srmod_shr1$lci <- srmod_shr1$fit-(srmod_shr1$se*1.96)
+srmod_shr1$uci <- srmod_shr1$fit+(srmod_shr1$se*1.96)
+#view srmod_shr1 #only ci for burn below
+head(srmod_shr1)
+summary(srmod_shr)$coefficients
+xshr_labels <- with(srmod_shr1, interaction(ab, burn_trt))
+xshr_labels <- str_replace_all(xshr_labels, c("above\\.Control" = "Above Control", "below\\.Control" = "Below Control", "above\\.Burn" = "Above Burn", "below\\.Burn" = "Below Burn"))dev.new(width=10,height=4,dpi=160,pointsize=12, noRStudioGD = T)dev.new(width=10,height=4,dpi=160,pointsize=12, noRStudioGD = T)dev.new(width=10,height=4,dpi=160,pointsize=12, noRStudioGD = T)
+plot(c(1:4), srmod_shr1$fit, xlim=c(0.5,4.5), pch=20, xaxt="n", ylim=c((min(srmod_shr1$lci)), max(srmod_shr1$uci)), ylab="Species Richness", xlab="", las=1, cex=2.5)
+arrows(c(1:4), srmod_shr1$lci, c(1:4), srmod_shr1$uci, length=0.3, code=3, angle=90)
+axis(side=1, at=c(1:4), labels=xshr_labels, tick=F, cex.axis=1)
+title(main = "Shrub Species Richness")
+
+
+#forb
+srmod_for<-glmer(forb~ab+burn_trt+(1|transect), family="poisson", data=div4)
+summary(srmod_for)
+ndfor <- expand.grid(ab = factor(c("above", "below"), levels = c("above", "below")),
+                     burn_trt = factor(c("Control", "Burn"), levels = c("Control", "Burn")))
+srmod_for1 <- predictSE(mod=srmod_for,newdata=ndfor,type="response",se.fit = T)
+srmod_for1 <- data.frame(ndfor, fit = srmod_for1$fit, se = srmod_for1$se.fit)
+srmod_for1$lci <- srmod_for1$fit-(srmod_for1$se*1.96)
+srmod_for1$uci <- srmod_for1$fit+(srmod_for1$se*1.96)
+#view srmod_for1
+head(srmod_for1)
+summary(srmod_for)$coefficients
+xfor_labels <- with(srmod_for1, interaction(ab, burn_trt))
+xfor_labels <- str_replace_all(xfor_labels, c("above\\.Control" = "Above Control", "below\\.Control" = "Below Control", "above\\.Burn" = "Above Burn", "below\\.Burn" = "Below Burn"))dev.new(width=10,height=4,dpi=160,pointsize=12, noRStudioGD = T)dev.new(width=10,height=4,dpi=160,pointsize=12, noRStudioGD = T)dev.new(width=10,height=4,dpi=160,pointsize=12, noRStudioGD = T)
+plot(c(1:4), srmod_for1$fit, xlim=c(0.5,4.5), pch=20, xaxt="n", ylim=c((min(srmod_for1$lci)), max(srmod_for1$uci)), ylab="Species Richness", xlab="", las=1, cex=2.5)
+arrows(c(1:4), srmod_for1$lci, c(1:4), srmod_for1$uci, length=0.3, code=3, angle=90)
+axis(side=1, at=c(1:4), labels=xfor_labels, tick=F, cex.axis=1)
+title(main = "Forb Species Richness")
+
+
+#grass
+srmod_gra<-glmer(grass~ab+burn_trt+(1|transect), family="poisson", data=div4)
+summary(srmod_gra)
+ndgra <- expand.grid(ab = factor(c("above", "below"), levels = c("above", "below")),
+                     burn_trt = factor(c("Control", "Burn"), levels = c("Control", "Burn")))
+srmod_gra1 <- predictSE(mod=srmod_gra,newdata=ndgra,type="response",se.fit = T)
+srmod_gra1 <- data.frame(ndgra, fit = srmod_gra1$fit, se = srmod_gra1$se.fit)
+srmod_gra1$lci <- srmod_gra1$fit-(srmod_gra1$se*1.96)
+srmod_gra1$uci <- srmod_gra1$fit+(srmod_gra1$se*1.96)
+#view srmod_gra1
+head(srmod_gra1)
+summary(srmod_gra)$coefficients
+xgra_labels <- with(srmod_gra1, interaction(ab, burn_trt))
+xgra_labels <- str_replace_all(xgra_labels, c("above\\.Control" = "Above Control", "below\\.Control" = "Below Control", "above\\.Burn" = "Above Burn", "below\\.Burn" = "Below Burn"))dev.new(width=10,height=4,dpi=160,pointsize=12, noRStudioGD = T)dev.new(width=10,height=4,dpi=160,pointsize=12, noRStudioGD = T)
+plot(c(1:4), srmod_gra1$fit, xlim=c(0.5,4.5), pch=20, xaxt="n", ylim=c((min(srmod_gra1$lci)), max(srmod_gra1$uci)), ylab="Species Richness", xlab="", las=1, cex=2.5)
+arrows(c(1:4), srmod_gra1$lci, c(1:4), srmod_gra1$uci, length=0.3, code=3, angle=90)
+axis(side=1, at=c(1:4), labels=xgra_labels, tick=F, cex.axis=1)
+title(main = "Grass Species Richness")
+
+#sedge
+srmod_sed<-glmer(sedge~ab+burn_trt+(1|transect), family="poisson", data=div4)
+summary(srmod_sed)
+ndsed <- expand.grid(ab = factor(c("above", "below"), levels = c("above", "below")),
+                     burn_trt = factor(c("Control", "Burn"), levels = c("Control", "Burn")))
+srmod_sed1 <- predictSE(mod=srmod_sed,newdata=ndsed,type="response",se.fit = T)
+srmod_sed1 <- data.frame(ndsed, fit = srmod_sed1$fit, se = srmod_sed1$se.fit)
+srmod_sed1$lci <- srmod_sed1$fit-(srmod_sed1$se*1.96)
+srmod_sed1$uci <- srmod_sed1$fit+(srmod_sed1$se*1.96)
+#view srmod_sed1
+head(srmod_sed1)
+summary(srmod_sed)$coefficients
+xsed_labels <- with(srmod_sed1, interaction(ab, burn_trt))
+xsed_labels <- str_replace_all(xsed_labels, c("above\\.Control" = "Above Control", "below\\.Control" = "Below Control", "above\\.Burn" = "Above Burn", "below\\.Burn" = "Below Burn"))dev.new(width=10,height=4,dpi=160,pointsize=12, noRStudioGD = T)
+plot(c(1:4), srmod_sed1$fit, xlim=c(0.5,4.5), pch=20, xaxt="n", ylim=c((min(srmod_sed1$lci)), max(srmod_sed1$uci)), ylab="Species Richness", xlab="", las=1, cex=2.5)
+arrows(c(1:4), srmod_sed1$lci, c(1:4), srmod_sed1$uci, length=0.3, code=3, angle=90)
+axis(side=1, at=c(1:4), labels=xsed_labels, tick=F, cex.axis=1)
+title(main = "Sedge Species Richness")
+
+
+#native_grass
+srmod_natgra<-glmer(native_grass~ab+burn_trt+(1|transect), family="poisson", data=div4)
+summary(srmod_natgra)
+ndnatgra <- expand.grid(ab = factor(c("above", "below"), levels = c("above", "below")),
+                     burn_trt = factor(c("Control", "Burn"), levels = c("Control", "Burn")))
+srmod_natgra1 <- predictSE(mod=srmod_natgra,newdata=ndnatgra,type="response",se.fit = T)
+srmod_natgra1 <- data.frame(ndnatgra, fit = srmod_natgra1$fit, se = srmod_natgra1$se.fit)
+srmod_natgra1$lci <- srmod_natgra1$fit-(srmod_natgra1$se*1.96)
+srmod_natgra1$uci <- srmod_natgra1$fit+(srmod_natgra1$se*1.96)
+#view srmod_natgra1
+head(srmod_natgra1)
+summary(srmod_natgra)$coefficients
+xnatgra_labels <- with(srmod_natgra1, interaction(ab, burn_trt))
+xnatgra_labels <- str_replace_all(xnatgra_labels, c("above\\.Control" = "Above Control", "below\\.Control" = "Below Control", "above\\.Burn" = "Above Burn", "below\\.Burn" = "Below Burn"))dev.new(width=10,height=4,dpi=160,pointsize=12, noRStudioGD = T)
+plot(c(1:4), srmod_natgra1$fit, xlim=c(0.5,4.5), pch=20, xaxt="n", ylim=c((min(srmod_natgra1$lci)), max(srmod_natgra1$uci)), ylab="Species Richness", xlab="", las=1, cex=2.5)
+arrows(c(1:4), srmod_natgra1$lci, c(1:4), srmod_natgra1$uci, length=0.3, code=3, angle=90)
+axis(side=1, at=c(1:4), labels=xnatgra_labels, tick=F, cex.axis=1)
+title(main = "Native Grass Species Richness")
+
+
+#exotic_grass
+srmod_exogra<-glmer(exotic_grass~ab+burn_trt+(1|transect), family="poisson", data=div4)
+summary(srmod_exogra)
+ndexogra <- expand.grid(ab = factor(c("above", "below"), levels = c("above", "below")),
+                        burn_trt = factor(c("Control", "Burn"), levels = c("Control", "Burn")))
+srmod_exogra1 <- predictSE(mod=srmod_exogra,newdata=ndexogra,type="response",se.fit = T)
+srmod_exogra1 <- data.frame(ndexogra, fit = srmod_exogra1$fit, se = srmod_exogra1$se.fit)
+srmod_exogra1$lci <- srmod_exogra1$fit-(srmod_exogra1$se*1.96)
+srmod_exogra1$uci <- srmod_exogra1$fit+(srmod_exogra1$se*1.96)
+#view srmod_exogra1
+head(srmod_exogra1)
+summary(srmod_exogra)$coefficients
+xexogra_labels <- with(srmod_exogra1, interaction(ab, burn_trt))
+xexogra_labels <- str_replace_all(xexogra_labels, c("above\\.Control" = "Above Control", "below\\.Control" = "Below Control", "above\\.Burn" = "Above Burn", "below\\.Burn" = "Below Burn"))
+dev.new(width=10,height=4,dpi=160,pointsize=12, noRStudioGD = T)
+plot(c(1:4), srmod_exogra1$fit, xlim=c(0.5,4.5), pch=20, xaxt="n", ylim=c((min(srmod_exogra1$lci)), max(srmod_exogra1$uci)), ylab="Species Richness", xlab="", las=1, cex=2.5)
+arrows(c(1:4), srmod_exogra1$lci, c(1:4), srmod_exogra1$uci, length=0.3, code=3, angle=90)
+axis(side=1, at=c(1:4), labels=xexogra_labels, tick=F, cex.axis=1)
+title(main = "Exotic Grass Species Richness")
+
+
+#
      
 #AG shannon and simpson
 
