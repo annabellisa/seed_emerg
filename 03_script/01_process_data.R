@@ -9,6 +9,9 @@ library(vegan)
 library(abdiv)
 library(divo)
 library(AICcmodavg)
+library(stringr)
+library(tidyr)
+library(dplyr)
 
 #---- loading data
 
@@ -110,45 +113,25 @@ AGdata[which(AGdata$species=="Sonchus oleraceus"),]
 table(AGspec$sp %in% BGspecid$code)
 
 
-# sr VENN diagram:
+#---- sr VENN diagram:
 
 
 # Summarise overlap:
-#belowonly<-21+47
-#aboveonly<-49+47
-#overlap<-47
 belowonly <- sum((combospec$location == "0" & combospec$speciesID == "1") + (combospec$location == "2" & combospec$speciesID == "1"))
 aboveonly <- sum((combospec$location == "1" & combospec$speciesID == "1") + (combospec$location == "2" & combospec$speciesID == "1"))
 overlap <- sum(combospec$location == "2" & combospec$speciesID == "1")
 
 dev.new(width=6,height=4,dpi=160,pointsize=12, noRStudioGD = T)
-
 par(mar=c(4,4,4,4))
-
 venn.plot<-draw.pairwise.venn(belowonly,aboveonly,overlap, category=c("Below","Above"),scaled=F,fill=rgb(0,0,0,0.5),fontfamily="sans",cat.fontfamily="sans",cex=1, cat.pos=c(2,10),lwd=1)
 
 pdf(file="venn.pdf",width=4,height=4,pointsize=12)
-
 par(mar=c(4,4,1,1))
-
 grid.draw(venn.plot)
-
 dev.off()
 
-belowonly <- sum((combospec$location == "0" & combospec$speciesID == "1") + (combospec$location == "2" & combospec$speciesID == "1"))
-aboveonly <- sum((combospec$location == "1" & combospec$speciesID == "1") + (combospec$location == "2" & combospec$speciesID == "1"))
-overlap <- sum(combospec$location == "2" & combospec$speciesID == "1")
-
+#---- four-way venn? 
 #merging datasets
-library(tidyr)
-library(dplyr)
-#venn2 <- merge(combospec, AGdata, by.x = "code", by.y = "sp", all.x = TRUE)
-#venn2 <- merge(combospec, tdata, by = "code", all.x = TRUE)
-head(venn2);dim(venn2)
-
-combospec$burn <- ifelse(is.na(combospec$burn_trt.x), 0, ifelse(is.na(combospec$burn_trt.y), 1, 2))
-
-
 merged_tdata <- merge(combospec, tdata, by = "code", all.x = T)
 merged_AGdata <- merge(combospec, AGdata, by = "code", all.x = T)
 merged_data <- merge(merged_tdata, merged_AGdata, by = "code", all = TRUE)
@@ -182,11 +165,7 @@ merged_data_sum <- merge(merged_data_sum, combospec, by = "code", all.x = T)
 remove_columns <- c("species.x", "origin.x", "life_span.x", "form.x", "family.x", "speciesID.x", "location.x.y")
 merged_data_sum <- merged_data_sum[, !(names(merged_data_sum) %in% remove_columns)]
 
-merged_data_sumID <- merged_data_sum[merged_data_sum$speciesID == 1, ]
-
-
-
-
+#quad.venn
 draw.quad.venn(
   area1 = sum((dimv4$location=="" combospec$location == "0" & combospec$speciesID == "1") + (combospec$location == "2" & combospec$speciesID == "1")) , area2, area3, area4, n12, n13, n14, n23, n24,
                n34, n123, n124, n134, n234, n1234, category = rep("",
@@ -250,8 +229,7 @@ venn_plot <- draw.quad.venn(
 # Plot the Venn diagram
 grid.draw(venn_plot)
 
-#----
-#define functional groups
+#----define functional groups
 head(BGspecid,4);dim(BGspecid)
 head(AGspecid,4);dim(AGspecid)
 
@@ -297,6 +275,7 @@ AG.exotic_grass <- AGspecid$code[which(AGspecid$form == "Grass" & AGspecid$origi
 
 #put AGshrub back in group when 5x5 data added
 #"AG.shrub",
+#adding AG.shrub back into group.df returns dim(X) must have a positive length when running for loop?
 #make a df of functional groups:
 group.df <- data.frame(group = c("BG.native","BG.exotic","BG.annual","BG.perr", "BG.leg", "BG.tree","BG.shrub","BG.forb","BG.grass","BG.sedge","BG.native_grass", "BG.exotic_grass","AG.native","AG.exotic","AG.annual","AG.perr","AG.leg", "AG.tree","AG.forb","AG.grass","AG.sedge", "AG.native_grass","AG.exotic_grass"))
 
@@ -323,7 +302,6 @@ for (i in 1:nrow(group.df)){
 
 rich.res<-data.frame(do.call(cbind,rich.data))
 colnames(rich.res)<-group.df$group
-
 
 
 #------ ssm contstruction
@@ -362,16 +340,10 @@ div1 <- sdata
 
 #AG species richness
 div1$agsr <- apply(AGmat, MARGIN = 1, FUN = function(x) length(which(x > 0)))
-#xx <- AGmat[, 3]
-#length(which(xx > 0))
 
-#boxplot(div1$agsr ~ div1$burn_trt)
-
-#bgsr, agsimps, bgsimps
 #BG species richness
 div1$bgsr <- apply(BGmat, MARGIN = 1, FUN = function(x) length(which(x>0)))
-#xxx <- BGmat[, 1]
-#length(which(xxx > 0))
+
 
 head(div1);dim(div1)
 head(rich.res); dim(rich.res)
@@ -414,14 +386,13 @@ gdf$ylab<-c("AG all","BG all","BG Native","BG Exotic","BG Annual","BG Perennial"
 
 #bwplot(div1$bgsr ~ div1$burn_trt)
 
-#bwplot sr 
+#div4 & div5
 div2 <- cnt_rich[, 1:5]
 head(div2);dim(div2)
 
 div3<-rbind(div2,div2)
 div3$ab<-c(rep("above",30),rep("below",30))
 head(div3);dim(div3)
-
 
 head(cnt_rich,3); dim(cnt_rich)
 
@@ -464,7 +435,8 @@ boxplot(sr ~ ab, data = div5, las = 1, ylab = "species richness", xlab = "")
 
 boxplot(sr ~ ab + burn_trt, data = div5, las = 1, ylab = "species richness", xlab = "", cex.axis = 0.7)
 
-#sr glmer
+#----SR GLMERS
+#div4
 #with interaction
 sr_mod1<-glmer(sr~ab*burn_trt+(1|transect), family="poisson", data=div5) 
 summary(sr_mod1)
@@ -489,6 +461,7 @@ arrows(c(1:4), sr_mod3$lci, c(1:4), sr_mod3$uci, length=0.3, code=3, angle=90)
 axis(side=1, at=c(1:4), labels=x_labels, tick=F, cex.axis=1)
 title(main = "Species Richness by Treatment")
 
+#div5
 #gamma glmer
 #without interaction
 srmod_all<-glmer(all~ab+burn_trt+(1|transect), family="poisson", data=div4)
@@ -748,8 +721,6 @@ arrows(c(1:4), srmod_exogra1$lci, c(1:4), srmod_exogra1$uci, length=0.3, code=3,
 axis(side=1, at=c(1:4), labels=xexogra_labels, tick=F, cex.axis=1)
 title(main = "Exotic Grass Species Richness")
 
-
-#
      
 #AG shannon and simpson
 
@@ -776,15 +747,4 @@ bwplot(div1$bgsimp ~ div1$burn_trt)
 AGmarg <- margalef(AGmat)
 Bgmarg <- margalef(BGmat)
 
-
-#?? singular error either due to collinearity (variables being linear combinations of others), so likely not enough variability?
-BGmodel_data <- data.frame(
-  burn_trt = div1$burn_trt,
-  transect = factor(div1$transect),
-  bgsr = div1$bgsr
-)
-BGmodel_glmm <- glmer(bgsr ~ burn_trt + (1 | transect), data = BGmodel_data, family = poisson)
-
-var(div1)
-head(div1);dim(div1)
 
