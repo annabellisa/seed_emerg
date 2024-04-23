@@ -96,7 +96,7 @@ Poe_079	"NA"	NA	NA	Grass	Poaceae	0	0
 Poe_082	"NA"	NA	NA	Grass	Poaceae	0	0
 Poe_083	"NA"	NA	NA	Grass	Poaceae	0	0
 Poe_086	"NA"	NA	NA	Grass	Poaceae	0	0
-Poe_091	"NA"	NA	NA	Grass	Poaceae	0	0
+Seh_ner	"Sehima nervosa"	Native	Perennial	Grass	Poaceae	1	0
 Poe_092	"NA"	NA	NA	Grass	Poaceae	0	0
 Poe_095	"NA"	NA	NA	Grass	Poaceae	0	0
 Poe_105	"NA"	NA	NA	Grass	Poaceae	0	0
@@ -164,7 +164,7 @@ For_040	"NA"	NA	NA	NA	NA	0	0
 For_046	"NA"	NA	NA	NA	Malvaceae	0	0
 For_049	"NA"	NA	NA	NA	NA	0	0
 For_050	"NA"	NA	NA	NA	NA	0	0
-For_052	"NA"	NA	NA	NA	NA	0	0
+Pte_sph	"Pterocaulon sphacelatum"	Native	Perennial	Herb	Asteraceae	1	0
 For_080	"NA"	NA	NA	NA	NA	0	0
 For_082	"NA"	NA	NA	NA	NA	0	0
 For_083	"NA"	NA	NA	NA	NA	0	0

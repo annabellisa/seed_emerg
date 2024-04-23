@@ -51,6 +51,7 @@ head(BGspec,4);dim(BGspec)
 #t37-46 below-ground species list excluding morphospecies (species identified as of 21/03/04)
 BGspecid <- combospec[(combospec$location == "0" | combospec$location == "2") & combospec$speciesID == "1",]
 head(BGspecid,4);dim(BGspecid)
+write.csv(BGspecid, file = "BGspecid.csv", row.names = FALSE)
 #alt
 #BGspecid<-BGspec[which(!is.na(BGspec$species)),]
 #BGspecid <- BGspec[BGspec$speciesID == "1",]
@@ -277,7 +278,7 @@ AG.exotic_grass <- AGspecid$code[which(AGspecid$form == "Grass" & AGspecid$origi
 #"AG.shrub",
 #adding AG.shrub back into group.df returns dim(X) must have a positive length when running for loop?
 #make a df of functional groups:
-group.df <- data.frame(group = c("BG.native","BG.exotic","BG.annual","BG.perr", "BG.leg", "BG.tree","BG.shrub","BG.forb","BG.grass","BG.sedge","BG.native_grass", "BG.exotic_grass","AG.native","AG.exotic","AG.annual","AG.perr","AG.leg", "AG.tree","AG.forb","AG.grass","AG.sedge", "AG.native_grass","AG.exotic_grass"))
+group.df <- data.frame(group = c("BG.native","BG.exotic","BG.annual","BG.perr", "BG.leg", "BG.tree","BG.shrub","BG.forb","BG.grass","BG.sedge","BG.native_grass", "BG.exotic_grass","AG.native","AG.exotic","AG.annual","AG.perr","AG.leg", "AG.tree","AG.shrub","AG.forb","AG.grass","AG.sedge", "AG.native_grass","AG.exotic_grass"))
 
 rich.data<-list()
 #shan.data<-list()
@@ -293,6 +294,14 @@ for (i in 1:nrow(group.df)){
   if(substr(name.thisrun,1,3)=="BG.") data.thisrun<-BGmat[,colnames(BGmat) %in% vec.thisrun]
   if(substr(name.thisrun,1,3)=="AG.") data.thisrun<-AGmat[,colnames(AGmat) %in% vec.thisrun]
   head(data.thisrun); dim(data.thisrun)
+  
+  print(dim(data.thisrun))
+  print(name.thisrun)
+  
+  head(data.thisrun)
+  dim(data.thisrun)
+  
+  print(data.thisrun)
   
   rich.data[[i]]<-apply(data.thisrun,1,function(x)length(which(x>0)))
   
@@ -596,7 +605,8 @@ srmod_tree1$uci <- srmod_tree1$fit+(srmod_tree1$se*1.96)
 head(srmod_tree1)
 summary(srmod_tree)$coefficients
 xtree_labels <- with(srmod_tree1, interaction(ab, burn_trt))
-xtree_labels <- str_replace_all(xtree_labels, c("above\\.Control" = "Above Control", "below\\.Control" = "Below Control", "above\\.Burn" = "Above Burn", "below\\.Burn" = "Below Burn"))dev.new(width=10,height=4,dpi=160,pointsize=12, noRStudioGD = T)dev.new(width=10,height=4,dpi=160,pointsize=12, noRStudioGD = T)dev.new(width=10,height=4,dpi=160,pointsize=12, noRStudioGD = T)
+xtree_labels <- str_replace_all(xtree_labels, c("above\\.Control" = "Above Control", "below\\.Control" = "Below Control", "above\\.Burn" = "Above Burn", "below\\.Burn" = "Below Burn"))
+dev.new(width=10,height=4,dpi=160,pointsize=12, noRStudioGD = T)
 plot(c(1:4), srmod_tree1$fit, xlim=c(0.5,4.5), pch=20, xaxt="n", ylim=c((min(srmod_tree1$lci)), max(srmod_tree1$uci)), ylab="Species Richness", xlab="", las=1, cex=2.5)
 arrows(c(1:4), srmod_tree1$lci, c(1:4), srmod_tree1$uci, length=0.3, code=3, angle=90)
 axis(side=1, at=c(1:4), labels=xtree_labels, tick=F, cex.axis=1)
@@ -615,7 +625,8 @@ srmod_shr1$uci <- srmod_shr1$fit+(srmod_shr1$se*1.96)
 head(srmod_shr1)
 summary(srmod_shr)$coefficients
 xshr_labels <- with(srmod_shr1, interaction(ab, burn_trt))
-xshr_labels <- str_replace_all(xshr_labels, c("above\\.Control" = "Above Control", "below\\.Control" = "Below Control", "above\\.Burn" = "Above Burn", "below\\.Burn" = "Below Burn"))dev.new(width=10,height=4,dpi=160,pointsize=12, noRStudioGD = T)dev.new(width=10,height=4,dpi=160,pointsize=12, noRStudioGD = T)dev.new(width=10,height=4,dpi=160,pointsize=12, noRStudioGD = T)
+xshr_labels <- str_replace_all(xshr_labels, c("above\\.Control" = "Above Control", "below\\.Control" = "Below Control", "above\\.Burn" = "Above Burn", "below\\.Burn" = "Below Burn"))
+dev.new(width=10,height=4,dpi=160,pointsize=12, noRStudioGD = T)
 plot(c(1:4), srmod_shr1$fit, xlim=c(0.5,4.5), pch=20, xaxt="n", ylim=c((min(srmod_shr1$lci)), max(srmod_shr1$uci)), ylab="Species Richness", xlab="", las=1, cex=2.5)
 arrows(c(1:4), srmod_shr1$lci, c(1:4), srmod_shr1$uci, length=0.3, code=3, angle=90)
 axis(side=1, at=c(1:4), labels=xshr_labels, tick=F, cex.axis=1)
@@ -635,7 +646,8 @@ srmod_for1$uci <- srmod_for1$fit+(srmod_for1$se*1.96)
 head(srmod_for1)
 summary(srmod_for)$coefficients
 xfor_labels <- with(srmod_for1, interaction(ab, burn_trt))
-xfor_labels <- str_replace_all(xfor_labels, c("above\\.Control" = "Above Control", "below\\.Control" = "Below Control", "above\\.Burn" = "Above Burn", "below\\.Burn" = "Below Burn"))dev.new(width=10,height=4,dpi=160,pointsize=12, noRStudioGD = T)dev.new(width=10,height=4,dpi=160,pointsize=12, noRStudioGD = T)dev.new(width=10,height=4,dpi=160,pointsize=12, noRStudioGD = T)
+xfor_labels <- str_replace_all(xfor_labels, c("above\\.Control" = "Above Control", "below\\.Control" = "Below Control", "above\\.Burn" = "Above Burn", "below\\.Burn" = "Below Burn"))
+dev.new(width=10,height=4,dpi=160,pointsize=12, noRStudioGD = T)dev.new(width=10,height=4,dpi=160,pointsize=12, noRStudioGD = T)dev.new(width=10,height=4,dpi=160,pointsize=12, noRStudioGD = T)
 plot(c(1:4), srmod_for1$fit, xlim=c(0.5,4.5), pch=20, xaxt="n", ylim=c((min(srmod_for1$lci)), max(srmod_for1$uci)), ylab="Species Richness", xlab="", las=1, cex=2.5)
 arrows(c(1:4), srmod_for1$lci, c(1:4), srmod_for1$uci, length=0.3, code=3, angle=90)
 axis(side=1, at=c(1:4), labels=xfor_labels, tick=F, cex.axis=1)
@@ -655,7 +667,8 @@ srmod_gra1$uci <- srmod_gra1$fit+(srmod_gra1$se*1.96)
 head(srmod_gra1)
 summary(srmod_gra)$coefficients
 xgra_labels <- with(srmod_gra1, interaction(ab, burn_trt))
-xgra_labels <- str_replace_all(xgra_labels, c("above\\.Control" = "Above Control", "below\\.Control" = "Below Control", "above\\.Burn" = "Above Burn", "below\\.Burn" = "Below Burn"))dev.new(width=10,height=4,dpi=160,pointsize=12, noRStudioGD = T)dev.new(width=10,height=4,dpi=160,pointsize=12, noRStudioGD = T)
+xgra_labels <- str_replace_all(xgra_labels, c("above\\.Control" = "Above Control", "below\\.Control" = "Below Control", "above\\.Burn" = "Above Burn", "below\\.Burn" = "Below Burn"))
+dev.new(width=10,height=4,dpi=160,pointsize=12, noRStudioGD = T)dev.new(width=10,height=4,dpi=160,pointsize=12, noRStudioGD = T)
 plot(c(1:4), srmod_gra1$fit, xlim=c(0.5,4.5), pch=20, xaxt="n", ylim=c((min(srmod_gra1$lci)), max(srmod_gra1$uci)), ylab="Species Richness", xlab="", las=1, cex=2.5)
 arrows(c(1:4), srmod_gra1$lci, c(1:4), srmod_gra1$uci, length=0.3, code=3, angle=90)
 axis(side=1, at=c(1:4), labels=xgra_labels, tick=F, cex.axis=1)
@@ -674,7 +687,8 @@ srmod_sed1$uci <- srmod_sed1$fit+(srmod_sed1$se*1.96)
 head(srmod_sed1)
 summary(srmod_sed)$coefficients
 xsed_labels <- with(srmod_sed1, interaction(ab, burn_trt))
-xsed_labels <- str_replace_all(xsed_labels, c("above\\.Control" = "Above Control", "below\\.Control" = "Below Control", "above\\.Burn" = "Above Burn", "below\\.Burn" = "Below Burn"))dev.new(width=10,height=4,dpi=160,pointsize=12, noRStudioGD = T)
+xsed_labels <- str_replace_all(xsed_labels, c("above\\.Control" = "Above Control", "below\\.Control" = "Below Control", "above\\.Burn" = "Above Burn", "below\\.Burn" = "Below Burn"))
+dev.new(width=10,height=4,dpi=160,pointsize=12, noRStudioGD = T)
 plot(c(1:4), srmod_sed1$fit, xlim=c(0.5,4.5), pch=20, xaxt="n", ylim=c((min(srmod_sed1$lci)), max(srmod_sed1$uci)), ylab="Species Richness", xlab="", las=1, cex=2.5)
 arrows(c(1:4), srmod_sed1$lci, c(1:4), srmod_sed1$uci, length=0.3, code=3, angle=90)
 axis(side=1, at=c(1:4), labels=xsed_labels, tick=F, cex.axis=1)
