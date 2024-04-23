@@ -200,3 +200,232 @@ div4 <- div2[,c(1:5,ncol(div2))]
 div4$ab <- "below"
 colnames(div4) [which(colnames(div4) == "bgsr")] <- "sr"
 head(div4);dim(div4)
+
+
+
+#sr_mod2
+nd1 <- expand.grid(ab = factor(c("above", "below"), levels = c("above", "below")),
+                   burn_trt = factor(c("Control", "Burn"), levels = c("Control", "Burn")))
+sr_mod3 <- predictSE(mod=sr_mod2,newdata=nd1,type="response",se.fit = T)
+sr_mod3 <- data.frame(nd1, fit = sr_mod3$fit, se = sr_mod3$se.fit)
+sr_mod3$lci <- sr_mod3$fit-(sr_mod3$se*1.96)
+sr_mod3$uci <- sr_mod3$fit+(sr_mod3$se*1.96)
+#view sr_mod3
+head(sr_mod3)
+summary(sr_mod2)$coefficients
+
+x_labels <- with(sr_mod3, interaction(ab, burn_trt))
+dev.new(width=10,height=4,dpi=160,pointsize=12, noRStudioGD = T)
+plot(c(1:4), sr_mod3$fit, xlim=c(0.5,4.5), pch=20, xaxt="n", ylim=c((min(sr_mod3$lci)), max(sr_mod3$uci)), ylab="Species Richness", xlab="", las=1, cex=2.5)
+arrows(c(1:4), sr_mod3$lci, c(1:4), sr_mod3$uci, length=0.3, code=3, angle=90)
+axis(side=1, at=c(1:4), labels=x_labels, tick=F, cex.axis=1)
+title(main = "Species Richness by Treatment")
+
+#alpha glmer
+nd1 <- expand.grid(ab = factor(c("above", "below"), levels = c("above", "below")),
+                   burn_trt = factor(c("Control", "Burn"), levels = c("Control", "Burn")))
+srmod_all1 <- predictSE(mod=srmod_all,newdata=nd1,type="response",se.fit = T)
+srmod_all1 <- data.frame(nd1, fit = srmod_all1$fit, se = srmod_all1$se.fit)
+srmod_all1$lci <- srmod_all1$fit-(srmod_all1$se*1.96)
+srmod_all1$uci <- srmod_all1$fit+(srmod_all1$se*1.96)
+#view srmod_nat1
+head(srmod_all1)
+summary(srmod_all)$coefficients
+xall_labels <- with(srmod_all1, interaction(ab, burn_trt))
+xall_labels <- str_replace_all(xall_labels, c("above\\.Control" = "Above Control", "below\\.Control" = "Below Control", "above\\.Burn" = "Above Burn", "below\\.Burn" = "Below Burn"))
+dev.new(width=10,height=4,dpi=160,pointsize=12, noRStudioGD = T)
+par(mfrow=c(1,2))
+plot(c(1:4), srmod_all1$fit, xlim=c(0.5,4.5), pch=20, xaxt="n", ylim=c((min(srmod_all1$lci)), max(srmod_all1$uci)), ylab="Species Richness", xlab="", las=1, cex=2.5)
+arrows(c(1:4), srmod_all1$lci, c(1:4), srmod_all1$uci, length=0.3, code=3, angle=90)
+axis(side=1, at=c(1:4), labels=xall_labels, tick=F, cex.axis=1)
+title(main = "Alpha Species Richness")
+
+#native
+srmod_nat1 <- predictSE(mod=srmod_nat,newdata=nd1,type="response",se.fit = T)
+srmod_nat1 <- data.frame(nd1, fit = srmod_nat1$fit, se = srmod_nat1$se.fit)
+srmod_nat1$lci <- srmod_nat1$fit-(srmod_nat1$se*1.96)
+srmod_nat1$uci <- srmod_nat1$fit+(srmod_nat1$se*1.96)
+#view srmod_nat1
+head(srmod_nat1)
+summary(srmod_nat)$coefficients
+xnat_labels <- with(srmod_nat1, interaction(ab, burn_trt))
+xnat_labels <- str_replace_all(xnat_labels, c("above\\.Control" = "AG Control", "below\\.Control" = "BG Control", "above\\.Burn" = "AG Burn", "below\\.Burn" = "BG Burn"))
+#dev.new(width=10,height=4,dpi=160,pointsize=12, noRStudioGD = T)
+plot(c(1:4), srmod_nat1$fit, xlim=c(0.5,4.5), pch=20, xaxt="n", ylim=c((min(srmod_nat1$lci)), max(srmod_nat1$uci)), ylab="Species Richness", xlab="", las=1, cex=2.5)
+arrows(c(1:4), srmod_nat1$lci, c(1:4), srmod_nat1$uci, length=0.3, code=3, angle=90)
+axis(side=1, at=c(1:4), labels=xnat_labels, tick=F, cex.axis=0.8)
+title(main = "Native Species Richness")
+
+#exotic
+srmod_exo1 <- predictSE(mod=srmod_exo,newdata=nd1,type="response",se.fit = T)
+srmod_exo1 <- data.frame(nd1, fit = srmod_exo1$fit, se = srmod_exo1$se.fit)
+srmod_exo1$lci <- srmod_exo1$fit-(srmod_exo1$se*1.96)
+srmod_exo1$uci <- srmod_exo1$fit+(srmod_exo1$se*1.96)
+#view srmod_exo1
+head(srmod_exo1)
+summary(srmod_exo)$coefficients
+xexo_labels <- with(srmod_exo1, interaction(ab, burn_trt))
+xexo_labels <- str_replace_all(xexo_labels, c("above\\.Control" = "Above Control", "below\\.Control" = "Below Control", "above\\.Burn" = "Above Burn", "below\\.Burn" = "Below Burn"))
+#
+plot(c(1:4), srmod_exo1$fit, xlim=c(0.5,4.5), pch=20, xaxt="n", ylim=c((min(srmod_exo1$lci)), max(srmod_exo1$uci)), ylab="Species Richness", xlab="", las=1, cex=2.5)
+arrows(c(1:4), srmod_exo1$lci, c(1:4), srmod_exo1$uci, length=0.3, code=3, angle=90)
+axis(side=1, at=c(1:4), labels=xexo_labels, tick=F, cex.axis=1)
+title(main = "Exotic Species Richness")
+
+#annual
+srmod_ann1 <- predictSE(mod=srmod_ann,newdata=nd1,type="response",se.fit = T)
+srmod_ann1 <- data.frame(nd1, fit = srmod_ann1$fit, se = srmod_ann1$se.fit)
+srmod_ann1$lci <- srmod_ann1$fit-(srmod_ann1$se*1.96)
+srmod_ann1$uci <- srmod_ann1$fit+(srmod_ann1$se*1.96)
+#view srmod_ann1
+head(srmod_ann1)
+summary(srmod_ann)$coefficients
+head(srmod_ann1)
+summary(srmod_ann)$coefficients
+xann_labels <- with(srmod_ann1, interaction(ab, burn_trt))
+xann_labels <- str_replace_all(xann_labels, c("above\\.Control" = "Above Control", "below\\.Control" = "Below Control", "above\\.Burn" = "Above Burn", "below\\.Burn" = "Below Burn"))dev.new(width=10,height=4,dpi=160,pointsize=12, noRStudioGD = T)dev.new(width=10,height=4,dpi=160,pointsize=12, noRStudioGD = T)dev.new(width=10,height=4,dpi=160,pointsize=12, noRStudioGD = T)
+plot(c(1:4), srmod_ann1$fit, xlim=c(0.5,4.5), pch=20, xaxt="n", ylim=c((min(srmod_ann1$lci)), max(srmod_ann1$uci)), ylab="Species Richness", xlab="", las=1, cex=2.5)
+arrows(c(1:4), srmod_ann1$lci, c(1:4), srmod_ann1$uci, length=0.3, code=3, angle=90)
+axis(side=1, at=c(1:4), labels=xann_labels, tick=F, cex.axis=1)
+title(main = "Annual Species Richness")
+
+#perennial
+srmod_per1 <- predictSE(mod=srmod_per,newdata=nd1,type="response",se.fit = T)
+srmod_per1 <- data.frame(nd1, fit = srmod_per1$fit, se = srmod_per1$se.fit)
+srmod_per1$lci <- srmod_per1$fit-(srmod_per1$se*1.96)
+srmod_per1$uci <- srmod_per1$fit+(srmod_per1$se*1.96)
+#view srmod_per1
+head(srmod_per1)
+summary(srmod_per)$coefficients
+xper_labels <- with(srmod_per1, interaction(ab, burn_trt))
+xper_labels <- str_replace_all(xper_labels, c("above\\.Control" = "Above Control", "below\\.Control" = "Below Control", "above\\.Burn" = "Above Burn", "below\\.Burn" = "Below Burn"))dev.new(width=10,height=4,dpi=160,pointsize=12, noRStudioGD = T)dev.new(width=10,height=4,dpi=160,pointsize=12, noRStudioGD = T)dev.new(width=10,height=4,dpi=160,pointsize=12, noRStudioGD = T)
+plot(c(1:4), srmod_per1$fit, xlim=c(0.5,4.5), pch=20, xaxt="n", ylim=c((min(srmod_per1$lci)), max(srmod_per1$uci)), ylab="Species Richness", xlab="", las=1, cex=2.5)
+arrows(c(1:4), srmod_per1$lci, c(1:4), srmod_per1$uci, length=0.3, code=3, angle=90)
+axis(side=1, at=c(1:4), labels=xper_labels, tick=F, cex.axis=1)
+title(main = "Perennial Species Richness")
+
+#legume
+srmod_leg1 <- predictSE(mod=srmod_leg,newdata=nd1,type="response",se.fit = T)
+srmod_leg1 <- data.frame(nd1, fit = srmod_leg1$fit, se = srmod_leg1$se.fit)
+srmod_leg1$lci <- srmod_leg1$fit-(srmod_leg1$se*1.96)
+srmod_leg1$uci <- srmod_leg1$fit+(srmod_leg1$se*1.96)
+#view srmod_leg1
+head(srmod_leg1)
+summary(srmod_leg)$coefficients
+xleg_labels <- with(srmod_leg1, interaction(ab, burn_trt))
+xleg_labels <- str_replace_all(xleg_labels, c("above\\.Control" = "Above Control", "below\\.Control" = "Below Control", "above\\.Burn" = "Above Burn", "below\\.Burn" = "Below Burn"))dev.new(width=10,height=4,dpi=160,pointsize=12, noRStudioGD = T)dev.new(width=10,height=4,dpi=160,pointsize=12, noRStudioGD = T)dev.new(width=10,height=4,dpi=160,pointsize=12, noRStudioGD = T)
+plot(c(1:4), srmod_leg1$fit, xlim=c(0.5,4.5), pch=20, xaxt="n", ylim=c((min(srmod_leg1$lci)), max(srmod_leg1$uci)), ylab="Species Richness", xlab="", las=1, cex=2.5)
+arrows(c(1:4), srmod_leg1$lci, c(1:4), srmod_leg1$uci, length=0.3, code=3, angle=90)
+axis(side=1, at=c(1:4), labels=xleg_labels, tick=F, cex.axis=1)
+title(main = "Legume Species Richness")
+
+#tree
+srmod_tree1 <- predictSE(mod=srmod_tree,newdata=nd1,type="response",se.fit = T)
+srmod_tree1 <- data.frame(nd1, fit = srmod_tree1$fit, se = srmod_tree1$se.fit)
+srmod_tree1$lci <- srmod_tree1$fit-(srmod_tree1$se*1.96)
+srmod_tree1$uci <- srmod_tree1$fit+(srmod_tree1$se*1.96)
+#view srmod_tree1
+head(srmod_tree1)
+summary(srmod_tree)$coefficients
+xtree_labels <- with(srmod_tree1, interaction(ab, burn_trt))
+xtree_labels <- str_replace_all(xtree_labels, c("above\\.Control" = "Above Control", "below\\.Control" = "Below Control", "above\\.Burn" = "Above Burn", "below\\.Burn" = "Below Burn"))
+dev.new(width=10,height=4,dpi=160,pointsize=12, noRStudioGD = T)
+plot(c(1:4), srmod_tree1$fit, xlim=c(0.5,4.5), pch=20, xaxt="n", ylim=c((min(srmod_tree1$lci)), max(srmod_tree1$uci)), ylab="Species Richness", xlab="", las=1, cex=2.5)
+arrows(c(1:4), srmod_tree1$lci, c(1:4), srmod_tree1$uci, length=0.3, code=3, angle=90)
+axis(side=1, at=c(1:4), labels=xtree_labels, tick=F, cex.axis=1)
+title(main = "Tree Species Richness")
+
+#shrub
+srmod_shr1 <- predictSE(mod=srmod_shr,newdata=nd1,type="response",se.fit = T)
+srmod_shr1 <- data.frame(nd1, fit = srmod_shr1$fit, se = srmod_shr1$se.fit)
+srmod_shr1$lci <- srmod_shr1$fit-(srmod_shr1$se*1.96)
+srmod_shr1$uci <- srmod_shr1$fit+(srmod_shr1$se*1.96)
+#view srmod_shr1 #only ci for burn below
+head(srmod_shr1)
+summary(srmod_shr)$coefficients
+xshr_labels <- with(srmod_shr1, interaction(ab, burn_trt))
+xshr_labels <- str_replace_all(xshr_labels, c("above\\.Control" = "Above Control", "below\\.Control" = "Below Control", "above\\.Burn" = "Above Burn", "below\\.Burn" = "Below Burn"))
+dev.new(width=10,height=4,dpi=160,pointsize=12, noRStudioGD = T)
+plot(c(1:4), srmod_shr1$fit, xlim=c(0.5,4.5), pch=20, xaxt="n", ylim=c((min(srmod_shr1$lci)), max(srmod_shr1$uci)), ylab="Species Richness", xlab="", las=1, cex=2.5)
+arrows(c(1:4), srmod_shr1$lci, c(1:4), srmod_shr1$uci, length=0.3, code=3, angle=90)
+axis(side=1, at=c(1:4), labels=xshr_labels, tick=F, cex.axis=1)
+title(main = "Shrub Species Richness")
+
+#forb
+srmod_for1 <- predictSE(mod=srmod_for,newdata=nd1,type="response",se.fit = T)
+srmod_for1 <- data.frame(nd1, fit = srmod_for1$fit, se = srmod_for1$se.fit)
+srmod_for1$lci <- srmod_for1$fit-(srmod_for1$se*1.96)
+srmod_for1$uci <- srmod_for1$fit+(srmod_for1$se*1.96)
+#view srmod_for1
+head(srmod_for1)
+summary(srmod_for)$coefficients
+xfor_labels <- with(srmod_for1, interaction(ab, burn_trt))
+xfor_labels <- str_replace_all(xfor_labels, c("above\\.Control" = "Above Control", "below\\.Control" = "Below Control", "above\\.Burn" = "Above Burn", "below\\.Burn" = "Below Burn"))
+dev.new(width=10,height=4,dpi=160,pointsize=12, noRStudioGD = T)dev.new(width=10,height=4,dpi=160,pointsize=12, noRStudioGD = T)dev.new(width=10,height=4,dpi=160,pointsize=12, noRStudioGD = T)
+plot(c(1:4), srmod_for1$fit, xlim=c(0.5,4.5), pch=20, xaxt="n", ylim=c((min(srmod_for1$lci)), max(srmod_for1$uci)), ylab="Species Richness", xlab="", las=1, cex=2.5)
+arrows(c(1:4), srmod_for1$lci, c(1:4), srmod_for1$uci, length=0.3, code=3, angle=90)
+axis(side=1, at=c(1:4), labels=xfor_labels, tick=F, cex.axis=1)
+title(main = "Forb Species Richness")
+
+#grass
+srmod_gra1 <- predictSE(mod=srmod_gra,newdata=nd1,type="response",se.fit = T)
+srmod_gra1 <- data.frame(nd1, fit = srmod_gra1$fit, se = srmod_gra1$se.fit)
+srmod_gra1$lci <- srmod_gra1$fit-(srmod_gra1$se*1.96)
+srmod_gra1$uci <- srmod_gra1$fit+(srmod_gra1$se*1.96)
+#view srmod_gra1
+head(srmod_gra1)
+summary(srmod_gra)$coefficients
+xgra_labels <- with(srmod_gra1, interaction(ab, burn_trt))
+xgra_labels <- str_replace_all(xgra_labels, c("above\\.Control" = "Above Control", "below\\.Control" = "Below Control", "above\\.Burn" = "Above Burn", "below\\.Burn" = "Below Burn"))
+dev.new(width=10,height=4,dpi=160,pointsize=12, noRStudioGD = T)dev.new(width=10,height=4,dpi=160,pointsize=12, noRStudioGD = T)
+plot(c(1:4), srmod_gra1$fit, xlim=c(0.5,4.5), pch=20, xaxt="n", ylim=c((min(srmod_gra1$lci)), max(srmod_gra1$uci)), ylab="Species Richness", xlab="", las=1, cex=2.5)
+arrows(c(1:4), srmod_gra1$lci, c(1:4), srmod_gra1$uci, length=0.3, code=3, angle=90)
+axis(side=1, at=c(1:4), labels=xgra_labels, tick=F, cex.axis=1)
+title(main = "Grass Species Richness")
+
+#sedge
+srmod_sed1 <- predictSE(mod=srmod_sed,newdata=nd1,type="response",se.fit = T)
+srmod_sed1 <- data.frame(nd1, fit = srmod_sed1$fit, se = srmod_sed1$se.fit)
+srmod_sed1$lci <- srmod_sed1$fit-(srmod_sed1$se*1.96)
+srmod_sed1$uci <- srmod_sed1$fit+(srmod_sed1$se*1.96)
+#view srmod_sed1
+head(srmod_sed1)
+summary(srmod_sed)$coefficients
+xsed_labels <- with(srmod_sed1, interaction(ab, burn_trt))
+xsed_labels <- str_replace_all(xsed_labels, c("above\\.Control" = "Above Control", "below\\.Control" = "Below Control", "above\\.Burn" = "Above Burn", "below\\.Burn" = "Below Burn"))
+dev.new(width=10,height=4,dpi=160,pointsize=12, noRStudioGD = T)
+plot(c(1:4), srmod_sed1$fit, xlim=c(0.5,4.5), pch=20, xaxt="n", ylim=c((min(srmod_sed1$lci)), max(srmod_sed1$uci)), ylab="Species Richness", xlab="", las=1, cex=2.5)
+arrows(c(1:4), srmod_sed1$lci, c(1:4), srmod_sed1$uci, length=0.3, code=3, angle=90)
+axis(side=1, at=c(1:4), labels=xsed_labels, tick=F, cex.axis=1)
+title(main = "Sedge Species Richness")
+
+#native grass
+srmod_natgra1 <- predictSE(mod=srmod_natgra,newdata=nd1,type="response",se.fit = T)
+srmod_natgra1 <- data.frame(nd1, fit = srmod_natgra1$fit, se = srmod_natgra1$se.fit)
+srmod_natgra1$lci <- srmod_natgra1$fit-(srmod_natgra1$se*1.96)
+srmod_natgra1$uci <- srmod_natgra1$fit+(srmod_natgra1$se*1.96)
+#view srmod_natgra1
+head(srmod_natgra1)
+summary(srmod_natgra)$coefficients
+xnatgra_labels <- with(srmod_natgra1, interaction(ab, burn_trt))
+xnatgra_labels <- str_replace_all(xnatgra_labels, c("above\\.Control" = "Above Control", "below\\.Control" = "Below Control", "above\\.Burn" = "Above Burn", "below\\.Burn" = "Below Burn"))dev.new(width=10,height=4,dpi=160,pointsize=12, noRStudioGD = T)
+plot(c(1:4), srmod_natgra1$fit, xlim=c(0.5,4.5), pch=20, xaxt="n", ylim=c((min(srmod_natgra1$lci)), max(srmod_natgra1$uci)), ylab="Species Richness", xlab="", las=1, cex=2.5)
+arrows(c(1:4), srmod_natgra1$lci, c(1:4), srmod_natgra1$uci, length=0.3, code=3, angle=90)
+axis(side=1, at=c(1:4), labels=xnatgra_labels, tick=F, cex.axis=1)
+title(main = "Native Grass Species Richness")
+
+#exotic grass
+srmod_exogra1 <- predictSE(mod=srmod_exogra,newdata=nd1,type="response",se.fit = T)
+srmod_exogra1 <- data.frame(nd1, fit = srmod_exogra1$fit, se = srmod_exogra1$se.fit)
+srmod_exogra1$lci <- srmod_exogra1$fit-(srmod_exogra1$se*1.96)
+srmod_exogra1$uci <- srmod_exogra1$fit+(srmod_exogra1$se*1.96)
+#view srmod_exogra1
+head(srmod_exogra1)
+summary(srmod_exogra)$coefficients
+xexogra_labels <- with(srmod_exogra1, interaction(ab, burn_trt))
+xexogra_labels <- str_replace_all(xexogra_labels, c("above\\.Control" = "Above Control", "below\\.Control" = "Below Control", "above\\.Burn" = "Above Burn", "below\\.Burn" = "Below Burn"))
+dev.new(width=10,height=4,dpi=160,pointsize=12, noRStudioGD = T)
+plot(c(1:4), srmod_exogra1$fit, xlim=c(0.5,4.5), pch=20, xaxt="n", ylim=c((min(srmod_exogra1$lci)), max(srmod_exogra1$uci)), ylab="Species Richness", xlab="", las=1, cex=2.5)
+arrows(c(1:4), srmod_exogra1$lci, c(1:4), srmod_exogra1$uci, length=0.3, code=3, angle=90)
+axis(side=1, at=c(1:4), labels=xexogra_labels, tick=F, cex.axis=1)
+title(main = "Exotic Grass Species Richness")
