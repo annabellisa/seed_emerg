@@ -446,6 +446,8 @@ div5$ab <- factor(div5$ab, levels = c("above","below"))
 head(div5);dim(div5)
 str(div5)
 
+
+
 #bwplot
 dev.new(width=10,height=4,dpi=160,pointsize=12, noRStudioGD = T)
 
@@ -874,6 +876,46 @@ arrows(c(1:4), srmod_nonlegfor1$lci, c(1:4), srmod_nonlegfor1$uci, length=0.05, 
 axis(side=1, at=c(1:4), labels=x_labels, tick=F, cex.axis=1)
 title(main = "(j) Non-leg Forbs", line = 0.5,adj=0)
 points(c(1:4), srmod_nonlegfor1$fit,col=c(rep("chartreuse4",2),rep("orange",2)), pch=20, cex=2.5)
+
+
+#PCA matrices
+#abundance above and below ssm
+div6 <- div4
+div6$quadratID <-paste(div6$quadratID,div6$ab,sep=".")
+div6 <- subset(div6, select = -ab)
+head(div6[1:10]);dim(div6)
+
+row.names(AGmat) <- paste0(row.names(AGmat), ".above")
+row.names(BGmat) <- paste0(row.names(BGmat), ".below")
+ALLmat <- cbind(AGmat,BGmat)
+head(ALLmat[1:10]);dim(ALLmat)
+
+div6 <- cbind(div6,ALLmat)
+head(div6[1:10]);dim(div6)
+
+#presence/absence above and below ssm
+div7 <- div6
+exclude_cols <-c("quadratID", "location", "transect", "quadrat", "burn_trt")
+div7[, !names(div7) %in% exclude_cols] <- lapply(div7[, !(names(div7) %in% exclude_cols)], function(x) ifelse (x>0,1, x))
+head(div7[1:10]);dim(div7)
+
+#pca
+#pca1 <- prcomp(div7[,which(colnames(div7)== "Aca_mai"):which(colnames(div7)== "Wah_gra")], scale = T)
+#pca1 <- prcomp(div7[, seq_along(colnames(div7))[colnames(div7) == "Aca_mai"]:seq_along(colnames(div7))[colnames(div7) == "Wah_gra"]], scale = TRUE)
+#pca1 <- prcomp(div7[, seq(which(colnames(div7) == "Aca_mai"), which(colnames(div7) == "Wah_gra"))], scale = TRUE)
+pca1 <- prcomp(div7[, grep("^Aca_mai$|^Wah_gra$", colnames(div7))], scale = TRUE)
+pov1<-summary(pca1)$importance[2,]
+
+pcadata <- data.frame(quadratID = div7[,1])
+head(pcadata,3); dim(pcadata)
+
+pcadata$pca.comp1<-pca1$x[,1]
+pcadata$pca.comp2<-pca1$x[,2]
+pcadata$pca.comp3<-pca1$x[,3]
+head(pca1$x)
+
+
+
 
 #AG shannon and simpson
 
