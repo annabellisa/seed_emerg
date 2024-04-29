@@ -903,7 +903,8 @@ head(div7[1:10]);dim(div7)
 #pca1 <- prcomp(div7[,which(colnames(div7)== "Aca_mai"):which(colnames(div7)== "Wah_gra")], scale = T)
 #pca1 <- prcomp(div7[, seq_along(colnames(div7))[colnames(div7) == "Aca_mai"]:seq_along(colnames(div7))[colnames(div7) == "Wah_gra"]], scale = TRUE)
 #pca1 <- prcomp(div7[, seq(which(colnames(div7) == "Aca_mai"), which(colnames(div7) == "Wah_gra"))], scale = TRUE)
-pca1 <- prcomp(div7[, grep("^Aca_mai$|^Wah_gra$", colnames(div7))], scale = TRUE)
+#pca1 <- prcomp(div7[, grep("^Aca_mai.*Wah_gra$", colnames(div7))], scale = TRUE)
+pca1 <- prcomp(div7[, grep("^Aca_mai", colnames(div7)):ncol(div7)], scale = F)
 pov1<-summary(pca1)$importance[2,]
 
 pcadata <- data.frame(quadratID = div7[,1])
@@ -913,9 +914,69 @@ pcadata$pca.comp1<-pca1$x[,1]
 pcadata$pca.comp2<-pca1$x[,2]
 pcadata$pca.comp3<-pca1$x[,3]
 head(pca1$x)
+head(pca1$rotation)
+head(pca1);dim(pca1)
+
+pca1$rotation[,1]
+pca1$rotation[,2]
+pca1$rotation[,3]
+summary(pca1)
+
+nd2 <- div7[,c("quadratID", "location", "transect", "quadrat", "burn_trt")]
+head(nd2);dim(nd2)
+
+pcadata2 <- merge(pcadata,nd2, by = "quadratID", all.x = T, all.y = F)
+head(pcadata2);dim(pcadata2)
+
+shapes<-c(15,17)
+View(shapes)
+shapes<-shapes[as.factor(pcadata2$burn_trt)]
+col.1<-c("grey60","grey20")
+col.1<-col.1[as.factor(pcadata2$burn_trt)]
+View(col.1)
 
 
+dev.new(height=8,width=8,dpi=80,pointsize=14,noRStudioGD = T)
+par(mar=c(4,4,2,2),mfrow=c(2,2),mgp=c(2.5,1,0))
+plot(x=1:length(pov1),y=pov1,ylab="Propotion Variance Explained",xlab="Components",type="p")
+lines(x=1:length(pov1),y=pov1)
+mtext("(a)",3,0.7,F,0)
+#scree plot (usually explained by first three point) - community composition isn't very different amongst the sites - 
+#ylim=c(-0.3,0.6)
+#at=-200
+#biplot(pca1, xlab="Component 1",ylab="Component 2",col=c("grey40","black"),var.axes=T,arrow.len=0.1, c(3:n), c(4:n))
+#biplot(pca1, xlab="Component 1", ylab="Component 2", col=c("grey40","black"), var.axes=TRUE, arrow.len=0.1, c(seq(3, 60)), c(seq(4, 60)))
+#biplot(pca1, xlab="Component 1", ylab="Component 2", col=c("grey40","black"), var.axes=TRUE, arrow.len=0.1, c(3:60), c(4:60))
+biplot(pca1, xlab="Component 1", ylab="Component 2", col=c("grey40","black"), var.axes=TRUE, arrow.len=0.1, choices=c(3, 4))
+mtext("(b)",3,0.7,F,adj = 0)
 
+
+plot(pcadata2$pca.comp1,pcadata2$pca.comp2,pch=shapes, xlab="",ylab="",cex=2,col=alpha(col.1,1))
+legend("bottomright",legend=c("Control Sites", "Burn Sites"),pch=c(15,17),pt.cex=2,col=c("grey60","grey20"))
+mtext("(b)",3,0.4,F,adj=0)
+title(ylab="PC2",cex=1.2)
+title(xlab="PC1",cex=1.2)
+text(x=c(-0.61888015), y=c(-7.32836938), labels= c("T26_20"), pos=4)
+text(x=c(14.84107197), y=c(-0.54987242), labels= c("T06_57"), pos=2)
+
+
+#1 vs 3
+plot(pcadata2$pca.comp1,pcadata2$pca.comp3,pch=shapes, xlab="",ylab="",cex=2,col=alpha(col.1,1))
+legend("bottomright",legend=c("Control Sites", "Burn Sites"),pch=c(15,17),pt.cex=2,col=c("grey60","grey20"))
+mtext("(c)",3,0.4,F,adj=0)
+title(ylab="PC3",cex=1.2)
+title(xlab="PC1",cex=1.2)
+text(x=c(0.49994222), y=c(-6.582940182), labels= c("T10_06"), pos=4)
+text(x=c(14.84107197), y=c(0.614645118), labels= c("T06_57"), pos=2)
+
+#2 vs 3
+plot(pcadata2$pca.comp2,pcadata2$pca.comp3,pch=shapes, xlab="",ylab="",cex=2,col=alpha(col.1,1))
+legend("bottomleft",legend=c("Control Sites", "Burn Sites"),pch=c(15,17),pt.cex=2,col=c("grey60","grey20"))
+mtext("(d)",3,0.4,F,adj=0)
+title(ylab="PC3",cex=1.2)
+title(xlab="PC2",cex=1.2)
+text(x=c(0.69979374), y=c(-6.582940182), labels= c("T10_06"), pos=2)
+text(x=c(-7.32836938), y=c(1.416516483), labels= c("T26_20"), pos=4)
 
 #AG shannon and simpson
 
