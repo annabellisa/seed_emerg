@@ -429,3 +429,33 @@ plot(c(1:4), srmod_exogra1$fit, xlim=c(0.5,4.5), pch=20, xaxt="n", ylim=c((min(s
 arrows(c(1:4), srmod_exogra1$lci, c(1:4), srmod_exogra1$uci, length=0.3, code=3, angle=90)
 axis(side=1, at=c(1:4), labels=xexogra_labels, tick=F, cex.axis=1)
 title(main = "Exotic Grass Species Richness")
+
+#biplot(pca1, xlab="Component 1",ylab="Component 2",col=c("grey40","black"),var.axes=T,arrow.len=0.1, c(3:n), c(4:n))
+#biplot(pca1, xlab="Component 1", ylab="Component 2", col=c("grey40","black"), var.axes=TRUE, arrow.len=0.1, c(seq(3, 60)), c(seq(4, 60)))
+#biplot(pca1, xlab="Component 1", ylab="Component 2", col=c("grey40","black"), var.axes=TRUE, arrow.len=0.1, c(3:60), c(4:60))
+
+
+#AG shannon and simpson
+
+div1$agshan <- diversity(AGmat, index = "shannon")
+div1$agsimp <- diversity(AGmat, index = "invsimpson")
+
+
+bwplot(div1$agsimp ~ div1$burn_trt)
+
+#BG shannon and simpson
+div1$bgshan <- diversity(BGmat, index = "shannon")
+div1$bgsimp <- diversity(BGmat, index = "invsimpson")
+
+
+bwplot(div1$bgsimp ~ div1$burn_trt)
+
+#sorensen
+
+#div1$bgsoren <- li(BGmat)
+#div1 <- subset(div1, select = -bgsoren)
+
+#margalef?
+#div1$agmarg <- margalef(AGmat) doesn't work as for community level comparison only
+AGmarg <- margalef(AGmat)
+Bgmarg <- margalef(BGmat)

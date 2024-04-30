@@ -941,12 +941,8 @@ par(mar=c(4,4,2,2),mfrow=c(2,2),mgp=c(2.5,1,0))
 plot(x=1:length(pov1),y=pov1,ylab="Propotion Variance Explained",xlab="Components",type="p")
 lines(x=1:length(pov1),y=pov1)
 mtext("(a)",3,0.7,F,0)
-#scree plot (usually explained by first three point) - community composition isn't very different amongst the sites - 
-#ylim=c(-0.3,0.6)
-#at=-200
-#biplot(pca1, xlab="Component 1",ylab="Component 2",col=c("grey40","black"),var.axes=T,arrow.len=0.1, c(3:n), c(4:n))
-#biplot(pca1, xlab="Component 1", ylab="Component 2", col=c("grey40","black"), var.axes=TRUE, arrow.len=0.1, c(seq(3, 60)), c(seq(4, 60)))
-#biplot(pca1, xlab="Component 1", ylab="Component 2", col=c("grey40","black"), var.axes=TRUE, arrow.len=0.1, c(3:60), c(4:60))
+#scree plot (usually explained by first three point) 
+
 biplot(pca1, xlab="Component 1", ylab="Component 2", col=c("grey40","black"), var.axes=TRUE, arrow.len=0.1, choices=c(3, 4))
 mtext("(b)",3,0.7,F,adj = 0)
 
@@ -978,29 +974,6 @@ title(xlab="PC2",cex=1.2)
 text(x=c(0.69979374), y=c(-6.582940182), labels= c("T10_06"), pos=2)
 text(x=c(-7.32836938), y=c(1.416516483), labels= c("T26_20"), pos=4)
 
-#AG shannon and simpson
 
-div1$agshan <- diversity(AGmat, index = "shannon")
-div1$agsimp <- diversity(AGmat, index = "invsimpson")
-
-
-bwplot(div1$agsimp ~ div1$burn_trt)
-
-#BG shannon and simpson
-div1$bgshan <- diversity(BGmat, index = "shannon")
-div1$bgsimp <- diversity(BGmat, index = "invsimpson")
-
-
-bwplot(div1$bgsimp ~ div1$burn_trt)
-
-#sorensen
-
-#div1$bgsoren <- li(BGmat)
-#div1 <- subset(div1, select = -bgsoren)
-
-#margalef?
-#div1$agmarg <- margalef(AGmat) doesn't work as for community level comparison only
-AGmarg <- margalef(AGmat)
-Bgmarg <- margalef(BGmat)
 
 
