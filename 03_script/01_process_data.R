@@ -885,27 +885,38 @@ div6$quadratID <-paste(div6$quadratID,div6$ab,sep=".")
 div6 <- subset(div6, select = -ab)
 head(div6[1:10]);dim(div6)
 
+#overwrite
 row.names(AGmat) <- paste0(row.names(AGmat), ".above")
 row.names(BGmat) <- paste0(row.names(BGmat), ".below")
 ALLmat <- cbind(AGmat,BGmat)
 head(ALLmat[1:10]);dim(ALLmat)
 
 div6 <- cbind(div6,ALLmat)
-head(div6[1:10]);dim(div6)
+head(div6[1:30]);dim(div6)
+#remove functional
 
 #presence/absence above and below ssm
 div7 <- div6
 exclude_cols <-c("quadratID", "location", "transect", "quadrat", "burn_trt")
 div7[, !names(div7) %in% exclude_cols] <- lapply(div7[, !(names(div7) %in% exclude_cols)], function(x) ifelse (x>0,1, x))
-head(div7[1:10]);dim(div7)
+head(div7[1:30],3);dim(div7)
+
+div8 <- div7[,which(colnames(div7)== "Aca_mai"):ncol(div7)]
+rownames(div8) <- div7$quadratID
+head(div8[1:10],3);dim(div8)
 
 #pca
 #pca1 <- prcomp(div7[,which(colnames(div7)== "Aca_mai"):which(colnames(div7)== "Wah_gra")], scale = T)
 #pca1 <- prcomp(div7[, seq_along(colnames(div7))[colnames(div7) == "Aca_mai"]:seq_along(colnames(div7))[colnames(div7) == "Wah_gra"]], scale = TRUE)
 #pca1 <- prcomp(div7[, seq(which(colnames(div7) == "Aca_mai"), which(colnames(div7) == "Wah_gra"))], scale = TRUE)
 #pca1 <- prcomp(div7[, grep("^Aca_mai.*Wah_gra$", colnames(div7))], scale = TRUE)
-pca1 <- prcomp(div7[, grep("^Aca_mai", colnames(div7)):ncol(div7)], scale = F)
+pca1 <- prcomp(div8)
+pca1
+summary(pca1)
 pov1<-summary(pca1)$importance[2,]
+head(div8[1:10],3);dim(div8)
+
+pca2 <- princomp(div8)
 
 pcadata <- data.frame(quadratID = div7[,1])
 head(pcadata,3); dim(pcadata)
@@ -922,11 +933,22 @@ pca1$rotation[,2]
 pca1$rotation[,3]
 summary(pca1)
 
-nd2 <- div7[,c("quadratID", "location", "transect", "quadrat", "burn_trt")]
+nd2 <- div4[,1:6]
 head(nd2);dim(nd2)
+head(div4);dim(div4)
+nd2$quadratID2 <- paste(nd2$quadratID,nd2$ab, sep=".")
 
-pcadata2 <- merge(pcadata,nd2, by = "quadratID", all.x = T, all.y = F)
+pcadata2 <- merge(pcadata,nd2, by.x = "quadratID", by.y = "quadratID2", all.x = T, all.y = F)
 head(pcadata2);dim(pcadata2)
+
+
+comp1_lmer<-lmer(pca.comp1~ab*burn_trt+(1|transect), data=pcadata2)
+summary(comp1_lmer)
+library("lmerTest")
+
+srmod_ann.int<-glmer(annual~ab*burn_trt+(1|transect), family="poisson", data=div4)
+summary(srmod_ann.int)
+
 
 shapes<-c(15,17)
 View(shapes)
@@ -974,6 +996,83 @@ title(xlab="PC2",cex=1.2)
 text(x=c(0.69979374), y=c(-6.582940182), labels= c("T10_06"), pos=2)
 text(x=c(-7.32836938), y=c(1.416516483), labels= c("T26_20"), pos=4)
 
+#beta
+head(div4);dim(div4)
+head(AGmat[,1:10]);dim(AGmat)
+head(BGmat[,1:10]);dim(BGmat)
+
+range(colSums(AGmat))
+range(colSums(BGmat))
+
+AGgam <- ncol(AGmat)
+BGgam <- ncol(BGmat)
+
+AGbeta <- AGgam/(div4$all[which(div4$ab == "above")])
+BGbeta <- BGgam/(div4$all[which(div4$ab == "below")])
 
 
+div4$beta.all <- c(AGbeta, BGbeta)
 
+
+AGbeta_lmer<-lmer(beta.all~ab*burn_trt+(1|transect), data=div4)
+summary(AGbeta_lmer)
+
+AGbeta_lmer1 <- predictSE(mod=AGbeta_lmer,newdata=nd1,type="response",se.fit = T)
+AGbeta_lmer1 <- data.frame(nd1, fit = AGbeta_lmer1$fit, se = AGbeta_lmer1$se.fit)
+AGbeta_lmer1$lci <- AGbeta_lmer1$fit-(AGbeta_lmer1$se*1.96)
+AGbeta_lmer1$uci <- AGbeta_lmer1$fit+(AGbeta_lmer1$se*1.96)
+head(AGbeta_lmer1)
+
+dev.new(height=8,width=8,dpi=80,pointsize=14,noRStudioGD = T)
+plot(c(1:4), AGbeta_lmer1$fit, xlim=c(0.5,4.5), pch=20, xaxt="n", ylim=c((min(AGbeta_lmer1$lci)), max(AGbeta_lmer1$uci)), ylab="y", xlab="", las=1, cex=2.5,type="n")
+arrows(c(1:4), AGbeta_lmer1$lci, c(1:4), AGbeta_lmer1$uci, length=0.05, code=3, angle=90)
+axis(side=1, at=c(1:4), labels=x_labels, tick=F, cex.axis=1)
+title(main = "beta div", line = 0.5,adj=0)
+points(c(1:4), AGbeta_lmer1$fit,col=c(rep("chartreuse4",2),rep("orange",2)), pch=20, cex=2.5)
+
+head(group.df)
+group.df$gamma <- NA
+
+head(div4)
+beta.data<-list()
+
+head(AGmat); dim(AGmat)
+head(BGmat); dim(BGmat)
+
+AGbeta <- AGgam/(div4$all[which(div4$ab == "above")])
+BGbeta <- BGgam/(div4$all[which(div4$ab == "below")])
+
+AGbeta.nat <- group.df$no_species[group.df$group == "AG.native"]/(div4$native[which(div4$ab == "above")])
+BGbeta.nat <- group.df$no_species[group.df$group == "BG.native"]/(div4$native[which(div4$ab == "below")])
+  
+div4$beta.nat <- c(AGbeta.nat, BGbeta.nat)
+
+AGnatbeta<-lmer(beta.nat~ab*burn_trt+(1|transect), data=div4)
+summary(AGnatbeta)
+
+AGnatbeta2<-lmer(beta.nat~ab+burn_trt+(1|transect), data=div4)
+summary(AGnatbeta2)
+
+#pca
+library(ecodist)
+head(div8[,1:10]);dim(div8)
+which(duplicated(colnames(div8)))
+dist1 <- vegdist(div8, method = "bray") # dissimilarity matrix using bray-curtis distance indices on the varespec dataset native to vegan
+head(dist1)
+length(dist1)
+str(dist1)
+
+pcoaVS <- pco(dist1, negvals = "zero", dround = 0) # if negvals = 0 sets all negative eigenvalues to zero; if = "rm" corrects for negative eigenvalues using method 1 of Legendre and Anderson 1999
+summary(pcoaVS)
+
+V1 <- data.frame(quadratID = rownames(pcoaVS$vectors[1]),X1 = pcoaVS$vectors[1])
+head(div4);dim(div4)
+div9 <- div4
+div9$quadratID2 <- paste(div9$quadratID,div9$ab, sep = ".")
+head(div9)
+div10 <- merge(div9,V1,by.x = "quadratID2", by.y = "quadratID", all.x = T, all.y = F)
+head(div10);dim(div10)
+
+
+X1_mod<-lmer(X1~ab*burn_trt+(1|transect), data=div10)
+summary(X1_mod)
