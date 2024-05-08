@@ -12,7 +12,9 @@ library(AICcmodavg)
 library(stringr)
 library(tidyr)
 library(dplyr)
-
+library(ggplot2)
+library(lmerTest)
+library(ecodist)
 #---- loading data
 
 #combined species list of above and below ground, including non identified
@@ -546,7 +548,7 @@ summary(srmod_gra.int)
 
 
 #sedge
-srmod_se1<-glmer(sedge~ab+burn_trt+(1|transect), family="poisson", data=div4)
+srmod_sed<-glmer(sedge~ab+burn_trt+(1|transect), family="poisson", data=div4)
 summary(srmod_sed)
 
 srmod_sed.int<-glmer(sedge~ab*burn_trt+(1|transect), family="poisson", data=div4)
@@ -910,6 +912,7 @@ head(div8[1:10],3);dim(div8)
 #pca1 <- prcomp(div7[, seq_along(colnames(div7))[colnames(div7) == "Aca_mai"]:seq_along(colnames(div7))[colnames(div7) == "Wah_gra"]], scale = TRUE)
 #pca1 <- prcomp(div7[, seq(which(colnames(div7) == "Aca_mai"), which(colnames(div7) == "Wah_gra"))], scale = TRUE)
 #pca1 <- prcomp(div7[, grep("^Aca_mai.*Wah_gra$", colnames(div7))], scale = TRUE)
+
 pca1 <- prcomp(div8)
 pca1
 summary(pca1)
@@ -918,14 +921,15 @@ head(div8[1:10],3);dim(div8)
 
 pca2 <- princomp(div8)
 
-pcadata <- data.frame(quadratID = div7[,1])
+pcadata <- data.frame(quadratID = div8[,1])
+pcadata <- data.frame(quadratID = rownames(div8), row.names = NULL)
 head(pcadata,3); dim(pcadata)
 
 pcadata$pca.comp1<-pca1$x[,1]
 pcadata$pca.comp2<-pca1$x[,2]
 pcadata$pca.comp3<-pca1$x[,3]
-head(pca1$x)
-head(pca1$rotation)
+head(pca1$x[1:3])
+head(pca1$rotation[1:3])
 head(pca1);dim(pca1)
 
 pca1$rotation[,1]
@@ -949,6 +953,7 @@ library("lmerTest")
 srmod_ann.int<-glmer(annual~ab*burn_trt+(1|transect), family="poisson", data=div4)
 summary(srmod_ann.int)
 
+library(ggplot2)
 
 shapes<-c(15,17)
 View(shapes)
@@ -1053,8 +1058,8 @@ summary(AGnatbeta)
 AGnatbeta2<-lmer(beta.nat~ab+burn_trt+(1|transect), data=div4)
 summary(AGnatbeta2)
 
-#pca
-library(ecodist)
+#pcoa
+
 head(div8[,1:10]);dim(div8)
 which(duplicated(colnames(div8)))
 dist1 <- vegdist(div8, method = "bray") # dissimilarity matrix using bray-curtis distance indices on the varespec dataset native to vegan
@@ -1064,6 +1069,46 @@ str(dist1)
 
 pcoaVS <- pco(dist1, negvals = "zero", dround = 0) # if negvals = 0 sets all negative eigenvalues to zero; if = "rm" corrects for negative eigenvalues using method 1 of Legendre and Anderson 1999
 summary(pcoaVS)
+
+dev.new(height=8,width=8,dpi=80,pointsize=14,noRStudioGD = T)
+plot(pcoaVS$vectors[,1], pcoaVS$vectors[,2], type = "p", xlab = "PCoA1", ylab = "PCoA2",
+     axes = TRUE, main = "PCoA (ecodist) on varespec data")
+
+text(pcoaVS$vectors[,1], pcoaVS$vectors[,2], labels(dist1), 
+     cex = 0.9, xpd = TRUE)
+
+pco1 <- pco(dist1, negvals = "zero", dround = 0)
+dev.new(height=8,width=8,dpi=80,pointsize=14,noRStudioGD = T)
+plot(pco1$vectors[,1], pco1$vectors[,2],
+     xlab = "PCoA1", ylab = "PCoA2", main = "PCoA plot")
+
+
+pcoaVS$values # eigenvalue for each component. This is a measure of the variance explained by each dimension
+pcoaVS$vectors # eigenvectors. Each column contains the scores for that dimension.
+
+
+# Project unstandardized and standardized species on the PCoA ordination plot
+
+res <- pcoa(dist1)
+
+dev.new(height=8,width=8,dpi=80,pointsize=14,noRStudioGD = T)
+par(mfrow=c(1,2))
+biplot(res, div8)
+biplot(res, div8.st)
+
+par(mfrow=c(1,2))
+biplot(res, div8, dir.axis1=-1, dir.axis2=-1)
+biplot(res, div8.st, dir.axis1=-1, dir.axis2=-1)
+
+
+write.table(div8, file = "01_data/div8.txt", sep = "\t",
+              row.names = TRUE, col.names = NA)
+
+
+
+
+
+
 
 V1 <- data.frame(quadratID = rownames(pcoaVS$vectors[1]),X1 = pcoaVS$vectors[1])
 head(div4);dim(div4)
