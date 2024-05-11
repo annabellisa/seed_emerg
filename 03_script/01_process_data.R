@@ -15,6 +15,7 @@ library(dplyr)
 library(ggplot2)
 library(lmerTest)
 library(ecodist)
+library(ape)
 #---- loading data
 
 #combined species list of above and below ground, including non identified
@@ -919,7 +920,7 @@ summary(pca1)
 pov1<-summary(pca1)$importance[2,]
 head(div8[1:10],3);dim(div8)
 
-pca2 <- princomp(div8)
+#pca2 <- princomp(div8)
 
 pcadata <- data.frame(quadratID = div8[,1])
 pcadata <- data.frame(quadratID = rownames(div8), row.names = NULL)
@@ -1002,6 +1003,7 @@ text(x=c(0.69979374), y=c(-6.582940182), labels= c("T10_06"), pos=2)
 text(x=c(-7.32836938), y=c(1.416516483), labels= c("T26_20"), pos=4)
 
 #beta
+#all
 head(div4);dim(div4)
 head(AGmat[,1:10]);dim(AGmat)
 head(BGmat[,1:10]);dim(BGmat)
@@ -1015,38 +1017,21 @@ BGgam <- ncol(BGmat)
 AGbeta <- AGgam/(div4$all[which(div4$ab == "above")])
 BGbeta <- BGgam/(div4$all[which(div4$ab == "below")])
 
-
 div4$beta.all <- c(AGbeta, BGbeta)
 
+#head(group.df)
+#group.df$gamma <- NA
 
-AGbeta_lmer<-lmer(beta.all~ab*burn_trt+(1|transect), data=div4)
-summary(AGbeta_lmer)
+#head(div4)
+#beta.data<-list()
 
-AGbeta_lmer1 <- predictSE(mod=AGbeta_lmer,newdata=nd1,type="response",se.fit = T)
-AGbeta_lmer1 <- data.frame(nd1, fit = AGbeta_lmer1$fit, se = AGbeta_lmer1$se.fit)
-AGbeta_lmer1$lci <- AGbeta_lmer1$fit-(AGbeta_lmer1$se*1.96)
-AGbeta_lmer1$uci <- AGbeta_lmer1$fit+(AGbeta_lmer1$se*1.96)
-head(AGbeta_lmer1)
+#head(AGmat); dim(AGmat)
+#head(BGmat); dim(BGmat)
 
-dev.new(height=8,width=8,dpi=80,pointsize=14,noRStudioGD = T)
-plot(c(1:4), AGbeta_lmer1$fit, xlim=c(0.5,4.5), pch=20, xaxt="n", ylim=c((min(AGbeta_lmer1$lci)), max(AGbeta_lmer1$uci)), ylab="y", xlab="", las=1, cex=2.5,type="n")
-arrows(c(1:4), AGbeta_lmer1$lci, c(1:4), AGbeta_lmer1$uci, length=0.05, code=3, angle=90)
-axis(side=1, at=c(1:4), labels=x_labels, tick=F, cex.axis=1)
-title(main = "beta div", line = 0.5,adj=0)
-points(c(1:4), AGbeta_lmer1$fit,col=c(rep("chartreuse4",2),rep("orange",2)), pch=20, cex=2.5)
+#AGbeta <- AGgam/(div4$all[which(div4$ab == "above")])
+#BGbeta <- BGgam/(div4$all[which(div4$ab == "below")])
 
-head(group.df)
-group.df$gamma <- NA
-
-head(div4)
-beta.data<-list()
-
-head(AGmat); dim(AGmat)
-head(BGmat); dim(BGmat)
-
-AGbeta <- AGgam/(div4$all[which(div4$ab == "above")])
-BGbeta <- BGgam/(div4$all[which(div4$ab == "below")])
-
+#beta native
 AGbeta.nat <- group.df$no_species[group.df$group == "AG.native"]/(div4$native[which(div4$ab == "above")])
 BGbeta.nat <- group.df$no_species[group.df$group == "BG.native"]/(div4$native[which(div4$ab == "below")])
   
@@ -1057,6 +1042,336 @@ summary(AGnatbeta)
 
 AGnatbeta2<-lmer(beta.nat~ab+burn_trt+(1|transect), data=div4)
 summary(AGnatbeta2)
+
+#beta exotic
+AGbeta.exo <- group.df$no_species[group.df$group == "AG.exotic"]/(div4$exotic[which(div4$ab == "above")])
+BGbeta.exo <- group.df$no_species[group.df$group == "BG.exotic"]/(div4$exotic[which(div4$ab == "below")])
+
+div4$beta.exo <- c(AGbeta.exo, BGbeta.exo)
+
+#beta exotic
+AGbeta.exo <- group.df$no_species[group.df$group == "AG.exotic"]/(div4$exotic[which(div4$ab == "above")])
+BGbeta.exo <- group.df$no_species[group.df$group == "BG.exotic"]/(div4$exotic[which(div4$ab == "below")])
+
+div4$beta.exo <- c(AGbeta.exo, BGbeta.exo)
+
+#beta annual
+AGbeta.ann <- ifelse(div4$annual[which(div4$ab == "above")] == 0, 0, group.df$no_species[group.df$group == "AG.annual"] /div4$annual[which(div4$ab == "above")])
+BGbeta.ann <- ifelse(div4$annual[which(div4$ab == "below")] == 0, 0, group.df$no_species[group.df$group == "BG.annual"] /div4$annual[which(div4$ab == "below")])
+
+div4$beta.ann <- c(AGbeta.ann, BGbeta.ann)
+
+
+#beta perennial
+AGbeta.per <- group.df$no_species[group.df$group == "AG.perr"]/(div4$perr[which(div4$ab == "above")])
+BGbeta.per <- group.df$no_species[group.df$group == "BG.perr"]/(div4$perr[which(div4$ab == "below")])
+
+div4$beta.per <- c(AGbeta.per, BGbeta.per)
+
+#beta forb
+AGbeta.for <- group.df$no_species[group.df$group == "AG.forb"]/(div4$forb[which(div4$ab == "above")])
+BGbeta.for <- group.df$no_species[group.df$group == "BG.forb"]/(div4$forb[which(div4$ab == "below")])
+
+div4$beta.for <- c(AGbeta.for, BGbeta.for)
+
+#beta grass
+AGbeta.gra <- group.df$no_species[group.df$group == "AG.grass"]/(div4$grass[which(div4$ab == "above")])
+BGbeta.gra <- group.df$no_species[group.df$group == "BG.grass"]/(div4$grass[which(div4$ab == "below")])
+
+div4$beta.gra <- c(AGbeta.gra, BGbeta.gra)
+
+#beta native grass
+AGbeta.natgra <- group.df$no_species[group.df$group == "AG.native_grass"]/(div4$native_grass[which(div4$ab == "above")])
+BGbeta.natgra <- group.df$no_species[group.df$group == "BG.native_grass"]/(div4$native_grass[which(div4$ab == "below")])
+
+div4$beta.natgra <- c(AGbeta.natgra, BGbeta.natgra)
+
+#beta exotic grass
+AGbeta.exogra <- ifelse(div4$exotic_grass[which(div4$ab == "above")] == 0, 0, group.df$no_species[group.df$group == "AG.exotic_grass"] /div4$exotic_grass[which(div4$ab == "above")])
+BGbeta.exogra <- ifelse(div4$exotic_grass[which(div4$ab == "below")] == 0, 0, group.df$no_species[group.df$group == "BG.exotic_grass"] /div4$exotic_grass[which(div4$ab == "below")])
+
+div4$beta.exogra <- c(AGbeta.exogra, BGbeta.exogra)
+
+#beta native forb
+AGbeta.natfor <- group.df$no_species[group.df$group == "AG.native_forb"]/(div4$native_forb[which(div4$ab == "above")])
+BGbeta.natfor <- group.df$no_species[group.df$group == "BG.native_forb"]/(div4$native_forb[which(div4$ab == "below")])
+
+div4$beta.natfor <- c(AGbeta.natfor, BGbeta.natfor)
+
+#beta exotic forb
+AGbeta.exofor <- ifelse(div4$exotic_forb[which(div4$ab == "above")] == 0, 0, group.df$no_species[group.df$group == "AG.exotic_forb"] /div4$exotic_forb[which(div4$ab == "above")])
+BGbeta.exofor <- ifelse(div4$exotic_forb[which(div4$ab == "below")] == 0, 0, group.df$no_species[group.df$group == "BG.exotic_forb"] /div4$exotic_forb[which(div4$ab == "below")])
+
+div4$beta.exofor <- c(AGbeta.exofor, BGbeta.exofor)
+
+
+#beta nonleg forb
+AGbeta.nlegfor <- ifelse(div4$nonleg_forb[which(div4$ab == "above")] == 0, 0, group.df$no_species[group.df$group == "AG.nonleg_forb"] /div4$nonleg_forb[which(div4$ab == "above")])
+BGbeta.nlegfor <- ifelse(div4$nonleg_forb[which(div4$ab == "below")] == 0, 0, group.df$no_species[group.df$group == "BG.nonleg_forb"] /div4$nonleg_forb[which(div4$ab == "below")])
+
+div4$beta.nlegfor <- c(AGbeta.nlegfor, BGbeta.nlegfor)
+
+
+#lmer
+#all
+allbeta<-lmer(beta.all~ab*burn_trt+(1|transect), data=div4)
+summary(AGbeta_lmer)
+
+allbeta1<-lmer(beta.all~ab+burn_trt+(1|transect), data=div4)
+summary(AGbeta_lmer1)
+
+#native
+natbeta<-lmer(beta.nat~ab*burn_trt+(1|transect), data=div4)
+summary(natbeta)
+
+natbeta2<-lmer(beta.nat~ab+burn_trt+(1|transect), data=div4)
+summary(natbeta2)
+
+#exotic
+exobeta<-lmer(beta.exo~ab*burn_trt+(1|transect), data=div4)
+summary(exobeta)
+
+exobeta2<-lmer(beta.exo~ab+burn_trt+(1|transect), data=div4)
+summary(exobeta2)
+
+#annual
+annbeta<-lmer(beta.ann~ab*burn_trt+(1|transect), data=div4)
+summary(annbeta)
+
+annbeta2<-lmer(beta.ann~ab+burn_trt+(1|transect), data=div4)
+summary(annbeta2)
+
+#perennial
+perbeta<-lmer(beta.per~ab*burn_trt+(1|transect), data=div4)
+summary(perbeta)
+
+perbeta2<-lmer(beta.per~ab+burn_trt+(1|transect), data=div4)
+summary(perbeta)
+
+#forb
+forbeta<-lmer(beta.for~ab*burn_trt+(1|transect), data=div4)
+summary(forbeta)
+
+forbeta2<-lmer(beta.for~ab+burn_trt+(1|transect), data=div4)
+summary(forbeta2)
+
+#grass
+grabeta<-lmer(beta.gra~ab*burn_trt+(1|transect), data=div4)
+summary(grabeta)
+
+grabeta2<-lmer(beta.gra~ab+burn_trt+(1|transect), data=div4)
+summary(grabeta2)
+
+#native grass
+natgrabeta<-lmer(beta.natgra~ab*burn_trt+(1|transect), data=div4)
+summary(natgrabeta)
+
+natgrabeta2<-lmer(beta.natgra~ab+burn_trt+(1|transect), data=div4)
+summary(natgrabeta2)
+
+#exotic grass
+exograbeta<-lmer(beta.exogra~ab*burn_trt+(1|transect), data=div4)
+summary(exograbeta)
+
+exograbeta2<-lmer(beta.exogra~ab+burn_trt+(1|transect), data=div4)
+summary(exograbeta2)
+
+#native forb
+natforbeta<-lmer(beta.natfor~ab*burn_trt+(1|transect), data=div4)
+summary(natforbeta)
+
+natforbeta2<-lmer(beta.natfor~ab+burn_trt+(1|transect), data=div4)
+summary(natforbeta2)
+
+#exotic forb
+exoforbeta<-lmer(beta.exofor~ab*burn_trt+(1|transect), data=div4)
+summary(exoforbeta)
+
+exoforbeta2<-lmer(beta.exofor~ab+burn_trt+(1|transect), data=div4)
+summary(exoforbeta2)
+
+#non leg forb
+nlegbeta<-lmer(beta.nlegfor~ab*burn_trt+(1|transect), data=div4)
+summary(nlegbeta2)
+
+nlegbeta2<-lmer(beta.nlegfor~ab+burn_trt+(1|transect), data=div4)
+summary(nlegbeta2)
+
+
+#predictse
+#all
+srmod_beta.all <- predictSE(mod=allbeta,newdata=nd1,type="response",se.fit = T)
+srmod_beta.all <- data.frame(nd1, fit = srmod_beta.all$fit, se = srmod_beta.all$se.fit)
+srmod_beta.all$lci <- srmod_beta.all$fit-(srmod_beta.all$se*1.96)
+srmod_beta.all$uci <- srmod_beta.all$fit+(srmod_beta.all$se*1.96)
+head(srmod_beta.all)
+
+#native
+srmod_beta.nat <- predictSE(mod=natbeta,newdata=nd1,type="response",se.fit = T)
+srmod_beta.nat <- data.frame(nd1, fit = srmod_beta.nat$fit, se = srmod_beta.nat$se.fit)
+srmod_beta.nat$lci <- srmod_beta.nat$fit-(srmod_beta.nat$se*1.96)
+srmod_beta.nat$uci <- srmod_beta.nat$fit+(srmod_beta.nat$se*1.96)
+head(srmod_beta.nat)
+
+#exotic
+srmod_beta.exo <- predictSE(mod=exobeta,newdata=nd1,type="response",se.fit = T)
+srmod_beta.exo <- data.frame(nd1, fit = srmod_beta.exo$fit, se = srmod_beta.exo$se.fit)
+srmod_beta.exo$lci <- srmod_beta.exo$fit-(srmod_beta.exo$se*1.96)
+srmod_beta.exo$uci <- srmod_beta.exo$fit+(srmod_beta.exo$se*1.96)
+head(srmod_beta.exo)
+
+#annual
+srmod_beta.ann <- predictSE(mod=annbeta,newdata=nd1,type="response",se.fit = T)
+srmod_beta.ann <- data.frame(nd1, fit = srmod_beta.ann$fit, se = srmod_beta.ann$se.fit)
+srmod_beta.ann$lci <- srmod_beta.ann$fit-(srmod_beta.ann$se*1.96)
+srmod_beta.ann$uci <- srmod_beta.ann$fit+(srmod_beta.ann$se*1.96)
+head(srmod_beta.ann)
+
+#perennial
+srmod_beta.per <- predictSE(mod=perbeta,newdata=nd1,type="response",se.fit = T)
+srmod_beta.per <- data.frame(nd1, fit = srmod_beta.per$fit, se = srmod_beta.per$se.fit)
+srmod_beta.per$lci <- srmod_beta.per$fit-(srmod_beta.per$se*1.96)
+srmod_beta.per$uci <- srmod_beta.per$fit+(srmod_beta.per$se*1.96)
+head(srmod_beta.per)
+
+#forb
+srmod_beta.for <- predictSE(mod=forbeta,newdata=nd1,type="response",se.fit = T)
+srmod_beta.for <- data.frame(nd1, fit = srmod_beta.for$fit, se = srmod_beta.for$se.fit)
+srmod_beta.for$lci <- srmod_beta.for$fit-(srmod_beta.for$se*1.96)
+srmod_beta.for$uci <- srmod_beta.for$fit+(srmod_beta.for$se*1.96)
+head(srmod_beta.for)
+
+#grass
+srmod_beta.gra <- predictSE(mod=grabeta,newdata=nd1,type="response",se.fit = T)
+srmod_beta.gra <- data.frame(nd1, fit = srmod_beta.gra$fit, se = srmod_beta.gra$se.fit)
+srmod_beta.gra$lci <- srmod_beta.gra$fit-(srmod_beta.gra$se*1.96)
+srmod_beta.gra$uci <- srmod_beta.gra$fit+(srmod_beta.gra$se*1.96)
+head(srmod_beta.gra)
+
+#native grass
+srmod_beta.natgra <- predictSE(mod=natgrabeta,newdata=nd1,type="response",se.fit = T)
+srmod_beta.natgra <- data.frame(nd1, fit = srmod_beta.natgra$fit, se = srmod_beta.natgra$se.fit)
+srmod_beta.natgra$lci <- srmod_beta.natgra$fit-(srmod_beta.natgra$se*1.96)
+srmod_beta.natgra$uci <- srmod_beta.natgra$fit+(srmod_beta.natgra$se*1.96)
+head(srmod_beta.natgra)
+
+#exotic grass
+srmod_beta.exogra <- predictSE(mod=exograbeta,newdata=nd1,type="response",se.fit = T)
+srmod_beta.exogra <- data.frame(nd1, fit = srmod_beta.exogra$fit, se = srmod_beta.exogra$se.fit)
+srmod_beta.exogra$lci <- srmod_beta.exogra$fit-(srmod_beta.exogra$se*1.96)
+srmod_beta.exogra$uci <- srmod_beta.exogra$fit+(srmod_beta.exogra$se*1.96)
+head(srmod_beta.exogra)
+
+#native forb
+srmod_beta.natfor <- predictSE(mod=natforbeta,newdata=nd1,type="response",se.fit = T)
+srmod_beta.natfor <- data.frame(nd1, fit = srmod_beta.natfor$fit, se = srmod_beta.natfor$se.fit)
+srmod_beta.natfor$lci <- srmod_beta.natfor$fit-(srmod_beta.natfor$se*1.96)
+srmod_beta.natfor$uci <- srmod_beta.natfor$fit+(srmod_beta.natfor$se*1.96)
+head(srmod_beta.natfor)
+
+#exotic forb
+srmod_beta.exofor <- predictSE(mod=exoforbeta,newdata=nd1,type="response",se.fit = T)
+srmod_beta.exofor <- data.frame(nd1, fit = srmod_beta.exofor$fit, se = srmod_beta.exofor$se.fit)
+srmod_beta.exofor$lci <- srmod_beta.exofor$fit-(srmod_beta.exofor$se*1.96)
+srmod_beta.exofor$uci <- srmod_beta.exofor$fit+(srmod_beta.exofor$se*1.96)
+head(srmod_beta.exofor)
+
+#non-leguminous forb
+srmod_beta.nlegfor <- predictSE(mod=nlegbeta,newdata=nd1,type="response",se.fit = T)
+srmod_beta.nlegfor <- data.frame(nd1, fit = srmod_beta.nlegfor$fit, se = srmod_beta.nlegfor$se.fit)
+srmod_beta.nlegfor$lci <- srmod_beta.nlegfor$fit-(srmod_beta.nlegfor$se*1.96)
+srmod_beta.nlegfor$uci <- srmod_beta.nlegfor$fit+(srmod_beta.nlegfor$se*1.96)
+head(srmod_beta.nlegfor)
+
+
+#beta plotting
+dev.new(width=9,height=12,dpi=160,pointsize=12, noRStudioGD = T)
+par(mfrow=c(4,3),mar=c(4,4,1.5,1), mgp=c(2.5,1,0))
+
+#all
+plot(c(1:4), srmod_beta.all$fit, xlim=c(0.5,4.5), pch=20, xaxt="n", ylim=c((min(srmod_beta.all$lci)), max(srmod_beta.all$uci)), ylab="Beta Diversity", xlab="", las=1, cex=2.5,type="n")
+arrows(c(1:4), srmod_beta.all$lci, c(1:4), srmod_beta.all$uci, length=0.05, code=3, angle=90)
+axis(side=1, at=c(1:4), labels=x_labels, tick=F, cex.axis=1)
+title(main = "(1) All", line = 0.5,adj=0)
+points(c(1:4), srmod_beta.all$fit,col=c(rep("chartreuse4",2),rep("orange",2)), pch=20, cex=2.5)
+
+#native
+plot(c(1:4), srmod_beta.nat$fit, xlim=c(0.5,4.5), pch=20, xaxt="n", ylim=c((min(srmod_beta.nat$lci)), max(srmod_beta.nat$uci)), ylab="Beta Diversity", xlab="", las=1, cex=2.5,type="n")
+arrows(c(1:4), srmod_beta.nat$lci, c(1:4), srmod_beta.nat$uci, length=0.05, code=3, angle=90)
+axis(side=1, at=c(1:4), labels=x_labels, tick=F, cex.axis=1)
+title(main = "(2) Native", line = 0.5,adj=0)
+points(c(1:4), srmod_beta.nat$fit,col=c(rep("chartreuse4",2),rep("orange",2)), pch=20, cex=2.5)
+
+#exotic
+plot(c(1:4), srmod_beta.exo$fit, xlim=c(0.5,4.5), pch=20, xaxt="n", ylim=c((min(srmod_beta.exo$lci)), max(srmod_beta.exo$uci)), ylab="Beta Diversity", xlab="", las=1, cex=2.5,type="n")
+arrows(c(1:4), srmod_beta.exo$lci, c(1:4), srmod_beta.exo$uci, length=0.05, code=3, angle=90)
+axis(side=1, at=c(1:4), labels=x_labels, tick=F, cex.axis=1)
+title(main = "(3) Exotic", line = 0.5,adj=0)
+points(c(1:4), srmod_beta.exo$fit,col=c(rep("chartreuse4",2),rep("orange",2)), pch=20, cex=2.5)
+
+#annual
+plot(c(1:4), srmod_beta.ann$fit, xlim=c(0.5,4.5), pch=20, xaxt="n", ylim=c((min(srmod_beta.ann$lci)), max(srmod_beta.ann$uci)), ylab="Beta Diversity", xlab="", las=1, cex=2.5,type="n")
+arrows(c(1:4), srmod_beta.ann$lci, c(1:4), srmod_beta.ann$uci, length=0.05, code=3, angle=90)
+axis(side=1, at=c(1:4), labels=x_labels, tick=F, cex.axis=1)
+title(main = "(4) Annual", line = 0.5,adj=0)
+points(c(1:4), srmod_beta.ann$fit,col=c(rep("chartreuse4",2),rep("orange",2)), pch=20, cex=2.5)
+
+#perennial
+plot(c(1:4), srmod_beta.per$fit, xlim=c(0.5,4.5), pch=20, xaxt="n", ylim=c((min(srmod_beta.per$lci)), max(srmod_beta.per$uci)), ylab="Beta Diversity", xlab="", las=1, cex=2.5,type="n")
+arrows(c(1:4), srmod_beta.per$lci, c(1:4), srmod_beta.per$uci, length=0.05, code=3, angle=90)
+axis(side=1, at=c(1:4), labels=x_labels, tick=F, cex.axis=1)
+title(main = "(5) Perennial", line = 0.5,adj=0)
+points(c(1:4), srmod_beta.per$fit,col=c(rep("chartreuse4",2),rep("orange",2)), pch=20, cex=2.5)
+
+#forb
+plot(c(1:4), srmod_beta.for$fit, xlim=c(0.5,4.5), pch=20, xaxt="n", ylim=c((min(srmod_beta.for$lci)), max(srmod_beta.for$uci)), ylab="Beta Diversity", xlab="", las=1, cex=2.5,type="n")
+arrows(c(1:4), srmod_beta.for$lci, c(1:4), srmod_beta.for$uci, length=0.05, code=3, angle=90)
+axis(side=1, at=c(1:4), labels=x_labels, tick=F, cex.axis=1)
+title(main = "(6) Forb", line = 0.5,adj=0)
+points(c(1:4), srmod_beta.for$fit,col=c(rep("chartreuse4",2),rep("orange",2)), pch=20, cex=2.5)
+
+#grass
+plot(c(1:4), srmod_beta.gra$fit, xlim=c(0.5,4.5), pch=20, xaxt="n", ylim=c((min(srmod_beta.gra$lci)), max(srmod_beta.gra$uci)), ylab="Beta Diversity", xlab="", las=1, cex=2.5,type="n")
+arrows(c(1:4), srmod_beta.gra$lci, c(1:4), srmod_beta.gra$uci, length=0.05, code=3, angle=90)
+axis(side=1, at=c(1:4), labels=x_labels, tick=F, cex.axis=1)
+title(main = "(7) Grass", line = 0.5,adj=0)
+points(c(1:4), srmod_beta.gra$fit,col=c(rep("chartreuse4",2),rep("orange",2)), pch=20, cex=2.5)
+
+#native grass
+plot(c(1:4), srmod_beta.natgra$fit, xlim=c(0.5,4.5), pch=20, xaxt="n", ylim=c((min(srmod_beta.natgra$lci)), max(srmod_beta.natgra$uci)), ylab="Beta Diversity", xlab="", las=1, cex=2.5,type="n")
+arrows(c(1:4), srmod_beta.natgra$lci, c(1:4), srmod_beta.natgra$uci, length=0.05, code=3, angle=90)
+axis(side=1, at=c(1:4), labels=x_labels, tick=F, cex.axis=1)
+title(main = "(8) Native Grass", line = 0.5,adj=0)
+points(c(1:4), srmod_beta.natgra$fit,col=c(rep("chartreuse4",2),rep("orange",2)), pch=20, cex=2.5)
+
+#exotic grass
+plot(c(1:4), srmod_beta.exogra$fit, xlim=c(0.5,4.5), pch=20, xaxt="n", ylim=c((min(srmod_beta.exogra$lci)), max(srmod_beta.exogra$uci)), ylab="Beta Diversity", xlab="", las=1, cex=2.5,type="n")
+arrows(c(1:4), srmod_beta.exogra$lci, c(1:4), srmod_beta.exogra$uci, length=0.05, code=3, angle=90)
+axis(side=1, at=c(1:4), labels=x_labels, tick=F, cex.axis=1)
+title(main = "(9) Exotic Grass", line = 0.5,adj=0)
+points(c(1:4), srmod_beta.exogra$fit,col=c(rep("chartreuse4",2),rep("orange",2)), pch=20, cex=2.5)
+
+#native forb
+plot(c(1:4), srmod_beta.natfor$fit, xlim=c(0.5,4.5), pch=20, xaxt="n", ylim=c((min(srmod_beta.natfor$lci)), max(srmod_beta.natfor$uci)), ylab="Beta Diversity", xlab="", las=1, cex=2.5,type="n")
+arrows(c(1:4), srmod_beta.natfor$lci, c(1:4), srmod_beta.natfor$uci, length=0.05, code=3, angle=90)
+axis(side=1, at=c(1:4), labels=x_labels, tick=F, cex.axis=1)
+title(main = "(10) Native Forb", line = 0.5,adj=0)
+points(c(1:4), srmod_beta.natfor$fit,col=c(rep("chartreuse4",2),rep("orange",2)), pch=20, cex=2.5)
+
+#exotic forb
+plot(c(1:4), srmod_beta.exofor$fit, xlim=c(0.5,4.5), pch=20, xaxt="n", ylim=c((min(srmod_beta.exofor$lci)), max(srmod_beta.exofor$uci)), ylab="Beta Diversity", xlab="", las=1, cex=2.5,type="n")
+arrows(c(1:4), srmod_beta.exofor$lci, c(1:4), srmod_beta.exofor$uci, length=0.05, code=3, angle=90)
+axis(side=1, at=c(1:4), labels=x_labels, tick=F, cex.axis=1)
+title(main = "(11) Exotic Forb", line = 0.5,adj=0)
+points(c(1:4), srmod_beta.exofor$fit,col=c(rep("chartreuse4",2),rep("orange",2)), pch=20, cex=2.5)
+
+#non-leg forb
+plot(c(1:4), srmod_beta.nlegfor$fit, xlim=c(0.5,4.5), pch=20, xaxt="n", ylim=c((min(srmod_beta.nlegfor$lci)), max(srmod_beta.nlegfor$uci)), ylab="Beta Diversity", xlab="", las=1, cex=2.5,type="n")
+arrows(c(1:4), srmod_beta.nlegfor$lci, c(1:4), srmod_beta.nlegfor$uci, length=0.05, code=3, angle=90)
+axis(side=1, at=c(1:4), labels=x_labels, tick=F, cex.axis=1)
+title(main = "(12) Non-leg Forbs", line = 0.5,adj=0)
+points(c(1:4), srmod_beta.nlegfor$fit,col=c(rep("chartreuse4",2),rep("orange",2)), pch=20, cex=2.5)
+
 
 #pcoa
 
@@ -1069,6 +1384,9 @@ str(dist1)
 
 pcoaVS <- pco(dist1, negvals = "zero", dround = 0) # if negvals = 0 sets all negative eigenvalues to zero; if = "rm" corrects for negative eigenvalues using method 1 of Legendre and Anderson 1999
 summary(pcoaVS)
+
+
+pov2 <- summary(pcoaVS)$importance[2,]
 
 dev.new(height=8,width=8,dpi=80,pointsize=14,noRStudioGD = T)
 plot(pcoaVS$vectors[,1], pcoaVS$vectors[,2], type = "p", xlab = "PCoA1", ylab = "PCoA2",
@@ -1100,9 +1418,9 @@ par(mfrow=c(1,2))
 biplot(res, div8, dir.axis1=-1, dir.axis2=-1)
 biplot(res, div8.st, dir.axis1=-1, dir.axis2=-1)
 
+summary(res)
 
-write.table(div8, file = "01_data/div8.txt", sep = "\t",
-              row.names = TRUE, col.names = NA)
+#write.table(div8, file = "01_data/div8.txt", sep = "\t", row.names = TRUE, col.names = NA)
 
 
 
