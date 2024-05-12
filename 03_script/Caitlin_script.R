@@ -459,3 +459,112 @@ bwplot(div1$bgsimp ~ div1$burn_trt)
 #div1$agmarg <- margalef(AGmat) doesn't work as for community level comparison only
 AGmarg <- margalef(AGmat)
 Bgmarg <- margalef(BGmat)
+
+
+
+
+for (i in 1:nrow(group.df)) {
+  
+  name.thisrun <- as.character(group.df$group[i])
+  vec.thisrun <- get(name.thisrun)
+  
+  print(vec.thisrun)  # Print vec.thisrun
+  
+  if (length(vec.thisrun) == 0) {
+    cat("Warning: Empty vector.\n")
+    next  # Skip to next iteration if vec.thisrun is empty
+  }
+  
+  if (substr(name.thisrun, 1, 3) == "BG.") data.thisrun <- BGmat[, colnames(BGmat) %in% vec.thisrun]
+  if (substr(name.thisrun, 1, 3) == "AG.") data.thisrun <- AGmat[, colnames(AGmat) %in% vec.thisrun]
+  
+  print(dim(data.thisrun))
+  
+  if (is.null(dim(data.thisrun))) {
+    if (substr(name.thisrun, 1, 3) == "AG.") rownames.thisrun <- rownames(AGmat) else rownames.thisrun <- rownames(BGmat)
+    data.thisrun <- data.frame(data.thisrun) 
+    colnames(data.thisrun) <- vec.thisrun
+    rownames(data.thisrun) <- rownames.thisrun
+  }
+  
+  # Convert non-numeric data to NA
+  data.thisrun <- apply(data.thisrun, 2, function(x) {
+    if (all(is.na(as.numeric(x)))) {
+      return(NA)
+    } else {
+      return(as.numeric(x))
+    }
+  })
+  
+  # Check for NA values
+  if (any(is.na(data.thisrun))) {
+    cat("Warning: Non-numeric values found in data.\n")
+    # Handle or remove NA values as needed
+    # For simplicity, we'll just remove rows with NA values here
+    data.thisrun <- na.omit(data.thisrun)
+  }
+  
+  #rich.data[[i]] <- apply(data.thisrun, 1, function(x) length(which(x > 0)))
+  
+  simp.data[[i]] <- diversity(data.thisrun, index = "invsimpson")
+  
+} # close i for
+
+simp.res <-data.frame(do.call(cbind,simp.data))
+groupnames <- tail(group.df$group, 34)[-c(1:2)]
+colnames(simp.res)<-groupnames
+
+
+
+for (i in 1:nrow(group.df)) {
+  
+  name.thisrun <- as.character(group.df$group[i])
+  vec.thisrun <- get(name.thisrun)
+  
+  print(vec.thisrun)  # Print vec.thisrun
+  
+  if (length(vec.thisrun) == 0) {
+    cat("Warning: Empty vector.\n")
+    next  # Skip to next iteration if vec.thisrun is empty
+  }
+  
+  if (substr(name.thisrun, 1, 3) == "BG.") data.thisrun <- BGmat[, colnames(BGmat) %in% vec.thisrun]
+  if (substr(name.thisrun, 1, 3) == "AG.") data.thisrun <- AGmat[, colnames(AGmat) %in% vec.thisrun]
+  
+  print(dim(data.thisrun))
+  
+  if (is.null(dim(data.thisrun))) {
+    if (substr(name.thisrun, 1, 3) == "AG.") rownames.thisrun <- rownames(AGmat) else rownames.thisrun <- rownames(BGmat)
+    data.thisrun <- data.frame(data.thisrun) 
+    colnames(data.thisrun) <- vec.thisrun
+    rownames(data.thisrun) <- rownames.thisrun
+  }
+  
+  # Convert non-numeric data to NA
+  data.thisrun <- apply(data.thisrun, 2, function(x) {
+    if (all(is.na(as.numeric(x)))) {
+      return(NA)
+    } else {
+      return(as.numeric(x))
+    }
+  })
+  
+  # Check for NA values
+  if (any(is.na(data.thisrun))) {
+    cat("Warning: Non-numeric values found in data.\n")
+    # Handle or remove NA values as needed
+    # For simplicity, we'll just remove rows with NA values here
+    data.thisrun <- na.omit(data.thisrun)
+  }
+  
+  # Check for Inf values after diversity calculation
+  simp_val <- diversity(data.thisrun, index = "invsimpson")
+  if (any(is.infinite(simp_val))) {
+    cat("Warning: Infinite value detected for group", name.thisrun, "\n")
+    # Replace infinite values with zero
+    simp_val[is.infinite(simp_val)] <- 0
+  }
+  
+  simp.data[[i]] <- simp_val
+  
+} # close i for
