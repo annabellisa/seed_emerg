@@ -568,3 +568,285 @@ for (i in 1:nrow(group.df)) {
   simp.data[[i]] <- simp_val
   
 } # close i for
+
+
+
+shapes<-c(15,17)
+
+shapes<-shapes[as.factor(pcadata2$burn_trt)]
+col.1<-c("grey60","grey20")
+col.1<-col.1[as.factor(pcadata2$burn_trt)]
+View(shapes)
+View(col.1)
+
+plot(pcadata2$pca.comp1,pcadata2$pca.comp2,pch=shapes, xlab="",ylab="",cex=2,col=alpha(col.1,1))
+legend("bottomright",legend=c("Control Sites", "Burn Sites"),pch=c(15,17),pt.cex=2,col=c("grey60","grey20"))
+
+
+
+pcadata <- data.frame(quadratID = div8[,1])
+pcadata <- data.frame(quadratID = rownames(div8), row.names = NULL)
+head(pcadata,3); dim(pcadata)
+
+pcoadata <- data.frame(quadratID = div8[,1])
+pcoadata <- data.frame(quadratID = rownames(div8), row.names = NULL)
+head(pcoadata,3); dim(pcoadata)
+
+pcoa_res <- cmdscale(dist1, k = 5, eig = TRUE)
+
+pcoadata$pcoa1 <- pcoa_res$points[, 1]
+pcoadata$pcoa2 <- pcoa_res$points[, 2]
+pcoadata$pcoa3 <- pcoa_res$points[, 3]
+pcoadata$pcoa4 <- pcoa_res$points[, 4]
+pcoadata$pcoa5 <- pcoa_res$points[, 5]
+
+#eig
+pcoaeig <- eigenvals(pcoaVS)
+pcoapov <- pcoaeig/sum(pcoaeig)
+cumsum(pcoaeig/sum(pcoaeig))
+
+
+
+pcoadata$pcoa1<-pcoaVS$x[,1]
+
+#pcadata$pca.comp1<-pca1$x[,1]
+#pcadata$pca.comp2<-pca1$x[,2]
+#pcadata$pca.comp3<-pca1$x[,3]
+#head(pca1$x[1:3])
+#head(pca1$rotation[1:3])
+#head(pca1);dim(pca1)
+
+head(pcoa_res$points[1:5])
+head(pcoa_res$eig[1:5])
+head(pcoa_res);dim(pcoa_res)
+
+#pcoaVS$eig[,1]
+#pcoa_res$eig[,2]
+#pcoa_res$eig[,3]
+#pcoa_res$eig[,4]
+#pcoa_res$eig[,5]
+
+pov1<-summary(pcoaVS)$[2,]
+
+dev.new(height=8,width=8,dpi=80,pointsize=14,noRStudioGD = T)
+par(mar=c(4,4,2,2),mfrow=c(2,2),mgp=c(2.5,1,0))
+plot(x=1:length(pcoapov),y=pcoapov,ylab="Propotion Variance Explained",xlab="Components",type="p")
+lines(x=1:length(pcoapov),y=pcoapov)
+mtext("(a)",3,0.7,F,0)
+
+
+#pca1$rotation[,1]
+#pca1$rotation[,2]
+#pca1$rotation[,3]
+#summary(pca1)
+
+nd2 <- div4[,1:6]
+head(nd2);dim(nd2)
+head(div4);dim(div4)
+nd2$quadratID2 <- paste(nd2$quadratID,nd2$ab, sep=".")
+
+pcadata2 <- merge(pcadata,nd2, by.x = "quadratID", by.y = "quadratID2", all.x = T, all.y = F)
+head(pcadata2);dim(pcadata2)
+
+pcoadata2 <- merge(pcoadata,nd2, by.x = "quadratID", by.y = "quadratID2", all.x = T, all.y = F)
+head(pcoadata2);dim(pcoadata2)
+
+
+
+comp1_lmer<-lmer(pcoa1~ab*burn_trt+(1|transect), data=pcoadata2)
+summary(comp1_lmer)
+comp2_lmer<-lmer(pcoa1~ab+burn_trt+(1|transect), data=pcoadata2)
+summary(comp2_lmer)
+
+library("lmerTest")
+
+srmod_ann.int<-glmer(annual~ab*burn_trt+(1|transect), family="poisson", data=div4)
+summary(srmod_ann.int)
+
+library(ggplot2)
+
+shapes<-c(15,17)
+
+shapes<-shapes[as.factor(pcadata2$ab)]
+col.1<-c("grey60","grey20")
+col.1<-col.1[as.factor(pcadata2$burn_trt)]
+View(shapes)
+View(col.1)
+
+shapes<-c(15,17)
+shapes<-shapes[as.factor(pcoadata2$burn_trt)]
+col.1<-c("grey60","grey20")
+col.1<-col.1[as.factor(pcoadata2$burn_trt)]
+View(shapes)
+View(col.1)
+
+shape.ab <- ifelse(pcoadata2$ab == "above", 15, 17) 
+col.burn <- ifelse(pcoadata2$burn_trt == "Control", "grey60", "grey20") 
+
+#
+head(pcoadata2);dim(pcoadata2)
+
+dev.new(width=12,height=12,dpi=160,pointsize=12, noRStudioGD = T)
+par(mfrow=c(3,3),mar=c(4,4,1.5,1), mgp=c(2.5,1,0))
+#1 vs 2
+plot(pcoadata2$pcoa1,pcadata2$pcoa2,pch=shape.ab, xlab="",ylab="",cex=2,col=col.burn)
+legend("bottomright",legend=c("Control Sites", "Burn Sites"),pch=c(15,17),pt.cex=2,col=c("grey60","grey20"))
+
+
+dev.new(height=8,width=8,dpi=80,pointsize=14,noRStudioGD = T)
+par(mar=c(4,4,2,2),mfrow=c(2,2),mgp=c(2.5,1,0))
+plot(x=1:length(pov1),y=pov1,ylab="Propotion Variance Explained",xlab="Components",type="p")
+lines(x=1:length(pov1),y=pov1)
+mtext("(a)",3,0.7,F,0)
+#scree plot (usually explained by first three point) 
+
+#biplot(pca1, xlab="Component 1", ylab="Component 2", col=c("grey40","black"), var.axes=TRUE, arrow.len=0.1, choices=c(3, 4))
+#mtext("(b)",3,0.7,F,adj = 0)
+
+
+#mds
+mds1 <- 
+
+
+#1 vs 2
+plot(pcoadata2$pcoa1,pcadata2$pcoa2,pch=shape.ab, xlab="",ylab="",cex=2,col=col.burn)
+legend("bottomright",legend=c("Control Sites", "Burn Sites"),pch=c(15,17),pt.cex=2,col=c("grey60","grey20"))
+mtext("(b)",3,0.4,F,adj=0)
+title(ylab="PC2",cex=1.2)
+title(xlab="PC1",cex=1.2)
+text(x=c(-0.61888015), y=c(-7.32836938), labels= c("T26_20"), pos=4)
+text(x=c(14.84107197), y=c(-0.54987242), labels= c("T06_57"), pos=2)
+
+#1 vs 3
+plot(pcoadata2$pcoa1,pcadata2$pcoa3,pch=shapes, xlab="",ylab="",cex=2,col=alpha(col.1,1))
+legend("bottomright",legend=c("Control Sites", "Burn Sites"),pch=c(15,17),pt.cex=2,col=c("grey60","grey20"))
+mtext("(c)",3,0.4,F,adj=0)
+title(ylab="PC3",cex=1.2)
+title(xlab="PC1",cex=1.2)
+text(x=c(0.49994222), y=c(-6.582940182), labels= c("T10_06"), pos=4)
+text(x=c(14.84107197), y=c(0.614645118), labels= c("T06_57"), pos=2)
+
+#1 vs 4
+plot(pcoadata2$pcoa1,pcadata2$pcoa4,pch=shapes, xlab="",ylab="",cex=2,col=alpha(col.1,1))
+legend("bottomleft",legend=c("Control Sites", "Burn Sites"),pch=c(15,17),pt.cex=2,col=c("grey60","grey20"))
+mtext("(d)",3,0.4,F,adj=0)
+title(ylab="PC3",cex=1.2)
+title(xlab="PC2",cex=1.2)
+text(x=c(0.69979374), y=c(-6.582940182), labels= c("T10_06"), pos=2)
+text(x=c(-7.32836938), y=c(1.416516483), labels= c("T26_20"), pos=4)
+
+#1 vs 5
+plot(pcoadata2$pcoa1,pcadata2$pcoa5,pch=shapes, xlab="",ylab="",cex=2,col=alpha(col.1,1))
+legend("bottomright",legend=c("Control Sites", "Burn Sites"),pch=c(15,17),pt.cex=2,col=c("grey60","grey20"))
+mtext("(c)",3,0.4,F,adj=0)
+title(ylab="PC3",cex=1.2)
+title(xlab="PC1",cex=1.2)
+text(x=c(0.49994222), y=c(-6.582940182), labels= c("T10_06"), pos=4)
+text(x=c(14.84107197), y=c(0.614645118), labels= c("T06_57"), pos=2)
+
+
+#2 vs 3
+plot(pcoadata2$pcoa2,pcadata2$pcoa3,pch=shapes, xlab="",ylab="",cex=2,col=alpha(col.1,1))
+legend("bottomright",legend=c("Control Sites", "Burn Sites"),pch=c(15,17),pt.cex=2,col=c("grey60","grey20"))
+mtext("(c)",3,0.4,F,adj=0)
+title(ylab="PC3",cex=1.2)
+title(xlab="PC1",cex=1.2)
+text(x=c(0.49994222), y=c(-6.582940182), labels= c("T10_06"), pos=4)
+text(x=c(14.84107197), y=c(0.614645118), labels= c("T06_57"), pos=2)
+
+#2 vs 4
+plot(pcoadata2$pcoa2,pcadata2$pcoa4,pch=shapes, xlab="",ylab="",cex=2,col=alpha(col.1,1))
+legend("bottomright",legend=c("Control Sites", "Burn Sites"),pch=c(15,17),pt.cex=2,col=c("grey60","grey20"))
+mtext("(c)",3,0.4,F,adj=0)
+title(ylab="PC3",cex=1.2)
+title(xlab="PC1",cex=1.2)
+text(x=c(0.49994222), y=c(-6.582940182), labels= c("T10_06"), pos=4)
+text(x=c(14.84107197), y=c(0.614645118), labels= c("T06_57"), pos=2)
+
+#2 vs 5
+plot(pcoadata2$pcoa2,pcadata2$pcoa5,pch=shapes, xlab="",ylab="",cex=2,col=alpha(col.1,1))
+legend("bottomright",legend=c("Control Sites", "Burn Sites"),pch=c(15,17),pt.cex=2,col=c("grey60","grey20"))
+mtext("(c)",3,0.4,F,adj=0)
+title(ylab="PC3",cex=1.2)
+title(xlab="PC1",cex=1.2)
+text(x=c(0.49994222), y=c(-6.582940182), labels= c("T10_06"), pos=4)
+text(x=c(14.84107197), y=c(0.614645118), labels= c("T06_57"), pos=2)
+
+#3 vs 4
+plot(pcoadata2$pcoa3,pcadata2$pcoa4,pch=shapes, xlab="",ylab="",cex=2,col=alpha(col.1,1))
+legend("bottomright",legend=c("Control Sites", "Burn Sites"),pch=c(15,17),pt.cex=2,col=c("grey60","grey20"))
+mtext("(c)",3,0.4,F,adj=0)
+title(ylab="PC3",cex=1.2)
+title(xlab="PC1",cex=1.2)
+text(x=c(0.49994222), y=c(-6.582940182), labels= c("T10_06"), pos=4)
+text(x=c(14.84107197), y=c(0.614645118), labels= c("T06_57"), pos=2)
+
+#3 vs 5
+plot(pcoadata2$pcoa3,pcadata2$pcoa5,pch=shapes, xlab="",ylab="",cex=2,col=alpha(col.1,1))
+legend("bottomright",legend=c("Control Sites", "Burn Sites"),pch=c(15,17),pt.cex=2,col=c("grey60","grey20"))
+mtext("(c)",3,0.4,F,adj=0)
+title(ylab="PC3",cex=1.2)
+title(xlab="PC1",cex=1.2)
+text(x=c(0.49994222), y=c(-6.582940182), labels= c("T10_06"), pos=4)
+text(x=c(14.84107197), y=c(0.614645118), labels= c("T06_57"), pos=2)
+
+dev.new(width=12,height=12,dpi=160,pointsize=12, noRStudioGD = T)
+par(mfrow=c(3,3),mar=c(4,4,1.5,1), mgp=c(2.5,1,0))
+
+#4 vs 5
+plot(pcoadata2$pcoa4,pcadata2$pcoa5,pch=shapes, xlab="",ylab="",cex=2,col=alpha(col.1,1))
+legend("bottomright",legend=c("Control Sites", "Burn Sites"),pch=c(15,17),pt.cex=2,col=c("grey60","grey20"))
+mtext("(c)",3,0.4,F,adj=0)
+title(ylab="PC3",cex=1.2)
+title(xlab="PC1",cex=1.2)
+text(x=c(0.49994222), y=c(-6.582940182), labels= c("T10_06"), pos=4)
+text(x=c(14.84107197), y=c(0.614645118), labels= c("T06_57"), pos=2)
+
+#1 vs 1
+plot(pcoadata2$pcoa1,pcadata2$pcoa1,pch=shapes, xlab="",ylab="",cex=2,col=alpha(col.1,1))
+legend("bottomright",legend=c("Control Sites", "Burn Sites"),pch=c(15,17),pt.cex=2,col=c("grey60","grey20"))
+mtext("(c)",3,0.4,F,adj=0)
+title(ylab="PC3",cex=1.2)
+title(xlab="PC1",cex=1.2)
+text(x=c(0.49994222), y=c(-6.582940182), labels= c("T10_06"), pos=4)
+text(x=c(14.84107197), y=c(0.614645118), labels= c("T06_57"), pos=2)
+
+#2 v 2
+plot(pcoadata2$pcoa2,pcadata2$pcoa2,pch=shapes, xlab="",ylab="",cex=2,col=alpha(col.1,1))
+legend("bottomright",legend=c("Control Sites", "Burn Sites"),pch=c(15,17),pt.cex=2,col=c("grey60","grey20"))
+mtext("(c)",3,0.4,F,adj=0)
+title(ylab="PC3",cex=1.2)
+title(xlab="PC1",cex=1.2)
+text(x=c(0.49994222), y=c(-6.582940182), labels= c("T10_06"), pos=4)
+text(x=c(14.84107197), y=c(0.614645118), labels= c("T06_57"), pos=2)
+
+#3 vs 3
+plot(pcoadata2$pcoa3,pcadata2$pcoa3,pch=shapes, xlab="",ylab="",cex=2,col=alpha(col.1,1))
+legend("bottomright",legend=c("Control Sites", "Burn Sites"),pch=c(15,17),pt.cex=2,col=c("grey60","grey20"))
+mtext("(c)",3,0.4,F,adj=0)
+title(ylab="PC3",cex=1.2)
+title(xlab="PC1",cex=1.2)
+text(x=c(0.49994222), y=c(-6.582940182), labels= c("T10_06"), pos=4)
+text(x=c(14.84107197), y=c(0.614645118), labels= c("T06_57"), pos=2)
+
+#4 vs 4
+plot(pcoadata2$pcoa4,pcadata2$pcoa4,pch=shapes, xlab="",ylab="",cex=2,col=alpha(col.1,1))
+legend("bottomright",legend=c("Control Sites", "Burn Sites"),pch=c(15,17),pt.cex=2,col=c("grey60","grey20"))
+mtext("(c)",3,0.4,F,adj=0)
+title(ylab="PC3",cex=1.2)
+title(xlab="PC1",cex=1.2)
+text(x=c(0.49994222), y=c(-6.582940182), labels= c("T10_06"), pos=4)
+text(x=c(14.84107197), y=c(0.614645118), labels= c("T06_57"), pos=2)
+
+#5 vs 5
+plot(pcoadata2$pcoa5,pcadata2$pcoa5,pch=shapes, xlab="",ylab="",cex=2,col=alpha(col.1,1))
+legend("bottomright",legend=c("Control Sites", "Burn Sites"),pch=c(15,17),pt.cex=2,col=c("grey60","grey20"))
+mtext("(c)",3,0.4,F,adj=0)
+title(ylab="PC3",cex=1.2)
+title(xlab="PC1",cex=1.2)
+text(x=c(0.49994222), y=c(-6.582940182), labels= c("T10_06"), pos=4)
+text(x=c(14.84107197), y=c(0.614645118), labels= c("T06_57"), pos=2)
+
+
+
+
