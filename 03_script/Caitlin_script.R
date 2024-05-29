@@ -848,5 +848,131 @@ text(x=c(0.49994222), y=c(-6.582940182), labels= c("T10_06"), pos=4)
 text(x=c(14.84107197), y=c(0.614645118), labels= c("T06_57"), pos=2)
 
 
+#-----
+#cleaning
 
+#div8 <- div7[,which(colnames(div7)== "Aca_mai"):ncol(div7)]
+#rownames(div8) <- div7$quadratID
+#head(div8[1:10],3);dim(div8)
+
+#PCA matrices
+#abundance above and below ssm
+#div6 <- div4
+#div6$quadratID <-paste(div6$quadratID,div6$ab,sep=".")
+#div6 <- subset(div6, select = -ab)
+#head(div6[1:10]);dim(div6)
+
+#overwrite
+#row.names(AGmat) <- paste0(row.names(AGmat), ".above")
+#row.names(BGmat) <- paste0(row.names(BGmat), ".below")
+#ALLmat <- cbind(AGmat,BGmat)
+#head(ALLmat[1:10]);dim(ALLmat)
+
+#div6 <- cbind(div6,ALLmat)
+#head(div6[1:60]);dim(div6)
+#remove functional
+
+#ssmat <- div6[,which(colnames(div6) == "Aca_mai"):ncol(div6)]
+#rownames(ssmat) <- div6$quadratID
+#head(ssmat[1:10],3);dim(ssmat)
+
+#---- four-way venn? 
+#merging datasets
+merged_tdata <- merge(combospec, tdata, by = "code", all.x = T)
+merged_AGdata <- merge(combospec, AGdata, by = "code", all.x = T)
+merged_data <- merge(merged_tdata, merged_AGdata, by = "code", all = TRUE)
+
+merged_data$burn <- ifelse(merged_data$burn_trt == "Control", 0, 
+                           ifelse(merged_data$burn_trt == "Burn", 1, 2))
+
+merged_data_summary <- merged_data %>%
+  group_by(code) %>%
+  summarize(burn = case_when(
+    all(burn == 0) ~ 0,   # If all burns are 0, assign 0
+    all(burn == 1) ~ 1,   # If all burns are 1, assign 1
+    TRUE ~ 2              # Otherwise, assign 2
+  ),
+  species.x = first(species.x),
+  origin.x = first(origin.x),
+  life_span.x = first(life_span.x),
+  form.x = first(form.x),
+  family.x = first(family.x),
+  speciesID.x = case_when(
+    all(speciesID.x == 1) ~ 1,
+    all(speciesID.x == 0) ~ 0,),
+  location.x.y = case_when(
+    all(location.x.y == 1) ~ 0,
+    all(location.x.y == 1) ~ 1,
+    all(location.x.y == 2) ~ 1
+  )  )
+
+merged_data_sum <- as.data.frame(merged_data_summary)
+merged_data_sum <- merge(merged_data_sum, combospec, by = "code", all.x = T)
+remove_columns <- c("species.x", "origin.x", "life_span.x", "form.x", "family.x", "speciesID.x", "location.x.y")
+merged_data_sum <- merged_data_sum[, !(names(merged_data_sum) %in% remove_columns)]
+merged_data_sumID <- merged_data_sum[merged_data_sum$speciesID == 1, ]
+
+#quad.venn
+draw.quad.venn(
+  area1 = sum((dimv4$location=="" combospec$location == "0" & combospec$speciesID == "1") + (combospec$location == "2" & combospec$speciesID == "1")) , area2, area3, area4, n12, n13, n14, n23, n24,
+  n34, n123, n124, n134, n234, n1234, category = rep("",
+                                                     4), lwd = rep(2, 4), lty = rep("solid", 4), col =
+    rep("black", 4), fill = NULL, alpha = rep(0.5, 4),
+  label.col = rep("black", 15), cex = rep(1, 15),
+  fontface = rep("plain", 15), fontfamily = rep("serif",
+                                                15), cat.pos = c(-15, 15, 0, 0), cat.dist = c(0.22,
+                                                                                              0.22, 0.11, 0.11), cat.col = rep("black", 4), cat.cex
+  = rep(1, 4), cat.fontface = rep("plain", 4),
+  cat.fontfamily = rep("serif", 4), cat.just =
+    rep(list(c(0.5, 0.5)), 4), rotation.degree = 0,
+  rotation.centre = c(0.5, 0.5), ind = TRUE, cex.prop =
+    NULL, print.mode = "raw", sigdigs = 3, direct.area =
+    FALSE, area.vector = 0, ...)
+#-----
+library(venneuler)
+area_0_0 <- sum(merged_data_sum$burn == 0 & merged_data_sum$location == 0)
+area_0_1 <- sum(merged_data_sum$burn == 0 & merged_data_sum$location == 1)
+area_1_0 <- sum(merged_data_sum$burn == 1 & merged_data_sum$location == 0)
+area_1_1 <- sum(merged_data_sum$burn == 1 & merged_data_sum$location == 1)
+
+# Define the intersection sizes
+n_00_00 <- sum(merged_data_sum$burn == 0 & merged_data_sum$location == 0)
+n_00_01 <- sum(merged_data_sum$burn == 0 & merged_data_sum$location == 1)
+n_00_10 <- sum(merged_data_sum$burn == 0 & merged_data_sum$location == 0)
+n_00_11 <- sum(merged_data_sum$burn == 0 & merged_data_sum$location == 1)
+n_00_12 <- sum(merged_data_sum$burn == 0 & merged_data_sum$location == 2)
+n_00_20 <- sum(merged_data_sum$burn == 0 & merged_data_sum$location == 0)
+n_00_21 <- sum(merged_data_sum$burn == 0 & merged_data_sum$location == 1)
+n_00_22 <- sum(merged_data_sum$burn == 0 & merged_data_sum$location == 2)
+
+# Draw the Venn diagram
+venn_plot <- draw.quad.venn(
+  area1 = area_0_0,
+  area2 = area_0_1,
+  area3 = area_1_0,
+  area4 = area_1_1,
+  n12 = n_00_00,
+  n13 = n_00_01,
+  n14 = n_00_10,
+  n23 = n_00_02,
+  n24 = n_00_11,
+  n34 = n_00_12,
+  n123 = n_00_20,
+  n124 = n_00_21,
+  n134 = n_00_22,
+  n234 = 0,  # No data for this intersection
+  n1234 = 0, # No data for this intersection
+  category = c("Control", "Control above", "Treatment", "Treatment above"),
+  fill = c("blue", "red", "green", "yellow"),
+  label.col = rep("black", 15),
+  cex = rep(1, 15),
+  fontface = rep("plain", 15),
+  cat.dist = c(0.15, 0.15, 0.15, 0.15), # Adjust label distance
+  cat.cex = 1.5, # Adjust label size
+  cat.fontface = 1, # Adjust label fontface
+  cat.just = list(c(0.5, 0.5), c(0.5, 0.5), c(0.5, 0.5), c(0.5, 0.5)) # Center label text
+)
+
+# Plot the Venn diagram
+grid.draw(venn_plot)
 

@@ -16,6 +16,7 @@ library(ggplot2)
 library(lmerTest)
 library(ecodist)
 library(ape)
+
 #---- loading data
 
 #combined species list of above and below ground, including non identified
@@ -117,14 +118,14 @@ AGdata[which(AGdata$species=="Sonchus oleraceus"),]
 table(AGspec$sp %in% BGspecid$code)
 
 
-#---- sr VENN diagram:
-
+#above/below species occurrence VENN diagram:
 
 # Summarise overlap:
 belowonly <- sum((combospec$location == "0" & combospec$speciesID == "1") + (combospec$location == "2" & combospec$speciesID == "1"))
 aboveonly <- sum((combospec$location == "1" & combospec$speciesID == "1") + (combospec$location == "2" & combospec$speciesID == "1"))
 overlap <- sum(combospec$location == "2" & combospec$speciesID == "1")
 
+#plot
 dev.new(width=6,height=4,dpi=160,pointsize=12, noRStudioGD = T)
 par(mar=c(4,4,4,4))
 venn.plot<-draw.pairwise.venn(belowonly,aboveonly,overlap, category=c("Seedbank","Vegetation"),scaled=F,fill=rgb(0,0,0,0.5),fontfamily="sans",cat.fontfamily="sans",cex=1, cat.pos=c(2,10),lwd=1)
@@ -134,105 +135,6 @@ par(mar=c(4,4,1,1))
 grid.draw(venn.plot)
 dev.off()
 
-#---- four-way venn? 
-#merging datasets
-merged_tdata <- merge(combospec, tdata, by = "code", all.x = T)
-merged_AGdata <- merge(combospec, AGdata, by = "code", all.x = T)
-merged_data <- merge(merged_tdata, merged_AGdata, by = "code", all = TRUE)
-
-merged_data$burn <- ifelse(merged_data$burn_trt == "Control", 0, 
-                           ifelse(merged_data$burn_trt == "Burn", 1, 2))
-
-merged_data_summary <- merged_data %>%
-  group_by(code) %>%
-  summarize(burn = case_when(
-    all(burn == 0) ~ 0,   # If all burns are 0, assign 0
-    all(burn == 1) ~ 1,   # If all burns are 1, assign 1
-    TRUE ~ 2              # Otherwise, assign 2
-  ),
-  species.x = first(species.x),
-  origin.x = first(origin.x),
-  life_span.x = first(life_span.x),
-  form.x = first(form.x),
-  family.x = first(family.x),
-  speciesID.x = case_when(
-    all(speciesID.x == 1) ~ 1,
-    all(speciesID.x == 0) ~ 0,),
-  location.x.y = case_when(
-    all(location.x.y == 1) ~ 0,
-    all(location.x.y == 1) ~ 1,
-    all(location.x.y == 2) ~ 1
-  )  )
-  
-merged_data_sum <- as.data.frame(merged_data_summary)
-merged_data_sum <- merge(merged_data_sum, combospec, by = "code", all.x = T)
-remove_columns <- c("species.x", "origin.x", "life_span.x", "form.x", "family.x", "speciesID.x", "location.x.y")
-merged_data_sum <- merged_data_sum[, !(names(merged_data_sum) %in% remove_columns)]
-merged_data_sumID <- merged_data_sum[merged_data_sum$speciesID == 1, ]
-
-#quad.venn
-draw.quad.venn(
-  area1 = sum((dimv4$location=="" combospec$location == "0" & combospec$speciesID == "1") + (combospec$location == "2" & combospec$speciesID == "1")) , area2, area3, area4, n12, n13, n14, n23, n24,
-               n34, n123, n124, n134, n234, n1234, category = rep("",
-                                                                  4), lwd = rep(2, 4), lty = rep("solid", 4), col =
-                 rep("black", 4), fill = NULL, alpha = rep(0.5, 4),
-               label.col = rep("black", 15), cex = rep(1, 15),
-               fontface = rep("plain", 15), fontfamily = rep("serif",
-                                                             15), cat.pos = c(-15, 15, 0, 0), cat.dist = c(0.22,
-                                                                                                           0.22, 0.11, 0.11), cat.col = rep("black", 4), cat.cex
-               = rep(1, 4), cat.fontface = rep("plain", 4),
-               cat.fontfamily = rep("serif", 4), cat.just =
-                 rep(list(c(0.5, 0.5)), 4), rotation.degree = 0,
-               rotation.centre = c(0.5, 0.5), ind = TRUE, cex.prop =
-                 NULL, print.mode = "raw", sigdigs = 3, direct.area =
-                 FALSE, area.vector = 0, ...)
-#-----
-library(venneuler)
-area_0_0 <- sum(merged_data_sum$burn == 0 & merged_data_sum$location == 0)
-area_0_1 <- sum(merged_data_sum$burn == 0 & merged_data_sum$location == 1)
-area_1_0 <- sum(merged_data_sum$burn == 1 & merged_data_sum$location == 0)
-area_1_1 <- sum(merged_data_sum$burn == 1 & merged_data_sum$location == 1)
-
-# Define the intersection sizes
-n_00_00 <- sum(merged_data_sum$burn == 0 & merged_data_sum$location == 0)
-n_00_01 <- sum(merged_data_sum$burn == 0 & merged_data_sum$location == 1)
-n_00_10 <- sum(merged_data_sum$burn == 0 & merged_data_sum$location == 0)
-n_00_11 <- sum(merged_data_sum$burn == 0 & merged_data_sum$location == 1)
-n_00_12 <- sum(merged_data_sum$burn == 0 & merged_data_sum$location == 2)
-n_00_20 <- sum(merged_data_sum$burn == 0 & merged_data_sum$location == 0)
-n_00_21 <- sum(merged_data_sum$burn == 0 & merged_data_sum$location == 1)
-n_00_22 <- sum(merged_data_sum$burn == 0 & merged_data_sum$location == 2)
-
-# Draw the Venn diagram
-venn_plot <- draw.quad.venn(
-  area1 = area_0_0,
-  area2 = area_0_1,
-  area3 = area_1_0,
-  area4 = area_1_1,
-  n12 = n_00_00,
-  n13 = n_00_01,
-  n14 = n_00_10,
-  n23 = n_00_02,
-  n24 = n_00_11,
-  n34 = n_00_12,
-  n123 = n_00_20,
-  n124 = n_00_21,
-  n134 = n_00_22,
-  n234 = 0,  # No data for this intersection
-  n1234 = 0, # No data for this intersection
-  category = c("Control", "Control above", "Treatment", "Treatment above"),
-  fill = c("blue", "red", "green", "yellow"),
-  label.col = rep("black", 15),
-  cex = rep(1, 15),
-  fontface = rep("plain", 15),
-  cat.dist = c(0.15, 0.15, 0.15, 0.15), # Adjust label distance
-  cat.cex = 1.5, # Adjust label size
-  cat.fontface = 1, # Adjust label fontface
-  cat.just = list(c(0.5, 0.5), c(0.5, 0.5), c(0.5, 0.5), c(0.5, 0.5)) # Center label text
-)
-
-# Plot the Venn diagram
-grid.draw(venn_plot)
 
 #----define functional groups
 head(BGspecid,4);dim(BGspecid)
@@ -326,7 +228,7 @@ rich.res<-data.frame(do.call(cbind,rich.data))
 colnames(rich.res)<-group.df$group
 
 
-#------ ssm contstruction
+#------ separate above and below ssm construction
 
 #AG ssm
 head(AGdata); dim(AGdata)
@@ -451,8 +353,6 @@ div5$ab <- factor(div5$ab, levels = c("above","below"))
 head(div5);dim(div5)
 str(div5)
 
-
-
 #bwplot
 dev.new(width=10,height=4,dpi=160,pointsize=12, noRStudioGD = T)
 
@@ -461,17 +361,8 @@ boxplot(sr ~ ab, data = div5, las = 1, ylab = "species richness", xlab = "")
 
 boxplot(sr ~ ab + burn_trt, data = div5, las = 1, ylab = "species richness", xlab = "", cex.axis = 0.7)
 
-#----SR GLMERS
-#div4
-#with interaction
-sr_mod1<-glmer(sr~ab*burn_trt+(1|transect), family="poisson", data=div5) 
-summary(sr_mod1)
-#without interaction
-sr_mod2<-glmer(sr~ab+burn_trt+(1|transect), family="poisson", data=div5)
-summary(sr_mod2)
+#----SR GLMERS. all interactions insignificant, additive models used in all further analysis.
 
-
-#div5
 #alpha glmer
 srmod_all<-glmer(all~ab+burn_trt+(1|transect), family="poisson", data=div4)
 summary(srmod_all)
@@ -741,6 +632,7 @@ head(srmod_nonlegfor1)
 
 
 #----
+#species richness plotting
 head(srmod_all1)
 head(srmod_nat1)
 head(srmod_exo1)
@@ -758,345 +650,155 @@ head(srmod_exogra1)
 x_labels <- c("AG", "BG", "AG", "BG")
 gdf
 
-dev.new(width=9,height=12,dpi=160,pointsize=12, noRStudioGD = T)
-
-par(mfrow=c(4,3),mar=c(4,4,1.5,1), mgp=c(2.5,1,0))
+dev.new(width=9,height=15,dpi=160,pointsize=12, noRStudioGD = T)
+par(mfrow=c(5,3),mar=c(4,4,1.5,1), mgp=c(2.5,1,0))
 
 #alpha sr
-
 plot(c(1:4), srmod_all1$fit, xlim=c(0.5,4.5), pch=20, xaxt="n", ylim=c((min(srmod_all1$lci)), max(srmod_all1$uci)), ylab="Species Richness", xlab="", las=1, cex=2.5,type="n")
 arrows(c(1:4), srmod_all1$lci, c(1:4), srmod_all1$uci, length=0.05, code=3, angle=90)
-axis(side=1, at=c(1:4), labels=x_labels, tick=F, cex.axis=1)
-title(main = "(a) Total", line = 0.5,adj=0)
+axis(side=1, at=c(1:4), labels=x_labels, tick=F, cex.axis=0.8)
+title(main = "(a) Total", line = 0.5,adj=0, cex.main=0.95)
 points(c(1:4), srmod_all1$fit,col=c(rep("chartreuse4",2),rep("orange",2)), pch=20, cex=2.5)
 
 #native
 plot(c(1:4), srmod_nat1$fit, xlim=c(0.5,4.5), pch=20, xaxt="n", ylim=c((min(srmod_nat1$lci)), max(srmod_nat1$uci)), ylab="Species Richness", xlab="", las=1, cex=2.5)
 arrows(c(1:4), srmod_nat1$lci, c(1:4), srmod_nat1$uci, length=0.05, code=3, angle=90)
-axis(side=1, at=c(1:4), labels=x_labels, tick=F, cex.axis=1)
-title(main = "(b) Native", line = 0.5,adj=0)
+axis(side=1, at=c(1:4), labels=x_labels, tick=F, cex.axis=0.8)
+title(main = "(b) Native", line = 0.5,adj=0, cex.main=0.95)
 points(c(1:4), srmod_nat1$fit,col=c(rep("chartreuse4",2),rep("orange",2)), pch=20, cex=2.5)
      
 #exotic
 plot(c(1:4), srmod_exo1$fit, xlim=c(0.5,4.5), pch=20, xaxt="n", ylim=c((min(srmod_exo1$lci)), max(srmod_exo1$uci)), ylab="Species Richness", xlab="", las=1, cex=2.5)
 arrows(c(1:4), srmod_exo1$lci, c(1:4), srmod_exo1$uci, length=0.05, code=3, angle=90)
-axis(side=1, at=c(1:4), labels=x_labels, tick=F, cex.axis=1)
-title(main = "(c) Exotic", line = 0.5,adj=0)
+axis(side=1, at=c(1:4), labels=x_labels, tick=F, cex.axis=0.8)
+title(main = "(c) Exotic", line = 0.5,adj=0, cex.main=0.95)
 points(c(1:4), srmod_exo1$fit,col=c(rep("chartreuse4",2),rep("orange",2)), pch=20, cex=2.5)
 
 #annual
 plot(c(1:4), srmod_ann1$fit, xlim=c(0.5,4.5), pch=20, xaxt="n", ylim=c((min(srmod_ann1$lci)), max(srmod_ann1$uci)), ylab="Species Richness", xlab="", las=1, cex=2.5)
 arrows(c(1:4), srmod_ann1$lci, c(1:4), srmod_ann1$uci, length=0.05, code=3, angle=90)
-axis(side=1, at=c(1:4), labels=x_labels, tick=F, cex.axis=1)
-title(main = "(d) Annual", line = 0.5,adj=0)
+axis(side=1, at=c(1:4), labels=x_labels, tick=F, cex.axis=0.8)
+title(main = "(d) Annual", line = 0.5,adj=0, cex.main=0.95)
 points(c(1:4), srmod_ann1$fit,col=c(rep("chartreuse4",2),rep("orange",2)), pch=20, cex=2.5)
 
 #perennial
 plot(c(1:4), srmod_per1$fit, xlim=c(0.5,4.5), pch=20, xaxt="n", ylim=c((min(srmod_per1$lci)), max(srmod_per1$uci)), ylab="Species Richness", xlab="", las=1, cex=2.5)
 arrows(c(1:4), srmod_per1$lci, c(1:4), srmod_per1$uci, length=0.05, code=3, angle=90)
-axis(side=1, at=c(1:4), labels=x_labels, tick=F, cex.axis=1)
-title(main = "(e) Perennial", line = 0.5,adj=0)
+axis(side=1, at=c(1:4), labels=x_labels, tick=F, cex.axis=0.8)
+title(main = "(e) Perennial", line = 0.5,adj=0, cex.main=0.95)
 points(c(1:4), srmod_per1$fit,col=c(rep("chartreuse4",2),rep("orange",2)), pch=20, cex=2.5)
-
-
-#leg
-
-#tree
-#plot(c(1:4), srmod_tree1$fit, xlim=c(0.5,4.5), pch=20, xaxt="n", ylim=c((min(srmod_tree1$lci)), max(srmod_tree1$uci)), ylab="Species Richness", xlab="", las=1, cex=2.5)
-#arrows(c(1:4), srmod_tree1$lci, c(1:4), srmod_tree1$uci, length=0.05, code=3, angle=90)
-#axis(side=1, at=c(1:4), labels=x_labels, tick=F, cex.axis=1)
-#title(main = "(f) Trees", line = 0.5,adj=0)
-#points(c(1:4), srmod_tree1$fit,col=c(rep("chartreuse4",2),rep("orange",2)), pch=20, cex=2.5)
-
-#shrub
-#plot(c(1:4), srmod_shr1$fit, xlim=c(0.5,4.5), pch=20, xaxt="n", ylim=c((min(srmod_shr1$lci)), max(srmod_shr1$uci)), ylab="Species Richness", xlab="", las=1, cex=2.5)
-#arrows(c(1:4), srmod_shr1$lci, c(1:4), srmod_shr1$uci, length=0.05, code=3, angle=90)
-#axis(side=1, at=c(1:4), labels=x_labels, tick=F, cex.axis=1)
-#title(main = "(g) Shrubs", line = 0.5,adj=0)
-#points(c(1:4), srmod_shr1$fit,col=c(rep("chartreuse4",2),rep("orange",2)), pch=20, cex=2.5)
 
 #forb
 plot(c(1:4), srmod_for1$fit, xlim=c(0.5,4.5), pch=20, xaxt="n", ylim=c((min(srmod_for1$lci)), max(srmod_for1$uci)), ylab="Species Richness", xlab="", las=1, cex=2.5)
 arrows(c(1:4), srmod_for1$lci, c(1:4), srmod_for1$uci, length=0.05, code=3, angle=90)
-axis(side=1, at=c(1:4), labels=x_labels, tick=F, cex.axis=1)
-title(main = "(f) Forbs", line = 0.5,adj=0)
+axis(side=1, at=c(1:4), labels=x_labels, tick=F, cex.axis=0.8)
+title(main = "(f) Forb", line = 0.5,adj=0, cex.main=0.95)
 points(c(1:4), srmod_for1$fit,col=c(rep("chartreuse4",2),rep("orange",2)), pch=20, cex=2.5)
 
 #grass
 plot(c(1:4), srmod_gra1$fit, xlim=c(0.5,4.5), pch=20, xaxt="n", ylim=c((min(srmod_gra1$lci)), max(srmod_gra1$uci)), ylab="Species Richness", xlab="", las=1, cex=2.5)
 arrows(c(1:4), srmod_gra1$lci, c(1:4), srmod_gra1$uci, length=0.05, code=3, angle=90)
-axis(side=1, at=c(1:4), labels=x_labels, tick=F, cex.axis=1)
-title(main = "(g) Grasses", line = 0.5,adj=0)
+axis(side=1, at=c(1:4), labels=x_labels, tick=F, cex.axis=0.8)
+title(main = "(g) Grass", line = 0.5,adj=0, cex.main=0.95)
 points(c(1:4), srmod_gra1$fit,col=c(rep("chartreuse4",2),rep("orange",2)), pch=20, cex=2.5)
-
-#sedge
-#plot(c(1:4), srmod_sed1$fit, xlim=c(0.5,4.5), pch=20, xaxt="n", ylim=c((min(srmod_sed1$lci)), max(srmod_sed1$uci)), ylab="Species Richness", xlab="", las=1, cex=2.5)
-#arrows(c(1:4), srmod_sed1$lci, c(1:4), srmod_sed1$uci, length=0.05, code=3, angle=90)
-#axis(side=1, at=c(1:4), labels=x_labels, tick=F, cex.axis=1)
-#title(main = "(j) Sedges", line = 0.5,adj=0)
-#points(c(1:4), srmod_sed1$fit,col=c(rep("chartreuse4",2),rep("orange",2)), pch=20, cex=2.5)
 
 #native grass
 plot(c(1:4), srmod_natgra1$fit, xlim=c(0.5,4.5), pch=20, xaxt="n", ylim=c((min(srmod_natgra1$lci)), max(srmod_natgra1$uci)), ylab="Species Richness", xlab="", las=1, cex=2.5)
 arrows(c(1:4), srmod_natgra1$lci, c(1:4), srmod_natgra1$uci, length=0.05, code=3, angle=90)
-axis(side=1, at=c(1:4), labels=x_labels, tick=F, cex.axis=1)
-title(main = "(h) Native Grasses", line = 0.5,adj=0)
+axis(side=1, at=c(1:4), labels=x_labels, tick=F, cex.axis=0.8)
+title(main = "(h) Native Grass", line = 0.5,adj=0, cex.main=0.95)
 points(c(1:4), srmod_natgra1$fit,col=c(rep("chartreuse4",2),rep("orange",2)), pch=20, cex=2.5)
 
 #exotic grass
 plot(c(1:4), srmod_exogra1$fit, xlim=c(0.5,4.5), pch=20, xaxt="n", ylim=c((min(srmod_exogra1$lci)), max(srmod_exogra1$uci)), ylab="Species Richness", xlab="", las=1, cex=2.5)
 arrows(c(1:4), srmod_exogra1$lci, c(1:4), srmod_exogra1$uci, length=0.05, code=3, angle=90)
-axis(side=1, at=c(1:4), labels=x_labels, tick=F, cex.axis=1)
-title(main = "(i) Exotic Grasses", line = 0.5,adj=0)
+axis(side=1, at=c(1:4), labels=x_labels, tick=F, cex.axis=0.8)
+title(main = "(i) Exotic Grass", line = 0.5,adj=0, cex.main=0.95)
 points(c(1:4), srmod_exogra1$fit,col=c(rep("chartreuse4",2),rep("orange",2)), pch=20, cex=2.5)
 
 #native forbs
-
 plot(c(1:4), srmod_natfor1$fit, xlim=c(0.5,4.5), pch=20, xaxt="n", ylim=c((min(srmod_natfor1$lci)), max(srmod_natfor1$uci)), ylab="Species Richness", xlab="", las=1, cex=2.5,type="n")
 arrows(c(1:4), srmod_natfor1$lci, c(1:4), srmod_natfor1$uci, length=0.05, code=3, angle=90)
-axis(side=1, at=c(1:4), labels=x_labels, tick=F, cex.axis=1)
-title(main = "(j) Native Forbs", line = 0.5,adj=0)
+axis(side=1, at=c(1:4), labels=x_labels, tick=F, cex.axis=0.8)
+title(main = "(j) Native Forb", line = 0.5,adj=0, cex.main=0.95)
 points(c(1:4), srmod_natfor1$fit,col=c(rep("chartreuse4",2),rep("orange",2)), pch=20, cex=2.5)
 
 #exotic forbs
-
 plot(c(1:4), srmod_exofor1$fit, xlim=c(0.5,4.5), pch=20, xaxt="n", ylim=c((min(srmod_exofor1$lci)), max(srmod_exofor1$uci)), ylab="Species Richness", xlab="", las=1, cex=2.5,type="n")
 arrows(c(1:4), srmod_exofor1$lci, c(1:4), srmod_exofor1$uci, length=0.05, code=3, angle=90)
-axis(side=1, at=c(1:4), labels=x_labels, tick=F, cex.axis=1)
-title(main = "(k) Exotic Forbs", line = 0.5,adj=0)
+axis(side=1, at=c(1:4), labels=x_labels, tick=F, cex.axis=0.8)
+title(main = "(k) Exotic Forb", line = 0.5,adj=0, cex.main=0.95)
 points(c(1:4), srmod_exofor1$fit,col=c(rep("chartreuse4",2),rep("orange",2)), pch=20, cex=2.5)
 
-#leguminous forbs
-
-#plot(c(1:4), srmod_legfor1$fit, xlim=c(0.5,4.5), pch=20, xaxt="n", ylim=c((min(srmod_legfor1$lci)), max(srmod_legfor1$uci)), ylab="Species Richness", xlab="", las=1, cex=2.5,type="n")
-#arrows(c(1:4), srmod_legfor1$lci, c(1:4), srmod_leg1$uci, length=0.05, code=3, angle=90)
-#axis(side=1, at=c(1:4), labels=x_labels, tick=F, cex.axis=1)
-#title(main = "(?) Leguminous Forbs", line = 0.5,adj=0)
-#points(c(1:4), srmod_legfor1$fit,col=c(rep("chartreuse4",2),rep("orange",2)), pch=20, cex=2.5)
-
 #non-leguminous forbs
-
 plot(c(1:4), srmod_legfor1$fit, xlim=c(0.5,4.5), pch=20, xaxt="n", ylim=c((min(srmod_nonlegfor1$lci)), max(srmod_nonlegfor1$uci)), ylab="Species Richness", xlab="", las=1, cex=2.5,type="n")
 arrows(c(1:4), srmod_nonlegfor1$lci, c(1:4), srmod_nonlegfor1$uci, length=0.05, code=3, angle=90)
-axis(side=1, at=c(1:4), labels=x_labels, tick=F, cex.axis=1)
-title(main = "(l) Non-leg Forbs", line = 0.5,adj=0)
+axis(side=1, at=c(1:4), labels=x_labels, tick=F, cex.axis=0.8)
+title(main = "(l) Non-leg Forb", line = 0.5,adj=0, cex.main=0.95)
 points(c(1:4), srmod_nonlegfor1$fit,col=c(rep("chartreuse4",2),rep("orange",2)), pch=20, cex=2.5)
 
+#leguminous forbs
+plot(c(1:4), srmod_legfor1$fit, xlim=c(0.5,4.5), pch=20, xaxt="n", ylim=c((min(srmod_legfor1$lci)), max(srmod_legfor1$uci)), ylab="Species Richness", xlab="", las=1, cex=2.5,type="n")
+arrows(c(1:4), srmod_legfor1$lci, c(1:4), srmod_legfor1$uci, length=0.05, code=3, angle=90)
+axis(side=1, at=c(1:4), labels=x_labels, tick=F, cex.axis=0.8)
+title(main = "(m) Leg Forb", line = 0.5,adj=0, cex.main=0.95)
+points(c(1:4), srmod_legfor1$fit,col=c(rep("chartreuse4",2),rep("orange",2)), pch=20, cex=2.5)
 
-#PCA matrices
-#abundance above and below ssm
-div6 <- div4
-div6$quadratID <-paste(div6$quadratID,div6$ab,sep=".")
-div6 <- subset(div6, select = -ab)
-head(div6[1:10]);dim(div6)
+par(xpd=NA)
+legend(8,2.9, legend=c("Control", "Burn"), col = c("chartreuse4", "orange"),pch=c(20, 20), cex = (1.45), title = "Legend")
+par(xpd=F)
 
-#overwrite
-row.names(AGmat) <- paste0(row.names(AGmat), ".above")
-row.names(BGmat) <- paste0(row.names(BGmat), ".below")
-ALLmat <- cbind(AGmat,BGmat)
-head(ALLmat[1:10]);dim(ALLmat)
-
-div6 <- cbind(div6,ALLmat)
-head(div6[1:60]);dim(div6)
-#remove functional
-
-ssmat <- div6[,which(colnames(div6) == "Aca_mai"):ncol(div6)]
-rownames(ssmat) <- div6$quadratID
-head(ssmat[1:10],3);dim(ssmat)
-
-
-
-#presence/absence above and below ssm
-div7 <- div6
-exclude_cols <-c("quadratID", "location", "transect", "quadrat", "burn_trt",)
-div7[, !names(div7) %in% exclude_cols] <- lapply(div7[, !(names(div7) %in% exclude_cols)], function(x) ifelse (x>0,1, x))
-head(div7[1:30],3);dim(div7)
-
-div8 <- div7[,which(colnames(div7)== "Aca_mai"):ncol(div7)]
-rownames(div8) <- div7$quadratID
-head(div8[1:10],3);dim(div8)
-
-
-all_spec <- union(colnames(AGmat), colnames(BGmat))
-#AGmat.all <- matrix(0, nrow = nrow(AGmat), ncol = length(all_spec),dimnames = list(row.names(AGmat), all_spec))
-#AGmat.all <- matrix(0, nrow = nrow(AGmat), ncol = length(all_spec),dimnames = list(paste0(row.names(AGmat), ".above"), all_spec))
-
-#empty matrices
-AGmat.all <- matrix(0, nrow=nrow(AGmat), ncol=length(all_spec))
-colnames(AGmat.all) <- all_spec
-rownames(AGmat.all) <- rownames(AGmat)
-
-commonAG <- intersect(colnames(AGmat), colnames(AGmat.all))
-
-AGmat <- as.matrix(AGmat)
-AGmat.all <- as.matrix(AGmat.all)
-
-AGmat.all[, commonAG] <- AGmat[, commonAG]
-
-
-BGmat.all <- matrix(0, nrow=nrow(BGmat), ncol=length(cols_BGmat.all))
-colnames(BGmat.all) <- cols_BGmat.all
-rownames(BGmat.all) <- rownames(BGmat)
-
-commonBG <- intersect(colnames(BGmat2), colnames(BGmat.all))
-
-#BGmat2 <- BGmat2[, match(colnames(BGmat.all), colnames(BGmat), nomatch = 0)]
-BGmat.all[,commonBG] <- BGmat2
-
-
-uniqueAG <- setdiff(colnames(AGmat), colnames(BGmat))
-uniqueBG <- setdiff(colnames(BGmat), colnames(AGmat))
-commonall <- intersect(colnames(AGmat), colnames(BGmat))
-
-cols_all <- c(uniqueAG, commonall, uniqueBG)
-BGmat.all <- BGmat.all[,cols_all]
-AGmat.all <- AGmat.all[,cols_all]
-
-
-cols_AGmat2 <- c(uniqueAG, commonall)
-AGmat2 <- AGmat
-AGmat2 <- AGmat2[,cols_AGmat2]
-
-
-colnames(AGmat)==colnames(AGmat2)
-
-cols_BGmat2 <- c(commonall, uniqueBG)
-BGmat2 <- BGmat
-BGmat2 <- BGmat2[,cols_BGmat2]
-
-colnames(BGmat)==colnames(BGmat2)
-
-#
-AGmat2 <- AGmat
-rownames(AGmat2) <-paste0(rownames(AGmat), ".above")
-
-BGmat2 <- BGmat
-rownames(BGmat2) <- paste0(rownames(BGmat), ".below")
-
-uniqueAG <- setdiff(colnames(AGmat), colnames(BGmat))
-uniqueBG <- setdiff(colnames(BGmat), colnames(AGmat))
-commonall <- intersect(colnames(AGmat), colnames(BGmat))
-
-cols_all <- c(uniqueAG, commonall, uniqueBG)
-
-rownames_all <- c(rownames(AGmat2), rownames(BGmat2))
-
-ALLmat <- matrix(0, nrow = length(rownames_all), ncol = length(cols_all))
-colnames(ALLmat) <- cols_all
-rownames(ALLmat) <-rownames_all
-
-ALLmat[rownames(AGmat2), colnames(AGmat2)<-AGmat2]
-ALLmat[rownames(BGmat2), colnames(BGmat2)<-BGmat2]
-
-#
+# ssm construction - creating an above and below matrix with 117 columns and 30 rows to merge into one.
 AGmat2 <- AGmat
 rownames(AGmat2) <- paste0(rownames(AGmat), ".above")
 
 BGmat2 <- BGmat
+BGmat2 <- as.matrix(BGmat2)
 rownames(BGmat2) <- paste0(rownames(BGmat), ".below")
 
 uniqueAG <- setdiff(colnames(AGmat), colnames(BGmat))
 uniqueBG <- setdiff(colnames(BGmat), colnames(AGmat))
 commonall <- intersect(colnames(AGmat), colnames(BGmat))
 
-cols_all <- c(uniqueAG, commonall, uniqueBG)
-cols_BG <- c(commonall, uniqueBG)
-cols_AG <- c(uniqueAG, commonall)
+cols_all1 <- c(uniqueAG, commonall, uniqueBG)
+rownames_ag <- c(rownames(AGmat2))
+rownames_bg <- c(rownames(BGmat2))
 
-rownames_all <- c(rownames(AGmat2), rownames(BGmat2))
-ALLmat <- matrix(0, nrow = length(rownames_all), ncol = length(cols_all))
-colnames(ALLmat) <- cols_all
-rownames(ALLmat) <- rownames_all
+# ALLmat ag and bg
+ALLmat.ag <- matrix(0, nrow = length(rownames_ag), ncol = length(cols_all1))
+colnames(ALLmat.ag) <- cols_all1
+rownames(ALLmat.ag) <- rownames_ag
+ALLmat.ag[1:nrow(AGmat2), colnames(AGmat2)] <- AGmat2
 
-BGmat2 <- BGmat2[,cols_BG]
-AGmat2 <- AGmat2[,cols_AG]
+ALLmat.bg <- matrix(0, nrow = length(rownames_bg), ncol = length(cols_all1))
+colnames(ALLmat.bg) <- cols_all1
+rownames(ALLmat.bg) <- rownames_bg
+ALLmat.bg[1:nrow(BGmat2), colnames(BGmat2)] <- BGmat2
 
-ALLmat[rownames(AGmat2), colnames(AGmat2)] <- AGmat2
-ALLmat[rownames(BGmat2), colnames(BGmat2)] <- BGmat2
+#ALLmat - combined above/below ssm
+ALLmat <- rbind(ALLmat.ag, ALLmat.bg)
 
-
-#
-print(dim(BGmat2))
-print(dim(ALLmat))
-print(rownames(BGmat2))
-print(rownames(ALLmat))
-print(colnames(BGmat2))
-print(colnames(ALLmat))
-
-if (all(rownames(BGmat2) %in% rownames(ALLmat)) && all(colnames(BGmat2) %in% colnames(ALLmat))) {
-  ALLmat[rownames(BGmat2), colnames(BGmat2)] <- BGmat2
-} else {
-  print("Mismatch in rownames or colnames between BGmat2 and ALLmat")
-}
-
-# Print the updated ALLmat to check the assignment
-print(ALLmat[,1:10])
-
-#
-print(dim(BGmat2))    # Should print: 30 73
-print(dim(ALLmat))    # Should print: 60 117
-print(rownames(BGmat2))
-print(rownames(ALLmat))
-print(colnames(BGmat2))
-print(colnames(ALLmat))
-
-#
-# Create a copy of AGmat and BGmat with modified row names
-AGmat2 <- AGmat
-rownames(AGmat2) <- paste0(rownames(AGmat), ".above")
-
-BGmat2 <- BGmat
-rownames(BGmat2) <- paste0(rownames(BGmat), ".below")
-
-# Determine the unique and common columns
-uniqueAG <- setdiff(colnames(AGmat), colnames(BGmat))
-uniqueBG <- setdiff(colnames(BGmat), colnames(AGmat))
-commonall <- intersect(colnames(AGmat), colnames(BGmat))
-
-# Create the full list of columns and rows
-cols_all <- c(uniqueAG, commonall, uniqueBG)
-rownames_all <- c(rownames(AGmat2), rownames(BGmat2))
-
-# Initialize ALLmat with zeros
-ALLmat <- matrix(0, nrow = length(rownames_all), ncol = length(cols_all))
-colnames(ALLmat) <- cols_all
-rownames(ALLmat) <- rownames_all
-
-# Verify dimensions and assignments
-print(dim(BGmat2))    # Should print: 30 73
-print(dim(ALLmat))    # Should print: 60 117
-
-# Assign AGmat2 to the first half of ALLmat
-ALLmat[1:nrow(AGmat2), colnames(AGmat2)] <- AGmat2
-
-# Assign BGmat2 to the second half of ALLmat
-ALLmat[(nrow(AGmat2) + 1):nrow(ALLmat), colnames(BGmat2)] <- BGmat2
-
-# Check the structure of ALLmat
-print(ALLmat[1:5, 1:5])  # Print a small portion of ALLmat to check the assignment
-print(ALLmat[(nrow(AGmat2) + 1):(nrow(AGmat2) + 5), 1:5])  # Check a portion of the second half
-
-# Print the updated ALLmat to check the assignment
-print(head(ALLmat[, 1:10]))
-
+#div 6 - presence/absence ssm
+div6 <- ALLmat
+div6[div6 > 0] <- 1
+head(div6);dim(div6)
 
 
 #pca
-#pca1 <- prcomp(div7[,which(colnames(div7)== "Aca_mai"):which(colnames(div7)== "Wah_gra")], scale = T)
-#pca1 <- prcomp(div7[, seq_along(colnames(div7))[colnames(div7) == "Aca_mai"]:seq_along(colnames(div7))[colnames(div7) == "Wah_gra"]], scale = TRUE)
-#pca1 <- prcomp(div7[, seq(which(colnames(div7) == "Aca_mai"), which(colnames(div7) == "Wah_gra"))], scale = TRUE)
-#pca1 <- prcomp(div7[, grep("^Aca_mai.*Wah_gra$", colnames(div7))], scale = TRUE)
 
-pca1 <- prcomp(div8)
+pca1 <- prcomp(div6)
 pca1
 summary(pca1)
 pov1<-summary(pca1)$importance[2,]
-head(div8[1:10],3);dim(div8)
+head(div6);dim(div6)
 
-#pca2 <- princomp(div8)
+#40% of variance explained by 3 components
+cum_var <- cumsum(pca1$sdev^2)/sum(pca1$sdev^2)
+sum(cum_var <= 0.4)
+cum_var[1:3]
 
-pcadata <- data.frame(quadratID = div8[,1])
-pcadata <- data.frame(quadratID = rownames(div8), row.names = NULL)
+pcadata <- data.frame(quadratID = div6[,1])
+pcadata <- data.frame(quadratID = rownames(div6), row.names = NULL)
 head(pcadata,3); dim(pcadata)
 
 pcadata$pca.comp1<-pca1$x[,1]
@@ -1119,66 +821,81 @@ nd2$quadratID2 <- paste(nd2$quadratID,nd2$ab, sep=".")
 pcadata2 <- merge(pcadata,nd2, by.x = "quadratID", by.y = "quadratID2", all.x = T, all.y = F)
 head(pcadata2);dim(pcadata2)
 
+#modelling pca components 1-3
+#comp1
+#comp1_lmer.int<-lmer(pca.comp1~ab*burn_trt+(1|transect), data=pcadata2)
+#summary(comp1_lmer.int)
 
-comp1_lmer<-lmer(pca.comp1~ab*burn_trt+(1|transect), data=pcadata2)
+comp1_lmer<-lmer(pca.comp1~ab+burn_trt+(1|transect), data=pcadata2)
 summary(comp1_lmer)
-library("lmerTest")
 
-srmod_ann.int<-glmer(annual~ab*burn_trt+(1|transect), family="poisson", data=div4)
-summary(srmod_ann.int)
+#comp2
+#comp2_lmer.int<-lmer(pca.comp2~ab*burn_trt+(1|transect), data=pcadata2)
+#summary(comp2_lmer.int)
 
-library(ggplot2)
+comp2_lmer<-lmer(pca.comp2~ab+burn_trt+(1|transect), data=pcadata2)
+summary(comp2_lmer)
 
+#comp3
+#comp3_lmer.int<-lmer(pca.comp3~ab*burn_trt+(1|transect), data=pcadata2)
+#summary(comp3_lmer.int)
+
+comp3_lmer<-lmer(pca.comp3~ab+burn_trt+(1|transect), data=pcadata2)
+summary(comp3_lmer)
+
+#plotting pca
 shapes<-c(15,17)
-
-shapes<-shapes[as.factor(pcadata2$burn_trt)]
+shapes<-shapes[as.factor(pcadata2$ab)]
 col.1<-c("grey60","grey20")
 col.1<-col.1[as.factor(pcadata2$burn_trt)]
 View(shapes)
 View(col.1)
 
 
-dev.new(height=8,width=8,dpi=80,pointsize=14,noRStudioGD = T)
-par(mar=c(4,4,2,2),mfrow=c(2,2),mgp=c(2.5,1,0))
-plot(x=1:length(pov1),y=pov1,ylab="Propotion Variance Explained",xlab="Components",type="p")
+dev.new(height=8,width=10,dpi=80,pointsize=14,noRStudioGD = T)
+
+#scree plot
+par(mar=c(4,4,2,2),mfrow=c(2,2),mgp=c(3,1,0), oma=c(0,0,0,8))
+plot(x=1:length(pov1),y=pov1,ylab="Propotion Variance Explained",xlab="Components",type="p", las=1)
 lines(x=1:length(pov1),y=pov1)
 mtext("(a)",3,0.7,F,0)
-#scree plot (usually explained by first three point) 
 
 #biplot(pca1, xlab="Component 1", ylab="Component 2", col=c("grey40","black"), var.axes=TRUE, arrow.len=0.1, choices=c(3, 4))
 #mtext("(b)",3,0.7,F,adj = 0)
 
 #1 vs 2
-plot(pcadata2$pca.comp1,pcadata2$pca.comp2,pch=shapes, xlab="",ylab="",cex=2,col=alpha(col.1,1))
-legend("bottomright",legend=c("Control Sites", "Burn Sites"),pch=c(15,17),pt.cex=2,col=c("grey60","grey20"))
+plot(pcadata2$pca.comp1,pcadata2$pca.comp2,pch=shapes, xlab="",ylab="",cex=2,col=alpha(col.1,1), las=1)
+#legend("bottomright",legend=c("Control Sites", "Burn Sites"),pch=c(15,17),pt.cex=2,col=c("grey60","grey20"))
 mtext("(b)",3,0.4,F,adj=0)
-title(ylab="PC2",cex=1.2)
-title(xlab="PC1",cex=1.2)
+title(ylab="PC2",cex=1.2, mgp=c(2.5,1,0))
+title(xlab="PC1",cex=1.2, mgp=c(2.5,1,0))
 text(x=c(-0.61888015), y=c(-7.32836938), labels= c("T26_20"), pos=4)
 text(x=c(14.84107197), y=c(-0.54987242), labels= c("T06_57"), pos=2)
 
+par(xpd=NA)
+legend(3.5,2, legend=c("Control Above", "Control Below", "Burnt Above", "Burnt Below"), col = c("grey60", "grey60", "grey20", "grey20"),pch=c(15, 17, 15, 17))
+par(xpd=F)
 
 #1 vs 3
-plot(pcadata2$pca.comp1,pcadata2$pca.comp3,pch=shapes, xlab="",ylab="",cex=2,col=alpha(col.1,1))
-legend("bottomright",legend=c("Control Sites", "Burn Sites"),pch=c(15,17),pt.cex=2,col=c("grey60","grey20"))
+plot(pcadata2$pca.comp1,pcadata2$pca.comp3,pch=shapes, xlab="",ylab="",cex=2,col=alpha(col.1,1), las=1)
+#legend("bottomright",legend=c("Control Sites", "Burn Sites"),pch=c(15,17),pt.cex=2,col=c("grey60","grey20"))
 mtext("(c)",3,0.4,F,adj=0)
-title(ylab="PC3",cex=1.2)
-title(xlab="PC1",cex=1.2)
+title(ylab="PC3",cex=1.2, mgp=c(2.5,1,0))
+title(xlab="PC1",cex=1.2, mgp=c(2.5,1,0))
 text(x=c(0.49994222), y=c(-6.582940182), labels= c("T10_06"), pos=4)
 text(x=c(14.84107197), y=c(0.614645118), labels= c("T06_57"), pos=2)
 
 #2 vs 3
-plot(pcadata2$pca.comp2,pcadata2$pca.comp3,pch=shapes, xlab="",ylab="",cex=2,col=alpha(col.1,1))
-legend("bottomleft",legend=c("Control Sites", "Burn Sites"),pch=c(15,17),pt.cex=2,col=c("grey60","grey20"))
+plot(pcadata2$pca.comp2,pcadata2$pca.comp3,pch=shapes, xlab="",ylab="",cex=2,col=alpha(col.1,1), las=1)
+#legend("bottomleft",legend=c("Control Sites", "Burn Sites"),pch=c(15,17),pt.cex=2,col=c("grey60","grey20"))
 mtext("(d)",3,0.4,F,adj=0)
-title(ylab="PC3",cex=1.2)
-title(xlab="PC2",cex=1.2)
+title(ylab="PC3",cex=1.2, mgp=c(2.5,1,0))
+title(xlab="PC2",cex=1.2, mgp=c(2.5,1,0))
 text(x=c(0.69979374), y=c(-6.582940182), labels= c("T10_06"), pos=2)
 text(x=c(-7.32836938), y=c(1.416516483), labels= c("T26_20"), pos=4)
 
 
-
-#beta
+#beta diversity
 #all
 head(div4);dim(div4)
 head(AGmat[,1:10]);dim(AGmat)
@@ -1194,18 +911,6 @@ AGbeta <- AGgam/(div4$all[which(div4$ab == "above")])
 BGbeta <- BGgam/(div4$all[which(div4$ab == "below")])
 
 div4$beta.all <- c(AGbeta, BGbeta)
-
-#head(group.df)
-#group.df$gamma <- NA
-
-#head(div4)
-#beta.data<-list()
-
-#head(AGmat); dim(AGmat)
-#head(BGmat); dim(BGmat)
-
-#AGbeta <- AGgam/(div4$all[which(div4$ab == "above")])
-#BGbeta <- BGgam/(div4$all[which(div4$ab == "below")])
 
 #beta native
 AGbeta.nat <- group.df$no_species[group.df$group == "AG.native"]/(div4$native[which(div4$ab == "above")])
@@ -1275,15 +980,20 @@ BGbeta.exofor <- ifelse(div4$exotic_forb[which(div4$ab == "below")] == 0, 0, gro
 div4$beta.exofor <- c(AGbeta.exofor, BGbeta.exofor)
 
 
-#beta nonleg forb
+#beta non leguminous forb
 AGbeta.nlegfor <- ifelse(div4$nonleg_forb[which(div4$ab == "above")] == 0, 0, group.df$no_species[group.df$group == "AG.nonleg_forb"] /div4$nonleg_forb[which(div4$ab == "above")])
 BGbeta.nlegfor <- ifelse(div4$nonleg_forb[which(div4$ab == "below")] == 0, 0, group.df$no_species[group.df$group == "BG.nonleg_forb"] /div4$nonleg_forb[which(div4$ab == "below")])
 
 div4$beta.nlegfor <- c(AGbeta.nlegfor, BGbeta.nlegfor)
 
+#beta leguminous forb
+AGbeta.legfor <- ifelse(div4$leg_forb[which(div4$ab == "above")] == 0, 0, group.df$no_species[group.df$group == "AG.leg_forb"] /div4$leg_forb[which(div4$ab == "above")])
+BGbeta.legfor <- ifelse(div4$leg_forb[which(div4$ab == "below")] == 0, 0, group.df$no_species[group.df$group == "BG.leg_forb"] /div4$leg_forb[which(div4$ab == "below")])
 
-#lmer
-#all -> interaction sig
+div4$beta.legfor <- c(AGbeta.legfor, BGbeta.legfor)
+
+#beta diversity modelling - lmer. all interactions insignificant except total, annual, perennial. all else uses additive models in further analysis.
+#all -> interaction significant
 allbeta<-lmer(beta.all~ab*burn_trt+(1|transect), data=div4)
 summary(allbeta)
 
@@ -1368,7 +1078,15 @@ nlegbeta2<-lmer(beta.nlegfor~ab+burn_trt+(1|transect), data=div4)
 summary(nlegbeta2)
 round(summary(nlegbeta2)$coefficient,3)
 
-#predictse
+#leg forb
+#legbeta<-lmer(beta.legfor~ab*burn_trt+(1|transect), data=div4)
+#summary(legbeta)
+
+legbeta2<-lmer(beta.legfor~ab+burn_trt+(1|transect), data=div4)
+summary(legbeta2)
+round(summary(legbeta2)$coefficient,3)
+
+#predictse beta diversity
 #all
 srmod_beta.all <- predictSE(mod=allbeta,newdata=nd1,type="response",se.fit = T)
 srmod_beta.all <- data.frame(nd1, fit = srmod_beta.all$fit, se = srmod_beta.all$se.fit)
@@ -1453,97 +1171,115 @@ srmod_beta.nlegfor$lci <- srmod_beta.nlegfor$fit-(srmod_beta.nlegfor$se*1.96)
 srmod_beta.nlegfor$uci <- srmod_beta.nlegfor$fit+(srmod_beta.nlegfor$se*1.96)
 head(srmod_beta.nlegfor)
 
+#leguminous forb
+srmod_beta.legfor <- predictSE(mod=legbeta2,newdata=nd1,type="response",se.fit = T)
+srmod_beta.legfor <- data.frame(nd1, fit = srmod_beta.legfor$fit, se = srmod_beta.legfor$se.fit)
+srmod_beta.legfor$lci <- srmod_beta.legfor$fit-(srmod_beta.legfor$se*1.96)
+srmod_beta.legfor$uci <- srmod_beta.legfor$fit+(srmod_beta.legfor$se*1.96)
+head(srmod_beta.legfor)
 
-#beta plotting
-dev.new(width=9,height=12,dpi=160,pointsize=12, noRStudioGD = T)
-par(mfrow=c(4,3),mar=c(4,4,1.5,1), mgp=c(2.5,1,0))
+#beta diversity plotting
+dev.new(width=9,height=15,dpi=160,pointsize=12, noRStudioGD = T)
+par(mfrow=c(5,3),mar=c(4,4,1.5,1), mgp=c(2.5,1,0))
 
 #all
 plot(c(1:4), srmod_beta.all$fit, xlim=c(0.5,4.5), pch=20, xaxt="n", ylim=c((min(srmod_beta.all$lci)), max(srmod_beta.all$uci)), ylab="Beta Diversity", xlab="", las=1, cex=2.5,type="n")
 arrows(c(1:4), srmod_beta.all$lci, c(1:4), srmod_beta.all$uci, length=0.05, code=3, angle=90)
-axis(side=1, at=c(1:4), labels=x_labels, tick=F, cex.axis=1)
-title(main = "(a) Total", line = 0.5,adj=0)
+axis(side=1, at=c(1:4), labels=x_labels, tick=F, cex.axis=0.8)
+title(main = "(a) Total*", line = 0.5,adj=0, cex.main=0.95)
 points(c(1:4), srmod_beta.all$fit,col=c(rep("chartreuse4",2),rep("orange",2)), pch=20, cex=2.5)
 
 #native
 plot(c(1:4), srmod_beta.nat$fit, xlim=c(0.5,4.5), pch=20, xaxt="n", ylim=c((min(srmod_beta.nat$lci)), max(srmod_beta.nat$uci)), ylab="Beta Diversity", xlab="", las=1, cex=2.5,type="n")
 arrows(c(1:4), srmod_beta.nat$lci, c(1:4), srmod_beta.nat$uci, length=0.05, code=3, angle=90)
-axis(side=1, at=c(1:4), labels=x_labels, tick=F, cex.axis=1)
-title(main = "(b) Native", line = 0.5,adj=0)
+axis(side=1, at=c(1:4), labels=x_labels, tick=F, cex.axis=0.8)
+title(main = "(b) Native", line = 0.5,adj=0, cex.main=0.95)
 points(c(1:4), srmod_beta.nat$fit,col=c(rep("chartreuse4",2),rep("orange",2)), pch=20, cex=2.5)
 
 #exotic
 plot(c(1:4), srmod_beta.exo$fit, xlim=c(0.5,4.5), pch=20, xaxt="n", ylim=c((min(srmod_beta.exo$lci)), max(srmod_beta.exo$uci)), ylab="Beta Diversity", xlab="", las=1, cex=2.5,type="n")
 arrows(c(1:4), srmod_beta.exo$lci, c(1:4), srmod_beta.exo$uci, length=0.05, code=3, angle=90)
-axis(side=1, at=c(1:4), labels=x_labels, tick=F, cex.axis=1)
-title(main = "(c) Exotic", line = 0.5,adj=0)
+axis(side=1, at=c(1:4), labels=x_labels, tick=F, cex.axis=0.8)
+title(main = "(c) Exotic", line = 0.5,adj=0, cex.main=0.95)
 points(c(1:4), srmod_beta.exo$fit,col=c(rep("chartreuse4",2),rep("orange",2)), pch=20, cex=2.5)
 
 #annual
 plot(c(1:4), srmod_beta.ann$fit, xlim=c(0.5,4.5), pch=20, xaxt="n", ylim=c((min(srmod_beta.ann$lci)), max(srmod_beta.ann$uci)), ylab="Beta Diversity", xlab="", las=1, cex=2.5,type="n")
 arrows(c(1:4), srmod_beta.ann$lci, c(1:4), srmod_beta.ann$uci, length=0.05, code=3, angle=90)
-axis(side=1, at=c(1:4), labels=x_labels, tick=F, cex.axis=1)
-title(main = "(d) Annual", line = 0.5,adj=0)
+axis(side=1, at=c(1:4), labels=x_labels, tick=F, cex.axis=0.8)
+title(main = "(d) Annual*", line = 0.5,adj=0, cex.main=0.95)
 points(c(1:4), srmod_beta.ann$fit,col=c(rep("chartreuse4",2),rep("orange",2)), pch=20, cex=2.5)
 
 #perennial
 plot(c(1:4), srmod_beta.per$fit, xlim=c(0.5,4.5), pch=20, xaxt="n", ylim=c((min(srmod_beta.per$lci)), max(srmod_beta.per$uci)), ylab="Beta Diversity", xlab="", las=1, cex=2.5,type="n")
 arrows(c(1:4), srmod_beta.per$lci, c(1:4), srmod_beta.per$uci, length=0.05, code=3, angle=90)
-axis(side=1, at=c(1:4), labels=x_labels, tick=F, cex.axis=1)
-title(main = "(e) Perennial", line = 0.5,adj=0)
+axis(side=1, at=c(1:4), labels=x_labels, tick=F, cex.axis=0.8)
+title(main = "(e) Perennial*", line = 0.5,adj=0, cex.main=0.95)
 points(c(1:4), srmod_beta.per$fit,col=c(rep("chartreuse4",2),rep("orange",2)), pch=20, cex=2.5)
 
 #forb
 plot(c(1:4), srmod_beta.for$fit, xlim=c(0.5,4.5), pch=20, xaxt="n", ylim=c((min(srmod_beta.for$lci)), max(srmod_beta.for$uci)), ylab="Beta Diversity", xlab="", las=1, cex=2.5,type="n")
 arrows(c(1:4), srmod_beta.for$lci, c(1:4), srmod_beta.for$uci, length=0.05, code=3, angle=90)
-axis(side=1, at=c(1:4), labels=x_labels, tick=F, cex.axis=1)
-title(main = "(f) Forbs", line = 0.5,adj=0)
+axis(side=1, at=c(1:4), labels=x_labels, tick=F, cex.axis=0.8)
+title(main = "(f) Forb", line = 0.5,adj=0, cex.main=0.95)
 points(c(1:4), srmod_beta.for$fit,col=c(rep("chartreuse4",2),rep("orange",2)), pch=20, cex=2.5)
 
 #grass
 plot(c(1:4), srmod_beta.gra$fit, xlim=c(0.5,4.5), pch=20, xaxt="n", ylim=c((min(srmod_beta.gra$lci)), max(srmod_beta.gra$uci)), ylab="Beta Diversity", xlab="", las=1, cex=2.5,type="n")
 arrows(c(1:4), srmod_beta.gra$lci, c(1:4), srmod_beta.gra$uci, length=0.05, code=3, angle=90)
-axis(side=1, at=c(1:4), labels=x_labels, tick=F, cex.axis=1)
-title(main = "(g) Grasses", line = 0.5,adj=0)
+axis(side=1, at=c(1:4), labels=x_labels, tick=F, cex.axis=0.8)
+title(main = "(g) Grass", line = 0.5,adj=0, cex.main=0.95)
 points(c(1:4), srmod_beta.gra$fit,col=c(rep("chartreuse4",2),rep("orange",2)), pch=20, cex=2.5)
 
 #native grass
 plot(c(1:4), srmod_beta.natgra$fit, xlim=c(0.5,4.5), pch=20, xaxt="n", ylim=c((min(srmod_beta.natgra$lci)), max(srmod_beta.natgra$uci)), ylab="Beta Diversity", xlab="", las=1, cex=2.5,type="n")
 arrows(c(1:4), srmod_beta.natgra$lci, c(1:4), srmod_beta.natgra$uci, length=0.05, code=3, angle=90)
-axis(side=1, at=c(1:4), labels=x_labels, tick=F, cex.axis=1)
-title(main = "(h) Native Grasses", line = 0.5,adj=0)
+axis(side=1, at=c(1:4), labels=x_labels, tick=F, cex.axis=0.8)
+title(main = "(h) Native Grass", line = 0.5,adj=0, cex.main=0.95)
 points(c(1:4), srmod_beta.natgra$fit,col=c(rep("chartreuse4",2),rep("orange",2)), pch=20, cex=2.5)
 
 #exotic grass
 plot(c(1:4), srmod_beta.exogra$fit, xlim=c(0.5,4.5), pch=20, xaxt="n", ylim=c((min(srmod_beta.exogra$lci)), max(srmod_beta.exogra$uci)), ylab="Beta Diversity", xlab="", las=1, cex=2.5,type="n")
 arrows(c(1:4), srmod_beta.exogra$lci, c(1:4), srmod_beta.exogra$uci, length=0.05, code=3, angle=90)
-axis(side=1, at=c(1:4), labels=x_labels, tick=F, cex.axis=1)
-title(main = "(i) Exotic Grasses", line = 0.5,adj=0)
+axis(side=1, at=c(1:4), labels=x_labels, tick=F, cex.axis=0.8)
+title(main = "(i) Exotic Grass", line = 0.5,adj=0, cex.main=0.95)
 points(c(1:4), srmod_beta.exogra$fit,col=c(rep("chartreuse4",2),rep("orange",2)), pch=20, cex=2.5)
 
 #native forb
 plot(c(1:4), srmod_beta.natfor$fit, xlim=c(0.5,4.5), pch=20, xaxt="n", ylim=c((min(srmod_beta.natfor$lci)), max(srmod_beta.natfor$uci)), ylab="Beta Diversity", xlab="", las=1, cex=2.5,type="n")
 arrows(c(1:4), srmod_beta.natfor$lci, c(1:4), srmod_beta.natfor$uci, length=0.05, code=3, angle=90)
-axis(side=1, at=c(1:4), labels=x_labels, tick=F, cex.axis=1)
-title(main = "(j) Native Forbs", line = 0.5,adj=0)
+axis(side=1, at=c(1:4), labels=x_labels, tick=F, cex.axis=0.8)
+title(main = "(j) Native Forb", line = 0.5,adj=0, cex.main=0.95)
 points(c(1:4), srmod_beta.natfor$fit,col=c(rep("chartreuse4",2),rep("orange",2)), pch=20, cex=2.5)
 
 #exotic forb
 plot(c(1:4), srmod_beta.exofor$fit, xlim=c(0.5,4.5), pch=20, xaxt="n", ylim=c((min(srmod_beta.exofor$lci)), max(srmod_beta.exofor$uci)), ylab="Beta Diversity", xlab="", las=1, cex=2.5,type="n")
 arrows(c(1:4), srmod_beta.exofor$lci, c(1:4), srmod_beta.exofor$uci, length=0.05, code=3, angle=90)
-axis(side=1, at=c(1:4), labels=x_labels, tick=F, cex.axis=1)
-title(main = "(k) Exotic Forbs", line = 0.5,adj=0)
+axis(side=1, at=c(1:4), labels=x_labels, tick=F, cex.axis=0.8)
+title(main = "(k) Exotic Forb", line = 0.5,adj=0, cex.main=0.95)
 points(c(1:4), srmod_beta.exofor$fit,col=c(rep("chartreuse4",2),rep("orange",2)), pch=20, cex=2.5)
 
 #non-leg forb
 plot(c(1:4), srmod_beta.nlegfor$fit, xlim=c(0.5,4.5), pch=20, xaxt="n", ylim=c((min(srmod_beta.nlegfor$lci)), max(srmod_beta.nlegfor$uci)), ylab="Beta Diversity", xlab="", las=1, cex=2.5,type="n")
 arrows(c(1:4), srmod_beta.nlegfor$lci, c(1:4), srmod_beta.nlegfor$uci, length=0.05, code=3, angle=90)
-axis(side=1, at=c(1:4), labels=x_labels, tick=F, cex.axis=1)
-title(main = "(l) Non-leg Forbs", line = 0.5,adj=0)
+axis(side=1, at=c(1:4), labels=x_labels, tick=F, cex.axis=0.8)
+title(main = "(l) Non-leg Forb", line = 0.5,adj=0, cex.main=0.95)
 points(c(1:4), srmod_beta.nlegfor$fit,col=c(rep("chartreuse4",2),rep("orange",2)), pch=20, cex=2.5)
 
 
-#invsimpson
+#leguminous forbs 
+plot(c(1:4), srmod_beta.legfor$fit, xlim=c(0.5,4.5), pch=20, xaxt="n", ylim=c((min(srmod_beta.legfor$lci)), max(srmod_beta.legfor$uci)), ylab="Species Richness", xlab="", las=1, cex=2.5,type="n")
+arrows(c(1:4), srmod_beta.legfor$lci, c(1:4), srmod_beta.legfor$uci, length=0.05, code=3, angle=90)
+axis(side=1, at=c(1:4), labels=x_labels, tick=F, cex.axis=0.8)
+title(main = "(m) Leg Forb", line = 0.5,adj=0, cex.main=0.95)
+points(c(1:4), srmod_beta.legfor$fit,col=c(rep("chartreuse4",2),rep("orange",2)), pch=20, cex=2.5)
+
+par(xpd=NA)
+legend(8,5.9, legend=c("Control", "Burn"), col = c("chartreuse4", "orange"),pch=c(20, 20), cex = (1.45), title = "Legend")
+par(xpd=F)
+
+
+#diversity index - invsimpson
 
 bgall.simp <- BGmat[, colnames(BGmat) %in% BG.all]
 bgall.simp <- diversity(bgall.simp, index = "invsimpson")
@@ -1685,112 +1421,107 @@ div4$simp.exofor <- c(agexofor.simp,bgexofor.simp)
 div4$simp.legfor <- c(aglegfor.simp,bglegfor.simp)
 div4$simp.nlegfor <- c(agnonlegfor.simp,bgnonlegfor.simp)
 
-#old
-#div1$agsimp <- diversity(AGmat, index ="invsimpson")
-#div1$bgsimp <- diversity(BGmat, index ="invsimpson")
-#div4$simp <- c(div1$agsimp, div1$bgsimp)
 
-
-#lmer
+#invsimpson modelling - lmer. interactions insignificant, all models used in further analysis were additive.
 #all
-allsimp<-lmer(simp~ab*burn_trt+(1|transect), data=div4)
-summary(allsimp)
+#allsimp<-lmer(simp~ab*burn_trt+(1|transect), data=div4)
+#summary(allsimp)
 
 allsimp2<-lmer(simp~ab+burn_trt+(1|transect), data=div4)
 summary(allsimp2)
 
 #native
-natsimp<-lmer(simp.nat~ab*burn_trt+(1|transect), data=div4)
-summary(natsimp)
+#natsimp<-lmer(simp.nat~ab*burn_trt+(1|transect), data=div4)
+#summary(natsimp)
 
 natsimp2<-lmer(simp.nat~ab+burn_trt+(1|transect), data=div4)
 summary(natsimp2)
 
 #exotic
-exosimp<-lmer(simp.exo~ab*burn_trt+(1|transect), data=div4)
-summary(exosimp)
+#exosimp<-lmer(simp.exo~ab*burn_trt+(1|transect), data=div4)
+#summary(exosimp)
 
 exosimp2<-lmer(simp.exo~ab+burn_trt+(1|transect), data=div4)
 summary(exosimp2)
 
 #annual
-annsimp<-lmer(simp.ann~ab*burn_trt+(1|transect), data=div4)
-summary(annsimp)
+#annsimp<-lmer(simp.ann~ab*burn_trt+(1|transect), data=div4)
+#summary(annsimp)
 
 annsimp2<-lmer(simp.ann~ab+burn_trt+(1|transect), data=div4)
 summary(annsimp2)
 
 #perennial
-persimp<-lmer(simp.per~ab*burn_trt+(1|transect), data=div4)
-summary(persimp)
+#persimp<-lmer(simp.per~ab*burn_trt+(1|transect), data=div4)
+#summary(persimp)
 
 persimp2<-lmer(simp.per~ab+burn_trt+(1|transect), data=div4)
 summary(persimp2)
 
 #forb
-forsimp<-lmer(simp.for~ab*burn_trt+(1|transect), data=div4)
-summary(forsimp)
+#forsimp<-lmer(simp.for~ab*burn_trt+(1|transect), data=div4)
+#summary(forsimp)
 
 forsimp2<-lmer(simp.for~ab+burn_trt+(1|transect), data=div4)
 summary(forsimp2)
 
 #grass
-grasimp<-lmer(simp.gra~ab*burn_trt+(1|transect), data=div4)
-summary(forsimp)
+#grasimp<-lmer(simp.gra~ab*burn_trt+(1|transect), data=div4)
+#summary(forsimp)
 
 grasimp2<-lmer(simp.gra~ab+burn_trt+(1|transect), data=div4)
 summary(grasimp2)
 
 #sedge
-sedsimp<-lmer(simp.sed~ab*burn_trt+(1|transect), data=div4)
-summary(sedsimp)
+#sedsimp<-lmer(simp.sed~ab*burn_trt+(1|transect), data=div4)
+#summary(sedsimp)
 
 sedsimp2<-lmer(simp.sed~ab+burn_trt+(1|transect), data=div4)
 summary(sedsimp2)
 
 #native grass
-natgrasimp<-lmer(simp.natgra~ab*burn_trt+(1|transect), data=div4)
-summary(natgrasimp)
+#natgrasimp<-lmer(simp.natgra~ab*burn_trt+(1|transect), data=div4)
+#summary(natgrasimp)
 
 natgrasimp2<-lmer(simp.natgra~ab+burn_trt+(1|transect), data=div4)
 summary(natgrasimp2)
 
 #exotic grass
-exograsimp<-lmer(simp.exogra~ab*burn_trt+(1|transect), data=div4)
-summary(exograsimp)
+#exograsimp<-lmer(simp.exogra~ab*burn_trt+(1|transect), data=div4)
+#summary(exograsimp)
 
 exograsimp2<-lmer(simp.exogra~ab+burn_trt+(1|transect), data=div4)
 summary(exograsimp2)
 
 #native forb
-natforsimp<-lmer(simp.natfor~ab*burn_trt+(1|transect), data=div4)
-summary(natforsimp)
+#natforsimp<-lmer(simp.natfor~ab*burn_trt+(1|transect), data=div4)
+#summary(natforsimp)
 
 natforsimp2<-lmer(simp.natfor~ab+burn_trt+(1|transect), data=div4)
 summary(natforsimp2)
 
 #exotic forb
-exoforsimp<-lmer(simp.exofor~ab*burn_trt+(1|transect), data=div4)
-summary(natforsimp)
+#exoforsimp<-lmer(simp.exofor~ab*burn_trt+(1|transect), data=div4)
+#summary(natforsimp)
 
 exoforsimp2<-lmer(simp.exofor~ab+burn_trt+(1|transect), data=div4)
 summary(exoforsimp2)
 
 #non leg forb
-nlegforsimp<-lmer(simp.nlegfor~ab*burn_trt+(1|transect), data=div4)
-summary(nlegforsimp)
+#nlegforsimp<-lmer(simp.nlegfor~ab*burn_trt+(1|transect), data=div4)
+#summary(nlegforsimp)
 
 nlegforsimp2<-lmer(simp.nlegfor~ab+burn_trt+(1|transect), data=div4)
 summary(nlegforsimp2)
 
 #leg forb
-legforsimp<-lmer(simp.legfor~ab*burn_trt+(1|transect), data=div4)
-summary(nlegforsimp)
+#legforsimp<-lmer(simp.legfor~ab*burn_trt+(1|transect), data=div4)
+#summary(nlegforsimp)
 
 legforsimp2<-lmer(simp.legfor~ab+burn_trt+(1|transect), data=div4)
 summary(legforsimp2)
 
-#simp predictSE
+#invsimpson predictSE
 #all
 srmod_simp.all <- predictSE(mod=allsimp2,newdata=nd1,type="response",se.fit = T)
 srmod_simp.all <- data.frame(nd1, fit = srmod_simp.all$fit, se = srmod_simp.all$se.fit)
@@ -1889,93 +1620,104 @@ srmod_simp.legfor$lci <- srmod_simp.legfor$fit-(srmod_simp.legfor$se*1.96)
 srmod_simp.legfor$uci <- srmod_simp.legfor$fit+(srmod_simp.legfor$se*1.96)
 head(srmod_simp.legfor)
 
-#simp plotting
-dev.new(width=9,height=12,dpi=160,pointsize=12, noRStudioGD = T)
-par(mfrow=c(4,3),mar=c(4,4,1.5,1), mgp=c(2.5,1,0))
+#invsimpson plotting
+dev.new(width=9,height=15,dpi=160,pointsize=12, noRStudioGD = T)
+par(mfrow=c(5,3),mar=c(4,4,1.5,1), mgp=c(2.5,1,0))
 
 #all
 plot(c(1:4), srmod_simp.all$fit, xlim=c(0.5,4.5), pch=20, xaxt="n", ylim=c((min(srmod_simp.all$lci)), max(srmod_simp.all$uci)), ylab="InvSimpson Diversity", xlab="", las=1, cex=2.5,type="n")
 arrows(c(1:4), srmod_simp.all$lci, c(1:4), srmod_simp.all$uci, length=0.05, code=3, angle=90)
-axis(side=1, at=c(1:4), labels=x_labels, tick=F, cex.axis=1)
-title(main = "(a) All", line = 0.5,adj=0)
+axis(side=1, at=c(1:4), labels=x_labels, tick=F, cex.axis=0.8)
+title(main = "(a) All", line = 0.5,adj=0, cex.main=0.95)
 points(c(1:4), srmod_simp.all$fit,col=c(rep("chartreuse4",2),rep("orange",2)), pch=20, cex=2.5)
 
 #native
 plot(c(1:4), srmod_simp.nat$fit, xlim=c(0.5,4.5), pch=20, xaxt="n", ylim=c((min(srmod_simp.nat$lci)), max(srmod_simp.nat$uci)), ylab="InvSimpson Diversity", xlab="", las=1, cex=2.5,type="n")
 arrows(c(1:4), srmod_simp.nat$lci, c(1:4), srmod_simp.nat$uci, length=0.05, code=3, angle=90)
-axis(side=1, at=c(1:4), labels=x_labels, tick=F, cex.axis=1)
-title(main = "(b) Native", line = 0.5,adj=0)
+axis(side=1, at=c(1:4), labels=x_labels, tick=F, cex.axis=0.8)
+title(main = "(b) Native", line = 0.5,adj=0, cex.main=0.95)
 points(c(1:4), srmod_simp.nat$fit,col=c(rep("chartreuse4",2),rep("orange",2)), pch=20, cex=2.5)
 
 #exotic
 plot(c(1:4), srmod_simp.exo$fit, xlim=c(0.5,4.5), pch=20, xaxt="n", ylim=c((min(srmod_simp.exo$lci)), max(srmod_simp.exo$uci)), ylab="InvSimpson Diversity", xlab="", las=1, cex=2.5,type="n")
 arrows(c(1:4), srmod_simp.exo$lci, c(1:4), srmod_simp.exo$uci, length=0.05, code=3, angle=90)
-axis(side=1, at=c(1:4), labels=x_labels, tick=F, cex.axis=1)
-title(main = "(c) Exotic", line = 0.5,adj=0)
+axis(side=1, at=c(1:4), labels=x_labels, tick=F, cex.axis=0.8)
+title(main = "(c) Exotic", line = 0.5,adj=0, cex.main=0.95)
 points(c(1:4), srmod_simp.exo$fit,col=c(rep("chartreuse4",2),rep("orange",2)), pch=20, cex=2.5)
 
 #annual
 plot(c(1:4), srmod_simp.ann$fit, xlim=c(0.5,4.5), pch=20, xaxt="n", ylim=c((min(srmod_simp.ann$lci)), max(srmod_simp.ann$uci)), ylab="InvSimpson Diversity", xlab="", las=1, cex=2.5,type="n")
 arrows(c(1:4), srmod_simp.ann$lci, c(1:4), srmod_simp.ann$uci, length=0.05, code=3, angle=90)
-axis(side=1, at=c(1:4), labels=x_labels, tick=F, cex.axis=1)
-title(main = "(d) Annual", line = 0.5,adj=0)
+axis(side=1, at=c(1:4), labels=x_labels, tick=F, cex.axis=0.8)
+title(main = "(d) Annual", line = 0.5,adj=0, cex.main=0.95)
 points(c(1:4), srmod_simp.ann$fit,col=c(rep("chartreuse4",2),rep("orange",2)), pch=20, cex=2.5)
 
 #perennial
 plot(c(1:4), srmod_simp.per$fit, xlim=c(0.5,4.5), pch=20, xaxt="n", ylim=c((min(srmod_simp.per$lci)), max(srmod_simp.per$uci)), ylab="InvSimpson Diversity", xlab="", las=1, cex=2.5,type="n")
 arrows(c(1:4), srmod_simp.per$lci, c(1:4), srmod_simp.per$uci, length=0.05, code=3, angle=90)
-axis(side=1, at=c(1:4), labels=x_labels, tick=F, cex.axis=1)
-title(main = "(e) Perennial", line = 0.5,adj=0)
+axis(side=1, at=c(1:4), labels=x_labels, tick=F, cex.axis=0.8)
+title(main = "(e) Perennial", line = 0.5,adj=0, cex.main=0.95)
 points(c(1:4), srmod_simp.per$fit,col=c(rep("chartreuse4",2),rep("orange",2)), pch=20, cex=2.5)
 
 #forb
 plot(c(1:4), srmod_simp.for$fit, xlim=c(0.5,4.5), pch=20, xaxt="n", ylim=c((min(srmod_simp.for$lci)), max(srmod_simp.for$uci)), ylab="InvSimpson Diversity", xlab="", las=1, cex=2.5,type="n")
 arrows(c(1:4), srmod_simp.for$lci, c(1:4), srmod_simp.for$uci, length=0.05, code=3, angle=90)
-axis(side=1, at=c(1:4), labels=x_labels, tick=F, cex.axis=1)
-title(main = "(f) Forb", line = 0.5,adj=0)
+axis(side=1, at=c(1:4), labels=x_labels, tick=F, cex.axis=0.8)
+title(main = "(f) Forb", line = 0.5,adj=0, cex.main=0.95)
 points(c(1:4), srmod_simp.for$fit,col=c(rep("chartreuse4",2),rep("orange",2)), pch=20, cex=2.5)
 
 #grass
 plot(c(1:4), srmod_simp.gra$fit, xlim=c(0.5,4.5), pch=20, xaxt="n", ylim=c((min(srmod_simp.gra$lci)), max(srmod_simp.gra$uci)), ylab="InvSimpson Diversity", xlab="", las=1, cex=2.5,type="n")
 arrows(c(1:4), srmod_simp.gra$lci, c(1:4), srmod_simp.gra$uci, length=0.05, code=3, angle=90)
-axis(side=1, at=c(1:4), labels=x_labels, tick=F, cex.axis=1)
-title(main = "(g) Grass", line = 0.5,adj=0)
+axis(side=1, at=c(1:4), labels=x_labels, tick=F, cex.axis=0.8)
+title(main = "(g) Grass", line = 0.5,adj=0, cex.main=0.95)
 points(c(1:4), srmod_simp.gra$fit,col=c(rep("chartreuse4",2),rep("orange",2)), pch=20, cex=2.5)
 
 #native grass
 plot(c(1:4), srmod_simp.natgra$fit, xlim=c(0.5,4.5), pch=20, xaxt="n", ylim=c((min(srmod_simp.natgra$lci)), max(srmod_simp.natgra$uci)), ylab="InvSimpson Diversity", xlab="", las=1, cex=2.5,type="n")
 arrows(c(1:4), srmod_simp.natgra$lci, c(1:4), srmod_simp.natgra$uci, length=0.05, code=3, angle=90)
-axis(side=1, at=c(1:4), labels=x_labels, tick=F, cex.axis=1)
-title(main = "(h) Native Grass", line = 0.5,adj=0)
+axis(side=1, at=c(1:4), labels=x_labels, tick=F, cex.axis=0.8)
+title(main = "(h) Native Grass", line = 0.5,adj=0, cex.main=0.95)
 points(c(1:4), srmod_simp.natgra$fit,col=c(rep("chartreuse4",2),rep("orange",2)), pch=20, cex=2.5)
 
 #exotic grass
 plot(c(1:4), srmod_simp.exogra$fit, xlim=c(0.5,4.5), pch=20, xaxt="n", ylim=c((min(srmod_simp.exogra$lci)), max(srmod_simp.exogra$uci)), ylab="InvSimpson Diversity", xlab="", las=1, cex=2.5,type="n")
 arrows(c(1:4), srmod_simp.exogra$lci, c(1:4), srmod_simp.exogra$uci, length=0.05, code=3, angle=90)
-axis(side=1, at=c(1:4), labels=x_labels, tick=F, cex.axis=1)
-title(main = "(i) Exotic Grass", line = 0.5,adj=0)
+axis(side=1, at=c(1:4), labels=x_labels, tick=F, cex.axis=0.8)
+title(main = "(i) Exotic Grass", line = 0.5,adj=0, cex.main=0.95)
 points(c(1:4), srmod_simp.exogra$fit,col=c(rep("chartreuse4",2),rep("orange",2)), pch=20, cex=2.5)
 
 #native forb
 plot(c(1:4), srmod_simp.natfor$fit, xlim=c(0.5,4.5), pch=20, xaxt="n", ylim=c((min(srmod_simp.natfor$lci)), max(srmod_simp.natfor$uci)), ylab="InvSimpson Diversity", xlab="", las=1, cex=2.5,type="n")
 arrows(c(1:4), srmod_simp.natfor$lci, c(1:4), srmod_simp.natfor$uci, length=0.05, code=3, angle=90)
-axis(side=1, at=c(1:4), labels=x_labels, tick=F, cex.axis=1)
-title(main = "(j) Native Forbs", line = 0.5,adj=0)
+axis(side=1, at=c(1:4), labels=x_labels, tick=F, cex.axis=0.8)
+title(main = "(j) Native Forb", line = 0.5,adj=0, cex.main=0.95)
 points(c(1:4), srmod_simp.natfor$fit,col=c(rep("chartreuse4",2),rep("orange",2)), pch=20, cex=2.5)
 
 #exotic forb
 plot(c(1:4), srmod_simp.exofor$fit, xlim=c(0.5,4.5), pch=20, xaxt="n", ylim=c((min(srmod_simp.exofor$lci)), max(srmod_simp.exofor$uci)), ylab="InvSimpson Diversity", xlab="", las=1, cex=2.5,type="n")
 arrows(c(1:4), srmod_simp.exofor$lci, c(1:4), srmod_simp.exofor$uci, length=0.05, code=3, angle=90)
-axis(side=1, at=c(1:4), labels=x_labels, tick=F, cex.axis=1)
-title(main = "(k) Exotic Forbs", line = 0.5,adj=0)
+axis(side=1, at=c(1:4), labels=x_labels, tick=F, cex.axis=0.8)
+title(main = "(k) Exotic Forb", line = 0.5,adj=0, cex.main=0.95)
 points(c(1:4), srmod_simp.exofor$fit,col=c(rep("chartreuse4",2),rep("orange",2)), pch=20, cex=2.5)
 
 #non leg forb
 plot(c(1:4), srmod_simp.nlegfor$fit, xlim=c(0.5,4.5), pch=20, xaxt="n", ylim=c((min(srmod_simp.nlegfor$lci)), max(srmod_simp.nlegfor$uci)), ylab="InvSimpson Diversity", xlab="", las=1, cex=2.5,type="n")
 arrows(c(1:4), srmod_simp.nlegfor$lci, c(1:4), srmod_simp.nlegfor$uci, length=0.05, code=3, angle=90)
-axis(side=1, at=c(1:4), labels=x_labels, tick=F, cex.axis=1)
-title(main = "(l) Non-leg Forbs", line = 0.5,adj=0)
+axis(side=1, at=c(1:4), labels=x_labels, tick=F, cex.axis=0.8)
+title(main = "(l) Non-leg Forb", line = 0.5,adj=0, cex.main=0.95)
 points(c(1:4), srmod_simp.nlegfor$fit,col=c(rep("chartreuse4",2),rep("orange",2)), pch=20, cex=2.5)
+
+#leg forb
+plot(c(1:4), srmod_simp.legfor$fit, xlim=c(0.5,4.5), pch=20, xaxt="n", ylim=c((min(srmod_simp.legfor$lci)), max(srmod_simp.legfor$uci)), ylab="Species Richness", xlab="", las=1, cex=2.5,type="n")
+arrows(c(1:4), srmod_simp.legfor$lci, c(1:4), srmod_simp.legfor$uci, length=0.05, code=3, angle=90)
+axis(side=1, at=c(1:4), labels=x_labels, tick=F, cex.axis=0.8)
+title(main = "(m) Leg Forb", line = 0.5,adj=0, cex.main=0.95)
+points(c(1:4), srmod_simp.legfor$fit,col=c(rep("chartreuse4",2),rep("orange",2)), pch=20, cex=2.5)
+
+par(xpd=NA)
+legend(8,2.3, legend=c("Control", "Burn"), col = c("chartreuse4", "orange"),pch=c(20, 20), cex = (1.45), title = "Legend")
+par(xpd=F)
 
 #simp?
 #div1$agsimp <- diversity(AGmat, index = "invsimpson")
