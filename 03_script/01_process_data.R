@@ -1,6 +1,6 @@
-# Analysis script
+# Analysis script: post-fire soil seedbank dynamics 
 
-# Author Caitlin Gaskell
+# Author: Caitlin Gaskell & Annabel Smith
 
 # ---- libraries
 library(VennDiagram)
@@ -20,7 +20,7 @@ library(ape)
 # ---- load workspace:
 load("04_workspaces/seedbank_analysis.RData")
 
-# ---- import data ----
+# ---- Import data ----
 
 #combined species list of above and below ground, including non identified
 combospec<-read.table("01_data/combinedspecies.txt",header=T)
@@ -142,7 +142,7 @@ grid.draw(venn.plot)
 dev.off()
 # ----
 
-# ---- define functional groups ----
+# ---- Define functional groups ----
 head(BGspecid,4);dim(BGspecid)
 head(AGspecid,4);dim(AGspecid)
 
@@ -205,7 +205,7 @@ group.df <- data.frame(group = c("BG.native","BG.exotic","BG.annual","BG.perr", 
 
 # ----
 
-# ---- site x species matrix ----
+# ---- Site x species matrix ----
 
 #AG ssm
 head(AGdata); dim(AGdata)
@@ -235,7 +235,7 @@ table(rownames(AGmat) %in% rownames(BGmat))
 
 # ----
 
-# ---- species richness of functional groups ----
+# ---- Species richness: functional groups ----
 
 rich.data<-list()
 simp.data<-list()
@@ -314,7 +314,7 @@ gdf$ylab<-c("AG all","BG all","BG Native","BG Exotic","BG Annual","BG Perennial"
 
 # ----
 
-# prepare data for analysis ----
+# Species richness: data set-up  ----
 
 # div4 & div5
 div2 <- cnt_rich[, 1:5]
@@ -356,7 +356,7 @@ div4$ab <- factor(div4$ab, levels = c("above","below"))
 
 # ----
 
-# model species richness ----
+# Species richness: modelling  ----
 
 #---- SR GLMERs: all interactions insignificant and removed; additive models used as final models
 
@@ -490,7 +490,7 @@ summary(srmod_nonlegfor)
 
 # ----
 
-# model estimates: species richness ----
+# Species richness: model estimates ----
 
 # ND for all models
 
@@ -620,7 +620,7 @@ head(srmod_nonlegfor1)
 
 # ----
 
-# plot species richness ----
+# Species richness: estimates ----
 
 head(srmod_all1)
 head(srmod_nat1)
@@ -768,22 +768,23 @@ colnames(ALLmat.ag) <- cols_all1
 rownames(ALLmat.ag) <- rownames_ag
 ALLmat.ag[1:nrow(AGmat2), colnames(AGmat2)] <- AGmat2
 head(ALLmat.ag,3); dim(ALLmat.ag)
-# up to here
 
 ALLmat.bg <- matrix(0, nrow = length(rownames_bg), ncol = length(cols_all1))
 colnames(ALLmat.bg) <- cols_all1
 rownames(ALLmat.bg) <- rownames_bg
 ALLmat.bg[1:nrow(BGmat2), colnames(BGmat2)] <- BGmat2
+head(ALLmat.bg,3); dim(ALLmat.bg)
 
-head(ALLmat.ag,3); dim(ALL.mat.ag)
+# these should all be true
+table(colnames(ALLmat.ag)==colnames(ALLmat.bg))
 
-#ALLmat - combined above/below ssm
+# ALLmat - combined above/below ssm
 ALLmat <- rbind(ALLmat.ag, ALLmat.bg)
 
-#div 6 - presence/absence ssm
+# change counts (bg) and covers (ag) to presence/absence 
 div6 <- ALLmat
 div6[div6 > 0] <- 1
-head(div6);dim(div6)
+head(div6[,1:10],4);dim(div6)
 
 # save.image("04_workspaces/seedbank_analysis.RData")
 
@@ -826,41 +827,47 @@ nd2$quadratID2 <- paste(nd2$quadratID,nd2$ab, sep=".")
 pcadata2 <- merge(pcadata,nd2, by.x = "quadratID", by.y = "quadratID2", all.x = T, all.y = F)
 head(pcadata2);dim(pcadata2)
 
-#modelling pca components 1-3
-#comp1
-#comp1_lmer.int<-lmer(pca.comp1~ab*burn_trt+(1|transect), data=pcadata2)
-#summary(comp1_lmer.int)
+# save.image("04_workspaces/seedbank_analysis.RData")
+
+# ----
+
+# Model Principal Components components 1-3 ----
+ 
+# comp1
+comp1_lmer.int<-lmer(pca.comp1~ab*burn_trt+(1|transect), data=pcadata2)
+summary(comp1_lmer.int)
 
 comp1_lmer<-lmer(pca.comp1~ab+burn_trt+(1|transect), data=pcadata2)
 summary(comp1_lmer)
 
-#comp2
-#comp2_lmer.int<-lmer(pca.comp2~ab*burn_trt+(1|transect), data=pcadata2)
-#summary(comp2_lmer.int)
+# comp2
+comp2_lmer.int<-lmer(pca.comp2~ab*burn_trt+(1|transect), data=pcadata2)
+summary(comp2_lmer.int)
 
 comp2_lmer<-lmer(pca.comp2~ab+burn_trt+(1|transect), data=pcadata2)
 summary(comp2_lmer)
 
-#comp3
-#comp3_lmer.int<-lmer(pca.comp3~ab*burn_trt+(1|transect), data=pcadata2)
-#summary(comp3_lmer.int)
+# comp3
+comp3_lmer.int<-lmer(pca.comp3~ab*burn_trt+(1|transect), data=pcadata2)
+summary(comp3_lmer.int)
 
 comp3_lmer<-lmer(pca.comp3~ab+burn_trt+(1|transect), data=pcadata2)
 summary(comp3_lmer)
 
-#plotting pca
+# save.image("04_workspaces/seedbank_analysis.RData")
+
+# ----
+
+# plot PCA ----
 shapes<-c(15,17)
 shapes<-shapes[as.factor(pcadata2$ab)]
 col.1<-c("grey60","grey20")
 col.1<-col.1[as.factor(pcadata2$burn_trt)]
-View(shapes)
-View(col.1)
-
 
 dev.new(height=8,width=10,dpi=80,pointsize=14,noRStudioGD = T)
-
-#scree plot
 par(mar=c(4,4,2,2),mfrow=c(2,2),mgp=c(3,1,0), oma=c(0,0,0,8))
+
+# scree plot
 plot(x=1:length(pov1),y=pov1,ylab="Propotion Variance Explained",xlab="Components",type="p", las=1)
 lines(x=1:length(pov1),y=pov1)
 mtext("(a)",3,0.7,F,0)
@@ -868,42 +875,42 @@ mtext("(a)",3,0.7,F,0)
 #biplot(pca1, xlab="Component 1", ylab="Component 2", col=c("grey40","black"), var.axes=TRUE, arrow.len=0.1, choices=c(3, 4))
 #mtext("(b)",3,0.7,F,adj = 0)
 
-#1 vs 2
+# 1 vs 2
 plot(pcadata2$pca.comp1,pcadata2$pca.comp2,pch=shapes, xlab="",ylab="",cex=2,col=alpha(col.1,1), las=1)
-#legend("bottomright",legend=c("Control Sites", "Burn Sites"),pch=c(15,17),pt.cex=2,col=c("grey60","grey20"))
 mtext("(b)",3,0.4,F,adj=0)
 title(ylab="PC2",cex=1.2, mgp=c(2.5,1,0))
 title(xlab="PC1",cex=1.2, mgp=c(2.5,1,0))
 text(x=c(-0.61888015), y=c(-7.32836938), labels= c("T26_20"), pos=4)
 text(x=c(14.84107197), y=c(-0.54987242), labels= c("T06_57"), pos=2)
 
+# Add legend
 par(xpd=NA)
 legend(3.5,2, legend=c("Control Above", "Control Below", "Burnt Above", "Burnt Below"), col = c("grey60", "grey60", "grey20", "grey20"),pch=c(15, 17, 15, 17))
 par(xpd=F)
 
-#1 vs 3
+# 1 vs 3
 plot(pcadata2$pca.comp1,pcadata2$pca.comp3,pch=shapes, xlab="",ylab="",cex=2,col=alpha(col.1,1), las=1)
-#legend("bottomright",legend=c("Control Sites", "Burn Sites"),pch=c(15,17),pt.cex=2,col=c("grey60","grey20"))
 mtext("(c)",3,0.4,F,adj=0)
 title(ylab="PC3",cex=1.2, mgp=c(2.5,1,0))
 title(xlab="PC1",cex=1.2, mgp=c(2.5,1,0))
 text(x=c(0.49994222), y=c(-6.582940182), labels= c("T10_06"), pos=4)
 text(x=c(14.84107197), y=c(0.614645118), labels= c("T06_57"), pos=2)
 
-#2 vs 3
+# 2 vs 3
 plot(pcadata2$pca.comp2,pcadata2$pca.comp3,pch=shapes, xlab="",ylab="",cex=2,col=alpha(col.1,1), las=1)
-#legend("bottomleft",legend=c("Control Sites", "Burn Sites"),pch=c(15,17),pt.cex=2,col=c("grey60","grey20"))
 mtext("(d)",3,0.4,F,adj=0)
 title(ylab="PC3",cex=1.2, mgp=c(2.5,1,0))
 title(xlab="PC2",cex=1.2, mgp=c(2.5,1,0))
 text(x=c(0.69979374), y=c(-6.582940182), labels= c("T10_06"), pos=2)
 text(x=c(-7.32836938), y=c(1.416516483), labels= c("T26_20"), pos=4)
 
+# save.image("04_workspaces/seedbank_analysis.RData")
+
 # ----
 
-# Beta diversity ----
+# Beta diversity: data set-up ----
 
-#all
+# all
 head(div4);dim(div4)
 head(AGmat[,1:10]);dim(AGmat)
 head(BGmat[,1:10]);dim(BGmat)
@@ -919,374 +926,389 @@ BGbeta <- BGgam/(div4$all[which(div4$ab == "below")])
 
 div4$beta.all <- c(AGbeta, BGbeta)
 
-#beta native
+# beta native
 AGbeta.nat <- group.df$no_species[group.df$group == "AG.native"]/(div4$native[which(div4$ab == "above")])
 BGbeta.nat <- group.df$no_species[group.df$group == "BG.native"]/(div4$native[which(div4$ab == "below")])
   
 div4$beta.nat <- c(AGbeta.nat, BGbeta.nat)
 
-#beta exotic
+# beta exotic
 AGbeta.exo <- group.df$no_species[group.df$group == "AG.exotic"]/(div4$exotic[which(div4$ab == "above")])
 BGbeta.exo <- group.df$no_species[group.df$group == "BG.exotic"]/(div4$exotic[which(div4$ab == "below")])
 
 div4$beta.exo <- c(AGbeta.exo, BGbeta.exo)
 
-#beta exotic
+# beta exotic
 AGbeta.exo <- group.df$no_species[group.df$group == "AG.exotic"]/(div4$exotic[which(div4$ab == "above")])
 BGbeta.exo <- group.df$no_species[group.df$group == "BG.exotic"]/(div4$exotic[which(div4$ab == "below")])
 
 div4$beta.exo <- c(AGbeta.exo, BGbeta.exo)
 
-#beta annual
+# beta annual
 AGbeta.ann <- ifelse(div4$annual[which(div4$ab == "above")] == 0, 0, group.df$no_species[group.df$group == "AG.annual"] /div4$annual[which(div4$ab == "above")])
 BGbeta.ann <- ifelse(div4$annual[which(div4$ab == "below")] == 0, 0, group.df$no_species[group.df$group == "BG.annual"] /div4$annual[which(div4$ab == "below")])
 
 div4$beta.ann <- c(AGbeta.ann, BGbeta.ann)
 
-
-#beta perennial
+# beta perennial
 AGbeta.per <- group.df$no_species[group.df$group == "AG.perr"]/(div4$perr[which(div4$ab == "above")])
 BGbeta.per <- group.df$no_species[group.df$group == "BG.perr"]/(div4$perr[which(div4$ab == "below")])
 
 div4$beta.per <- c(AGbeta.per, BGbeta.per)
 
-#beta forb
+# beta forb
 AGbeta.for <- group.df$no_species[group.df$group == "AG.forb"]/(div4$forb[which(div4$ab == "above")])
 BGbeta.for <- group.df$no_species[group.df$group == "BG.forb"]/(div4$forb[which(div4$ab == "below")])
 
 div4$beta.for <- c(AGbeta.for, BGbeta.for)
 
-#beta grass
+# beta grass
 AGbeta.gra <- group.df$no_species[group.df$group == "AG.grass"]/(div4$grass[which(div4$ab == "above")])
 BGbeta.gra <- group.df$no_species[group.df$group == "BG.grass"]/(div4$grass[which(div4$ab == "below")])
 
 div4$beta.gra <- c(AGbeta.gra, BGbeta.gra)
 
-#beta native grass
+# beta native grass
 AGbeta.natgra <- group.df$no_species[group.df$group == "AG.native_grass"]/(div4$native_grass[which(div4$ab == "above")])
 BGbeta.natgra <- group.df$no_species[group.df$group == "BG.native_grass"]/(div4$native_grass[which(div4$ab == "below")])
 
 div4$beta.natgra <- c(AGbeta.natgra, BGbeta.natgra)
 
-#beta exotic grass
+# beta exotic grass
 AGbeta.exogra <- ifelse(div4$exotic_grass[which(div4$ab == "above")] == 0, 0, group.df$no_species[group.df$group == "AG.exotic_grass"] /div4$exotic_grass[which(div4$ab == "above")])
 BGbeta.exogra <- ifelse(div4$exotic_grass[which(div4$ab == "below")] == 0, 0, group.df$no_species[group.df$group == "BG.exotic_grass"] /div4$exotic_grass[which(div4$ab == "below")])
 
 div4$beta.exogra <- c(AGbeta.exogra, BGbeta.exogra)
 
-#beta native forb
+# beta native forb
 AGbeta.natfor <- group.df$no_species[group.df$group == "AG.native_forb"]/(div4$native_forb[which(div4$ab == "above")])
 BGbeta.natfor <- group.df$no_species[group.df$group == "BG.native_forb"]/(div4$native_forb[which(div4$ab == "below")])
 
 div4$beta.natfor <- c(AGbeta.natfor, BGbeta.natfor)
 
-#beta exotic forb
+# beta exotic forb
 AGbeta.exofor <- ifelse(div4$exotic_forb[which(div4$ab == "above")] == 0, 0, group.df$no_species[group.df$group == "AG.exotic_forb"] /div4$exotic_forb[which(div4$ab == "above")])
 BGbeta.exofor <- ifelse(div4$exotic_forb[which(div4$ab == "below")] == 0, 0, group.df$no_species[group.df$group == "BG.exotic_forb"] /div4$exotic_forb[which(div4$ab == "below")])
 
 div4$beta.exofor <- c(AGbeta.exofor, BGbeta.exofor)
 
-
-#beta non leguminous forb
+# beta non leguminous forb
 AGbeta.nlegfor <- ifelse(div4$nonleg_forb[which(div4$ab == "above")] == 0, 0, group.df$no_species[group.df$group == "AG.nonleg_forb"] /div4$nonleg_forb[which(div4$ab == "above")])
 BGbeta.nlegfor <- ifelse(div4$nonleg_forb[which(div4$ab == "below")] == 0, 0, group.df$no_species[group.df$group == "BG.nonleg_forb"] /div4$nonleg_forb[which(div4$ab == "below")])
 
 div4$beta.nlegfor <- c(AGbeta.nlegfor, BGbeta.nlegfor)
 
-#beta leguminous forb
+# beta leguminous forb
 AGbeta.legfor <- ifelse(div4$leg_forb[which(div4$ab == "above")] == 0, 0, group.df$no_species[group.df$group == "AG.leg_forb"] /div4$leg_forb[which(div4$ab == "above")])
 BGbeta.legfor <- ifelse(div4$leg_forb[which(div4$ab == "below")] == 0, 0, group.df$no_species[group.df$group == "BG.leg_forb"] /div4$leg_forb[which(div4$ab == "below")])
 
 div4$beta.legfor <- c(AGbeta.legfor, BGbeta.legfor)
 
-#beta diversity modelling - lmer. all interactions insignificant except total, annual, perennial. all else uses additive models in further analysis.
-#all -> interaction significant
+# save.image("04_workspaces/seedbank_analysis.RData")
+
+# ----
+
+# Beta diversity: modelling ----
+
+# beta diversity modelling - lmer. all interactions insignificant except total, annual, perennial. all else uses additive models in further analysis.
+
+# all -> interaction significant
 allbeta<-lmer(beta.all~ab*burn_trt+(1|transect), data=div4)
 summary(allbeta)
 
-#allbeta1<-lmer(beta.all~ab+burn_trt+(1|transect), data=div4)
-#summary(allbeta1)
+# allbeta1<-lmer(beta.all~ab+burn_trt+(1|transect), data=div4)
+# summary(allbeta1)
 
-#native
-#natbeta<-lmer(beta.nat~ab*burn_trt+(1|transect), data=div4)
-#summary(natbeta)
+# native
+natbeta<-lmer(beta.nat~ab*burn_trt+(1|transect), data=div4)
+summary(natbeta)
 
 natbeta2<-lmer(beta.nat~ab+burn_trt+(1|transect), data=div4)
 summary(natbeta2)
 
-#exotic
-#exobeta<-lmer(beta.exo~ab*burn_trt+(1|transect), data=div4)
-#summary(exobeta)
+# exotic
+exobeta<-lmer(beta.exo~ab*burn_trt+(1|transect), data=div4)
+summary(exobeta)
 
 exobeta2<-lmer(beta.exo~ab+burn_trt+(1|transect), data=div4)
 summary(exobeta2)
 
-#annual - interaction significant
+# annual - interaction significant
 annbeta<-lmer(beta.ann~ab*burn_trt+(1|transect), data=div4)
 summary(annbeta)
 
-#annbeta2<-lmer(beta.ann~ab+burn_trt+(1|transect), data=div4)
-#summary(annbeta2)
+# annbeta2<-lmer(beta.ann~ab+burn_trt+(1|transect), data=div4)
+# summary(annbeta2)
 
-#perennial - interaction significant
+# perennial - interaction significant
 perbeta<-lmer(beta.per~ab*burn_trt+(1|transect), data=div4)
 summary(perbeta)
 
-#perbeta2<-lmer(beta.per~ab+burn_trt+(1|transect), data=div4)
-#summary(perbeta)
+# perbeta2<-lmer(beta.per~ab+burn_trt+(1|transect), data=div4)
+# summary(perbeta)
 
-#forb
-#forbeta<-lmer(beta.for~ab*burn_trt+(1|transect), data=div4)
-#summary(forbeta)
+# forb
+forbeta<-lmer(beta.for~ab*burn_trt+(1|transect), data=div4)
+summary(forbeta)
 
 forbeta2<-lmer(beta.for~ab+burn_trt+(1|transect), data=div4)
 summary(forbeta2)
 
-#grass
-#grabeta<-lmer(beta.gra~ab*burn_trt+(1|transect), data=div4)
-#summary(grabeta)
+# grass
+grabeta<-lmer(beta.gra~ab*burn_trt+(1|transect), data=div4)
+summary(grabeta)
 
 grabeta2<-lmer(beta.gra~ab+burn_trt+(1|transect), data=div4)
 summary(grabeta2)
 
-#native grass
-#natgrabeta<-lmer(beta.natgra~ab*burn_trt+(1|transect), data=div4)
-#summary(natgrabeta)
+# native grass
+natgrabeta<-lmer(beta.natgra~ab*burn_trt+(1|transect), data=div4)
+summary(natgrabeta)
 
 natgrabeta2<-lmer(beta.natgra~ab+burn_trt+(1|transect), data=div4)
 summary(natgrabeta2)
 
-#exotic grass
-#exograbeta<-lmer(beta.exogra~ab*burn_trt+(1|transect), data=div4)
-#summary(exograbeta)
+# exotic grass
+exograbeta<-lmer(beta.exogra~ab*burn_trt+(1|transect), data=div4)
+summary(exograbeta)
 
 exograbeta2<-lmer(beta.exogra~ab+burn_trt+(1|transect), data=div4)
 summary(exograbeta2)
 
-#native forb
-#natforbeta<-lmer(beta.natfor~ab*burn_trt+(1|transect), data=div4)
-#summary(natforbeta)
+# native forb
+natforbeta<-lmer(beta.natfor~ab*burn_trt+(1|transect), data=div4)
+summary(natforbeta)
 
 natforbeta2<-lmer(beta.natfor~ab+burn_trt+(1|transect), data=div4)
 summary(natforbeta2)
 
-#exotic forb
-#exoforbeta<-lmer(beta.exofor~ab*burn_trt+(1|transect), data=div4)
-#summary(exoforbeta)
+# exotic forb
+exoforbeta<-lmer(beta.exofor~ab*burn_trt+(1|transect), data=div4)
+summary(exoforbeta)
 
 exoforbeta2<-lmer(beta.exofor~ab+burn_trt+(1|transect), data=div4)
 summary(exoforbeta2)
 
-#non leg forb
-#nlegbeta<-lmer(beta.nlegfor~ab*burn_trt+(1|transect), data=div4)
-#summary(nlegbeta)
+# non leg forb
+nlegbeta<-lmer(beta.nlegfor~ab*burn_trt+(1|transect), data=div4)
+summary(nlegbeta)
 
 nlegbeta2<-lmer(beta.nlegfor~ab+burn_trt+(1|transect), data=div4)
 summary(nlegbeta2)
 round(summary(nlegbeta2)$coefficient,3)
 
-#leg forb
-#legbeta<-lmer(beta.legfor~ab*burn_trt+(1|transect), data=div4)
-#summary(legbeta)
+# leg forb
+legbeta<-lmer(beta.legfor~ab*burn_trt+(1|transect), data=div4)
+summary(legbeta)
 
 legbeta2<-lmer(beta.legfor~ab+burn_trt+(1|transect), data=div4)
 summary(legbeta2)
 round(summary(legbeta2)$coefficient,3)
 
-#predictse beta diversity
-#all
+# save.image("04_workspaces/seedbank_analysis.RData")
+
+# ----
+
+# Beta diversity: model estimates ----
+
+# predictSE beta diversity
+
+# all
 srmod_beta.all <- predictSE(mod=allbeta,newdata=nd1,type="response",se.fit = T)
 srmod_beta.all <- data.frame(nd1, fit = srmod_beta.all$fit, se = srmod_beta.all$se.fit)
 srmod_beta.all$lci <- srmod_beta.all$fit-(srmod_beta.all$se*1.96)
 srmod_beta.all$uci <- srmod_beta.all$fit+(srmod_beta.all$se*1.96)
 head(srmod_beta.all)
 
-#native
+# native
 srmod_beta.nat <- predictSE(mod=natbeta2,newdata=nd1,type="response",se.fit = T)
 srmod_beta.nat <- data.frame(nd1, fit = srmod_beta.nat$fit, se = srmod_beta.nat$se.fit)
 srmod_beta.nat$lci <- srmod_beta.nat$fit-(srmod_beta.nat$se*1.96)
 srmod_beta.nat$uci <- srmod_beta.nat$fit+(srmod_beta.nat$se*1.96)
 head(srmod_beta.nat)
 
-#exotic
+# exotic
 srmod_beta.exo <- predictSE(mod=exobeta2,newdata=nd1,type="response",se.fit = T)
 srmod_beta.exo <- data.frame(nd1, fit = srmod_beta.exo$fit, se = srmod_beta.exo$se.fit)
 srmod_beta.exo$lci <- srmod_beta.exo$fit-(srmod_beta.exo$se*1.96)
 srmod_beta.exo$uci <- srmod_beta.exo$fit+(srmod_beta.exo$se*1.96)
 head(srmod_beta.exo)
 
-#annual
+# annual
 srmod_beta.ann <- predictSE(mod=annbeta,newdata=nd1,type="response",se.fit = T)
 srmod_beta.ann <- data.frame(nd1, fit = srmod_beta.ann$fit, se = srmod_beta.ann$se.fit)
 srmod_beta.ann$lci <- srmod_beta.ann$fit-(srmod_beta.ann$se*1.96)
 srmod_beta.ann$uci <- srmod_beta.ann$fit+(srmod_beta.ann$se*1.96)
 head(srmod_beta.ann)
 
-#perennial
+# perennial
 srmod_beta.per <- predictSE(mod=perbeta,newdata=nd1,type="response",se.fit = T)
 srmod_beta.per <- data.frame(nd1, fit = srmod_beta.per$fit, se = srmod_beta.per$se.fit)
 srmod_beta.per$lci <- srmod_beta.per$fit-(srmod_beta.per$se*1.96)
 srmod_beta.per$uci <- srmod_beta.per$fit+(srmod_beta.per$se*1.96)
 head(srmod_beta.per)
 
-#forb
+# forb
 srmod_beta.for <- predictSE(mod=forbeta2,newdata=nd1,type="response",se.fit = T)
 srmod_beta.for <- data.frame(nd1, fit = srmod_beta.for$fit, se = srmod_beta.for$se.fit)
 srmod_beta.for$lci <- srmod_beta.for$fit-(srmod_beta.for$se*1.96)
 srmod_beta.for$uci <- srmod_beta.for$fit+(srmod_beta.for$se*1.96)
 head(srmod_beta.for)
 
-#grass
+# grass
 srmod_beta.gra <- predictSE(mod=grabeta2,newdata=nd1,type="response",se.fit = T)
 srmod_beta.gra <- data.frame(nd1, fit = srmod_beta.gra$fit, se = srmod_beta.gra$se.fit)
 srmod_beta.gra$lci <- srmod_beta.gra$fit-(srmod_beta.gra$se*1.96)
 srmod_beta.gra$uci <- srmod_beta.gra$fit+(srmod_beta.gra$se*1.96)
 head(srmod_beta.gra)
 
-#native grass
+# native grass
 srmod_beta.natgra <- predictSE(mod=natgrabeta2,newdata=nd1,type="response",se.fit = T)
 srmod_beta.natgra <- data.frame(nd1, fit = srmod_beta.natgra$fit, se = srmod_beta.natgra$se.fit)
 srmod_beta.natgra$lci <- srmod_beta.natgra$fit-(srmod_beta.natgra$se*1.96)
 srmod_beta.natgra$uci <- srmod_beta.natgra$fit+(srmod_beta.natgra$se*1.96)
 head(srmod_beta.natgra)
 
-#exotic grass
+# exotic grass
 srmod_beta.exogra <- predictSE(mod=exograbeta2,newdata=nd1,type="response",se.fit = T)
 srmod_beta.exogra <- data.frame(nd1, fit = srmod_beta.exogra$fit, se = srmod_beta.exogra$se.fit)
 srmod_beta.exogra$lci <- srmod_beta.exogra$fit-(srmod_beta.exogra$se*1.96)
 srmod_beta.exogra$uci <- srmod_beta.exogra$fit+(srmod_beta.exogra$se*1.96)
 head(srmod_beta.exogra)
 
-#native forb
+# native forb
 srmod_beta.natfor <- predictSE(mod=natforbeta2,newdata=nd1,type="response",se.fit = T)
 srmod_beta.natfor <- data.frame(nd1, fit = srmod_beta.natfor$fit, se = srmod_beta.natfor$se.fit)
 srmod_beta.natfor$lci <- srmod_beta.natfor$fit-(srmod_beta.natfor$se*1.96)
 srmod_beta.natfor$uci <- srmod_beta.natfor$fit+(srmod_beta.natfor$se*1.96)
 head(srmod_beta.natfor)
 
-#exotic forb
+# exotic forb
 srmod_beta.exofor <- predictSE(mod=exoforbeta2,newdata=nd1,type="response",se.fit = T)
 srmod_beta.exofor <- data.frame(nd1, fit = srmod_beta.exofor$fit, se = srmod_beta.exofor$se.fit)
 srmod_beta.exofor$lci <- srmod_beta.exofor$fit-(srmod_beta.exofor$se*1.96)
 srmod_beta.exofor$uci <- srmod_beta.exofor$fit+(srmod_beta.exofor$se*1.96)
 head(srmod_beta.exofor)
 
-#non-leguminous forb
+# non-leguminous forb
 srmod_beta.nlegfor <- predictSE(mod=nlegbeta2,newdata=nd1,type="response",se.fit = T)
 srmod_beta.nlegfor <- data.frame(nd1, fit = srmod_beta.nlegfor$fit, se = srmod_beta.nlegfor$se.fit)
 srmod_beta.nlegfor$lci <- srmod_beta.nlegfor$fit-(srmod_beta.nlegfor$se*1.96)
 srmod_beta.nlegfor$uci <- srmod_beta.nlegfor$fit+(srmod_beta.nlegfor$se*1.96)
 head(srmod_beta.nlegfor)
 
-#leguminous forb
+# leguminous forb
 srmod_beta.legfor <- predictSE(mod=legbeta2,newdata=nd1,type="response",se.fit = T)
 srmod_beta.legfor <- data.frame(nd1, fit = srmod_beta.legfor$fit, se = srmod_beta.legfor$se.fit)
 srmod_beta.legfor$lci <- srmod_beta.legfor$fit-(srmod_beta.legfor$se*1.96)
 srmod_beta.legfor$uci <- srmod_beta.legfor$fit+(srmod_beta.legfor$se*1.96)
 head(srmod_beta.legfor)
 
+# save.image("04_workspaces/seedbank_analysis.RData")
+
 # ----
 
-# Plot beta diversity ----
+# Beta diversity: plot estimates ----
 
-dev.new(width=9,height=15,dpi=160,pointsize=12, noRStudioGD = T)
-par(mfrow=c(5,3),mar=c(4,4,1.5,1), mgp=c(2.5,1,0))
+dev.new(width=8.27,height=11.69,dpi=70,pointsize=18, noRStudioGD = T)
+par(mfrow=c(5,3),mar=c(4,4,1.5,1), mgp=c(2.4,1,0))
 
-#all
+# all
 plot(c(1:4), srmod_beta.all$fit, xlim=c(0.5,4.5), pch=20, xaxt="n", ylim=c((min(srmod_beta.all$lci)), max(srmod_beta.all$uci)), ylab="Beta Diversity", xlab="", las=1, cex=2.5,type="n")
 arrows(c(1:4), srmod_beta.all$lci, c(1:4), srmod_beta.all$uci, length=0.05, code=3, angle=90)
-axis(side=1, at=c(1:4), labels=x_labels, tick=F, cex.axis=0.8)
-title(main = "(a) Total*", line = 0.5,adj=0, cex.main=0.95)
+axis(side=1, at=c(1:4), labels=x_labels, tick=T, cex.axis=0.8)
+title(main = "(a) Total *", line = 0.5,adj=0, cex.main=0.95)
 points(c(1:4), srmod_beta.all$fit,col=c(rep("chartreuse4",2),rep("orange",2)), pch=20, cex=2.5)
 
-#native
+# native
 plot(c(1:4), srmod_beta.nat$fit, xlim=c(0.5,4.5), pch=20, xaxt="n", ylim=c((min(srmod_beta.nat$lci)), max(srmod_beta.nat$uci)), ylab="Beta Diversity", xlab="", las=1, cex=2.5,type="n")
 arrows(c(1:4), srmod_beta.nat$lci, c(1:4), srmod_beta.nat$uci, length=0.05, code=3, angle=90)
-axis(side=1, at=c(1:4), labels=x_labels, tick=F, cex.axis=0.8)
+axis(side=1, at=c(1:4), labels=x_labels, tick=T, cex.axis=0.8)
 title(main = "(b) Native", line = 0.5,adj=0, cex.main=0.95)
 points(c(1:4), srmod_beta.nat$fit,col=c(rep("chartreuse4",2),rep("orange",2)), pch=20, cex=2.5)
 
-#exotic
+# exotic
 plot(c(1:4), srmod_beta.exo$fit, xlim=c(0.5,4.5), pch=20, xaxt="n", ylim=c((min(srmod_beta.exo$lci)), max(srmod_beta.exo$uci)), ylab="Beta Diversity", xlab="", las=1, cex=2.5,type="n")
 arrows(c(1:4), srmod_beta.exo$lci, c(1:4), srmod_beta.exo$uci, length=0.05, code=3, angle=90)
-axis(side=1, at=c(1:4), labels=x_labels, tick=F, cex.axis=0.8)
+axis(side=1, at=c(1:4), labels=x_labels, tick=T, cex.axis=0.8)
 title(main = "(c) Exotic", line = 0.5,adj=0, cex.main=0.95)
 points(c(1:4), srmod_beta.exo$fit,col=c(rep("chartreuse4",2),rep("orange",2)), pch=20, cex=2.5)
 
-#annual
+# annual
 plot(c(1:4), srmod_beta.ann$fit, xlim=c(0.5,4.5), pch=20, xaxt="n", ylim=c((min(srmod_beta.ann$lci)), max(srmod_beta.ann$uci)), ylab="Beta Diversity", xlab="", las=1, cex=2.5,type="n")
 arrows(c(1:4), srmod_beta.ann$lci, c(1:4), srmod_beta.ann$uci, length=0.05, code=3, angle=90)
-axis(side=1, at=c(1:4), labels=x_labels, tick=F, cex.axis=0.8)
-title(main = "(d) Annual*", line = 0.5,adj=0, cex.main=0.95)
+axis(side=1, at=c(1:4), labels=x_labels, tick=T, cex.axis=0.8)
+title(main = "(d) Annual *", line = 0.5,adj=0, cex.main=0.95)
 points(c(1:4), srmod_beta.ann$fit,col=c(rep("chartreuse4",2),rep("orange",2)), pch=20, cex=2.5)
 
-#perennial
+# perennial
 plot(c(1:4), srmod_beta.per$fit, xlim=c(0.5,4.5), pch=20, xaxt="n", ylim=c((min(srmod_beta.per$lci)), max(srmod_beta.per$uci)), ylab="Beta Diversity", xlab="", las=1, cex=2.5,type="n")
 arrows(c(1:4), srmod_beta.per$lci, c(1:4), srmod_beta.per$uci, length=0.05, code=3, angle=90)
-axis(side=1, at=c(1:4), labels=x_labels, tick=F, cex.axis=0.8)
-title(main = "(e) Perennial*", line = 0.5,adj=0, cex.main=0.95)
+axis(side=1, at=c(1:4), labels=x_labels, tick=T, cex.axis=0.8)
+title(main = "(e) Perennial *", line = 0.5,adj=0, cex.main=0.95)
 points(c(1:4), srmod_beta.per$fit,col=c(rep("chartreuse4",2),rep("orange",2)), pch=20, cex=2.5)
 
-#forb
+# forb
 plot(c(1:4), srmod_beta.for$fit, xlim=c(0.5,4.5), pch=20, xaxt="n", ylim=c((min(srmod_beta.for$lci)), max(srmod_beta.for$uci)), ylab="Beta Diversity", xlab="", las=1, cex=2.5,type="n")
 arrows(c(1:4), srmod_beta.for$lci, c(1:4), srmod_beta.for$uci, length=0.05, code=3, angle=90)
-axis(side=1, at=c(1:4), labels=x_labels, tick=F, cex.axis=0.8)
+axis(side=1, at=c(1:4), labels=x_labels, tick=T, cex.axis=0.8)
 title(main = "(f) Forb", line = 0.5,adj=0, cex.main=0.95)
 points(c(1:4), srmod_beta.for$fit,col=c(rep("chartreuse4",2),rep("orange",2)), pch=20, cex=2.5)
 
-#grass
+# grass
 plot(c(1:4), srmod_beta.gra$fit, xlim=c(0.5,4.5), pch=20, xaxt="n", ylim=c((min(srmod_beta.gra$lci)), max(srmod_beta.gra$uci)), ylab="Beta Diversity", xlab="", las=1, cex=2.5,type="n")
 arrows(c(1:4), srmod_beta.gra$lci, c(1:4), srmod_beta.gra$uci, length=0.05, code=3, angle=90)
-axis(side=1, at=c(1:4), labels=x_labels, tick=F, cex.axis=0.8)
+axis(side=1, at=c(1:4), labels=x_labels, tick=T, cex.axis=0.8)
 title(main = "(g) Grass", line = 0.5,adj=0, cex.main=0.95)
 points(c(1:4), srmod_beta.gra$fit,col=c(rep("chartreuse4",2),rep("orange",2)), pch=20, cex=2.5)
 
-#native grass
+# native grass
 plot(c(1:4), srmod_beta.natgra$fit, xlim=c(0.5,4.5), pch=20, xaxt="n", ylim=c((min(srmod_beta.natgra$lci)), max(srmod_beta.natgra$uci)), ylab="Beta Diversity", xlab="", las=1, cex=2.5,type="n")
 arrows(c(1:4), srmod_beta.natgra$lci, c(1:4), srmod_beta.natgra$uci, length=0.05, code=3, angle=90)
-axis(side=1, at=c(1:4), labels=x_labels, tick=F, cex.axis=0.8)
+axis(side=1, at=c(1:4), labels=x_labels, tick=T, cex.axis=0.8)
 title(main = "(h) Native Grass", line = 0.5,adj=0, cex.main=0.95)
 points(c(1:4), srmod_beta.natgra$fit,col=c(rep("chartreuse4",2),rep("orange",2)), pch=20, cex=2.5)
 
-#exotic grass
+# exotic grass
 plot(c(1:4), srmod_beta.exogra$fit, xlim=c(0.5,4.5), pch=20, xaxt="n", ylim=c((min(srmod_beta.exogra$lci)), max(srmod_beta.exogra$uci)), ylab="Beta Diversity", xlab="", las=1, cex=2.5,type="n")
 arrows(c(1:4), srmod_beta.exogra$lci, c(1:4), srmod_beta.exogra$uci, length=0.05, code=3, angle=90)
-axis(side=1, at=c(1:4), labels=x_labels, tick=F, cex.axis=0.8)
+axis(side=1, at=c(1:4), labels=x_labels, tick=T, cex.axis=0.8)
 title(main = "(i) Exotic Grass", line = 0.5,adj=0, cex.main=0.95)
 points(c(1:4), srmod_beta.exogra$fit,col=c(rep("chartreuse4",2),rep("orange",2)), pch=20, cex=2.5)
 
-#native forb
+# native forb
 plot(c(1:4), srmod_beta.natfor$fit, xlim=c(0.5,4.5), pch=20, xaxt="n", ylim=c((min(srmod_beta.natfor$lci)), max(srmod_beta.natfor$uci)), ylab="Beta Diversity", xlab="", las=1, cex=2.5,type="n")
 arrows(c(1:4), srmod_beta.natfor$lci, c(1:4), srmod_beta.natfor$uci, length=0.05, code=3, angle=90)
-axis(side=1, at=c(1:4), labels=x_labels, tick=F, cex.axis=0.8)
+axis(side=1, at=c(1:4), labels=x_labels, tick=T, cex.axis=0.8)
 title(main = "(j) Native Forb", line = 0.5,adj=0, cex.main=0.95)
 points(c(1:4), srmod_beta.natfor$fit,col=c(rep("chartreuse4",2),rep("orange",2)), pch=20, cex=2.5)
 
-#exotic forb
+# exotic forb
 plot(c(1:4), srmod_beta.exofor$fit, xlim=c(0.5,4.5), pch=20, xaxt="n", ylim=c((min(srmod_beta.exofor$lci)), max(srmod_beta.exofor$uci)), ylab="Beta Diversity", xlab="", las=1, cex=2.5,type="n")
 arrows(c(1:4), srmod_beta.exofor$lci, c(1:4), srmod_beta.exofor$uci, length=0.05, code=3, angle=90)
-axis(side=1, at=c(1:4), labels=x_labels, tick=F, cex.axis=0.8)
+axis(side=1, at=c(1:4), labels=x_labels, tick=T, cex.axis=0.8)
 title(main = "(k) Exotic Forb", line = 0.5,adj=0, cex.main=0.95)
 points(c(1:4), srmod_beta.exofor$fit,col=c(rep("chartreuse4",2),rep("orange",2)), pch=20, cex=2.5)
 
-#non-leg forb
+# non-leg forb
 plot(c(1:4), srmod_beta.nlegfor$fit, xlim=c(0.5,4.5), pch=20, xaxt="n", ylim=c((min(srmod_beta.nlegfor$lci)), max(srmod_beta.nlegfor$uci)), ylab="Beta Diversity", xlab="", las=1, cex=2.5,type="n")
 arrows(c(1:4), srmod_beta.nlegfor$lci, c(1:4), srmod_beta.nlegfor$uci, length=0.05, code=3, angle=90)
-axis(side=1, at=c(1:4), labels=x_labels, tick=F, cex.axis=0.8)
-title(main = "(l) Non-leg Forb", line = 0.5,adj=0, cex.main=0.95)
+axis(side=1, at=c(1:4), labels=x_labels, tick=T, cex.axis=0.8)
+title(main = "(l) Non-leguminous Forb", line = 0.5,adj=0, cex.main=0.95)
 points(c(1:4), srmod_beta.nlegfor$fit,col=c(rep("chartreuse4",2),rep("orange",2)), pch=20, cex=2.5)
 
-
-#leguminous forbs 
-plot(c(1:4), srmod_beta.legfor$fit, xlim=c(0.5,4.5), pch=20, xaxt="n", ylim=c((min(srmod_beta.legfor$lci)), max(srmod_beta.legfor$uci)), ylab="Species Richness", xlab="", las=1, cex=2.5,type="n")
+# leguminous forbs 
+plot(c(1:4), srmod_beta.legfor$fit, xlim=c(0.5,4.5), pch=20, xaxt="n", ylim=c((min(srmod_beta.legfor$lci)), max(srmod_beta.legfor$uci)), ylab="Beta Diversity", xlab="", las=1, cex=2.5,type="n")
 arrows(c(1:4), srmod_beta.legfor$lci, c(1:4), srmod_beta.legfor$uci, length=0.05, code=3, angle=90)
-axis(side=1, at=c(1:4), labels=x_labels, tick=F, cex.axis=0.8)
-title(main = "(m) Leg Forb", line = 0.5,adj=0, cex.main=0.95)
+axis(side=1, at=c(1:4), labels=x_labels, tick=T, cex.axis=0.8)
+title(main = "(m) Leguminous Forb", line = 0.5,adj=0, cex.main=0.95)
 points(c(1:4), srmod_beta.legfor$fit,col=c(rep("chartreuse4",2),rep("orange",2)), pch=20, cex=2.5)
 
 par(xpd=NA)
-legend(8,5.9, legend=c("Control", "Burn"), col = c("chartreuse4", "orange"),pch=c(20, 20), cex = (1.45), title = "Legend")
+legend(7,5.9, legend=c("Control", "Burn"), col = c("chartreuse4", "orange"),pch=c(20, 20), cex = (1),pt.cex=2, title = NULL,bty="o")
 par(xpd=F)
+
+# save.image("04_workspaces/seedbank_analysis.RData")
 
 # ----
 
