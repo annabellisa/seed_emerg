@@ -1,6 +1,554 @@
 #Caitlin's script - script development - no longer need in main script
 
 
+# diversity index - invsimpson ----
+
+bgall.simp <- BGmat[, colnames(BGmat) %in% BG.all]
+bgall.simp <- diversity(bgall.simp, index = "invsimpson")
+
+bgnat.simp <-BGmat[, colnames(BGmat) %in% BG.native]
+bgnat.simp <-diversity(bgnat.simp, index = "invsimpson")
+bgnat.simp[is.infinite(bgnat.simp)] <- 0
+
+bgexo.simp <-BGmat[, colnames(BGmat) %in% BG.exotic]
+bgexo.simp <-diversity(bgexo.simp, index = "invsimpson")
+bgexo.simp[is.infinite(bgexo.simp)] <- 0
+
+bgann.simp <-BGmat[, colnames(BGmat) %in% BG.annual]
+bgann.simp <-diversity(bgann.simp, index = "invsimpson")
+bgann.simp[is.infinite(bgann.simp)] <- 0
+
+bgper.simp <-BGmat[, colnames(BGmat) %in% BG.perr]
+bgper.simp <-diversity(bgper.simp, index = "invsimpson")
+bgper.simp[is.infinite(bgper.simp)] <- 0
+
+#bgleg.simp <-BGmat[, colnames(BGmat) %in% BG.leg]
+#bgleg.simp <-diversity(bgleg.simp, index = "invsimpson")
+
+bgtree.simp <-BGmat[, colnames(BGmat) %in% BG.tree]
+bgtree.simp <-diversity(bgtree.simp, index = "invsimpson")
+bgtree.simp[is.infinite(bgtree.simp)] <- 0
+
+bgfor.simp <-BGmat[, colnames(BGmat) %in% BG.forb]
+bgfor.simp <-diversity(bgfor.simp, index = "invsimpson")
+bgfor.simp[is.infinite(bgfor.simp)] <- 0
+
+bggra.simp <-BGmat[, colnames(BGmat) %in% BG.grass]
+bggra.simp <-diversity(bggra.simp, index = "invsimpson")
+bggra.simp[is.infinite(bggra.simp)] <- 0
+
+bgsed.simp <-BGmat[, colnames(BGmat) %in% BG.sedge]
+bgsed.simp <-diversity(bgsed.simp, index = "invsimpson")
+bgsed.simp[is.infinite(bgsed.simp)] <- 0
+
+bgnatgra.simp <-BGmat[, colnames(BGmat) %in% BG.native_grass]
+bgnatgra.simp <-diversity(bgnatgra.simp, index = "invsimpson")
+bgnatgra.simp[is.infinite(bgnatgra.simp)] <- 0
+
+bgexogra.simp <-BGmat[, colnames(BGmat) %in% BG.exotic_grass]
+bgexogra.simp <-diversity(bgexogra.simp, index = "invsimpson")
+bgexogra.simp[is.infinite(bgexogra.simp)] <- 0
+
+bgnatfor.simp <-BGmat[, colnames(BGmat) %in% BG.native_forb]
+bgnatfor.simp <-diversity(bgnatfor.simp, index = "invsimpson")
+bgnatfor.simp[is.infinite(bgnatfor.simp)] <- 0
+
+bgexofor.simp <-BGmat[, colnames(BGmat) %in% BG.exotic_forb]
+bgexofor.simp <-diversity(bgexofor.simp, index = "invsimpson")
+bgexofor.simp[is.infinite(bgexofor.simp)] <- 0
+
+bglegfor.simp <-BGmat[, colnames(BGmat) %in% BG.leg_forb]
+bglegfor.simp <-diversity(bglegfor.simp, index = "invsimpson")
+bglegfor.simp[is.infinite(bglegfor.simp)] <- 0
+
+bgnonlegfor.simp <-BGmat[, colnames(BGmat) %in% BG.nonleg_forb]
+bgnonlegfor.simp <-diversity(bgnonlegfor.simp, index = "invsimpson")
+bgnonlegfor.simp[is.infinite(bgnonlegfor.simp)] <- 0
+
+
+agall.simp <- AGmat[, colnames(AGmat) %in% AG.all]
+agall.simp <- diversity(agall.simp, index = "invsimpson")
+
+agnat.simp <-AGmat[, colnames(AGmat) %in% AG.native]
+agnat.simp <-diversity(agnat.simp, index = "invsimpson")
+agnat.simp[is.infinite(agnat.simp)] <- 0
+
+agexo.simp <-AGmat[, colnames(AGmat) %in% AG.exotic]
+agexo.simp <-diversity(agexo.simp, index = "invsimpson")
+agexo.simp[is.infinite(agexo.simp)] <- 0
+
+agann.simp <-AGmat[, colnames(AGmat) %in% AG.annual]
+agann.simp <-diversity(agann.simp, index = "invsimpson")
+agann.simp[is.infinite(agann.simp)] <- 0
+
+agper.simp <-AGmat[, colnames(AGmat) %in% AG.perr]
+agper.simp <-diversity(agper.simp, index = "invsimpson")
+agper.simp[is.infinite(agper.simp)] <- 0
+
+#agleg.simp <-AGmat[, colnames(AGmat) %in% AG.leg]
+#agleg.simp <-diversity(agleg.simp, index = "invsimpson")
+
+agtree.simp <-AGmat[, colnames(AGmat) %in% AG.tree]
+agtree.simp <-diversity(agtree.simp, index = "invsimpson")
+agtree.simp[is.infinite(agtree.simp)] <- 0
+
+agfor.simp <-AGmat[, colnames(AGmat) %in% AG.forb]
+agfor.simp <-diversity(agfor.simp, index = "invsimpson")
+agfor.simp[is.infinite(agfor.simp)] <- 0
+
+aggra.simp <-AGmat[, colnames(AGmat) %in% AG.grass]
+aggra.simp <-diversity(aggra.simp, index = "invsimpson")
+aggra.simp[is.infinite(aggra.simp)] <- 0
+
+agsed.simp <-AGmat[, colnames(AGmat) %in% AG.sedge]
+agsed.simp <-diversity(agsed.simp, index = "invsimpson")
+agsed.simp[is.infinite(agsed.simp)] <- 0
+
+agnatgra.simp <-AGmat[, colnames(AGmat) %in% AG.native_grass]
+agnatgra.simp <-diversity(agnatgra.simp, index = "invsimpson")
+agnatgra.simp[is.infinite(agnatgra.simp)] <- 0
+
+agexogra.simp <-AGmat[, colnames(AGmat) %in% AG.exotic_grass]
+agexogra.simp <-diversity(agexogra.simp, index = "invsimpson")
+agexogra.simp[is.infinite(agexogra.simp)] <- 0
+
+agnatfor.simp <-AGmat[, colnames(AGmat) %in% AG.native_forb]
+agnatfor.simp <-diversity(agnatfor.simp, index = "invsimpson")
+agnatfor.simp[is.infinite(agnatfor.simp)] <- 0
+
+agexofor.simp <-AGmat[, colnames(AGmat) %in% AG.exotic_forb]
+agexofor.simp <-diversity(agexofor.simp, index = "invsimpson")
+agexofor.simp[is.infinite(agexofor.simp)] <- 0
+
+aglegfor.simp <-AGmat[, colnames(AGmat) %in% AG.leg_forb]
+aglegfor.simp <-diversity(aglegfor.simp, index = "invsimpson")
+aglegfor.simp[is.infinite(aglegfor.simp)] <- 0
+
+agnonlegfor.simp <-AGmat[, colnames(AGmat) %in% AG.nonleg_forb]
+agnonlegfor.simp <-diversity(agnonlegfor.simp, index = "invsimpson")
+agnonlegfor.simp[is.infinite(agnonlegfor.simp)] <- 0
+
+div4$simp <- c(agall.simp, bgall.simp)
+div4$simp.nat <- c(agnat.simp,bgnat.simp)
+div4$simp.exo <- c(agexo.simp,bgexo.simp)
+div4$simp.ann <- c(agann.simp,bgann.simp)
+div4$simp.per <- c(agper.simp,bgper.simp)
+div4$simp.for <- c(agfor.simp,bgfor.simp)
+div4$simp.gra <- c(aggra.simp,bggra.simp)
+div4$simp.sed <- c(agsed.simp,bgsed.simp)
+div4$simp.natgra <- c(agnatgra.simp,bgnatgra.simp)
+div4$simp.exogra <- c(agexogra.simp,bgexogra.simp)
+div4$simp.natfor <- c(agnatfor.simp,bgnatfor.simp)
+div4$simp.exofor <- c(agexofor.simp,bgexofor.simp)
+div4$simp.legfor <- c(aglegfor.simp,bglegfor.simp)
+div4$simp.nlegfor <- c(agnonlegfor.simp,bgnonlegfor.simp)
+
+
+#invsimpson modelling - lmer. interactions insignificant, all models used in further analysis were additive.
+#all
+#allsimp<-lmer(simp~ab*burn_trt+(1|transect), data=div4)
+#summary(allsimp)
+
+allsimp2<-lmer(simp~ab+burn_trt+(1|transect), data=div4)
+summary(allsimp2)
+
+#native
+#natsimp<-lmer(simp.nat~ab*burn_trt+(1|transect), data=div4)
+#summary(natsimp)
+
+natsimp2<-lmer(simp.nat~ab+burn_trt+(1|transect), data=div4)
+summary(natsimp2)
+
+#exotic
+#exosimp<-lmer(simp.exo~ab*burn_trt+(1|transect), data=div4)
+#summary(exosimp)
+
+exosimp2<-lmer(simp.exo~ab+burn_trt+(1|transect), data=div4)
+summary(exosimp2)
+
+#annual
+#annsimp<-lmer(simp.ann~ab*burn_trt+(1|transect), data=div4)
+#summary(annsimp)
+
+annsimp2<-lmer(simp.ann~ab+burn_trt+(1|transect), data=div4)
+summary(annsimp2)
+
+#perennial
+#persimp<-lmer(simp.per~ab*burn_trt+(1|transect), data=div4)
+#summary(persimp)
+
+persimp2<-lmer(simp.per~ab+burn_trt+(1|transect), data=div4)
+summary(persimp2)
+
+#forb
+#forsimp<-lmer(simp.for~ab*burn_trt+(1|transect), data=div4)
+#summary(forsimp)
+
+forsimp2<-lmer(simp.for~ab+burn_trt+(1|transect), data=div4)
+summary(forsimp2)
+
+#grass
+#grasimp<-lmer(simp.gra~ab*burn_trt+(1|transect), data=div4)
+#summary(forsimp)
+
+grasimp2<-lmer(simp.gra~ab+burn_trt+(1|transect), data=div4)
+summary(grasimp2)
+
+#sedge
+#sedsimp<-lmer(simp.sed~ab*burn_trt+(1|transect), data=div4)
+#summary(sedsimp)
+
+sedsimp2<-lmer(simp.sed~ab+burn_trt+(1|transect), data=div4)
+summary(sedsimp2)
+
+#native grass
+#natgrasimp<-lmer(simp.natgra~ab*burn_trt+(1|transect), data=div4)
+#summary(natgrasimp)
+
+natgrasimp2<-lmer(simp.natgra~ab+burn_trt+(1|transect), data=div4)
+summary(natgrasimp2)
+
+#exotic grass
+#exograsimp<-lmer(simp.exogra~ab*burn_trt+(1|transect), data=div4)
+#summary(exograsimp)
+
+exograsimp2<-lmer(simp.exogra~ab+burn_trt+(1|transect), data=div4)
+summary(exograsimp2)
+
+#native forb
+#natforsimp<-lmer(simp.natfor~ab*burn_trt+(1|transect), data=div4)
+#summary(natforsimp)
+
+natforsimp2<-lmer(simp.natfor~ab+burn_trt+(1|transect), data=div4)
+summary(natforsimp2)
+
+#exotic forb
+#exoforsimp<-lmer(simp.exofor~ab*burn_trt+(1|transect), data=div4)
+#summary(natforsimp)
+
+exoforsimp2<-lmer(simp.exofor~ab+burn_trt+(1|transect), data=div4)
+summary(exoforsimp2)
+
+#non leg forb
+#nlegforsimp<-lmer(simp.nlegfor~ab*burn_trt+(1|transect), data=div4)
+#summary(nlegforsimp)
+
+nlegforsimp2<-lmer(simp.nlegfor~ab+burn_trt+(1|transect), data=div4)
+summary(nlegforsimp2)
+
+#leg forb
+#legforsimp<-lmer(simp.legfor~ab*burn_trt+(1|transect), data=div4)
+#summary(nlegforsimp)
+
+legforsimp2<-lmer(simp.legfor~ab+burn_trt+(1|transect), data=div4)
+summary(legforsimp2)
+
+#invsimpson predictSE
+#all
+srmod_simp.all <- predictSE(mod=allsimp2,newdata=nd1,type="response",se.fit = T)
+srmod_simp.all <- data.frame(nd1, fit = srmod_simp.all$fit, se = srmod_simp.all$se.fit)
+srmod_simp.all$lci <- srmod_simp.all$fit-(srmod_simp.all$se*1.96)
+srmod_simp.all$uci <- srmod_simp.all$fit+(srmod_simp.all$se*1.96)
+head(srmod_simp.all)
+
+#native
+srmod_simp.nat <- predictSE(mod=natsimp2,newdata=nd1,type="response",se.fit = T)
+srmod_simp.nat <- data.frame(nd1, fit = srmod_simp.nat$fit, se = srmod_simp.nat$se.fit)
+srmod_simp.nat$lci <- srmod_simp.nat$fit-(srmod_simp.nat$se*1.96)
+srmod_simp.nat$uci <- srmod_simp.nat$fit+(srmod_simp.nat$se*1.96)
+head(srmod_simp.nat)
+
+#exotic
+srmod_simp.exo <- predictSE(mod=exosimp2,newdata=nd1,type="response",se.fit = T)
+srmod_simp.exo <- data.frame(nd1, fit = srmod_simp.exo$fit, se = srmod_simp.exo$se.fit)
+srmod_simp.exo$lci <- srmod_simp.exo$fit-(srmod_simp.exo$se*1.96)
+srmod_simp.exo$uci <- srmod_simp.exo$fit+(srmod_simp.exo$se*1.96)
+head(srmod_simp.exo)
+
+#annual
+srmod_simp.ann <- predictSE(mod=annsimp2,newdata=nd1,type="response",se.fit = T)
+srmod_simp.ann <- data.frame(nd1, fit = srmod_simp.ann$fit, se = srmod_simp.ann$se.fit)
+srmod_simp.ann$lci <- srmod_simp.ann$fit-(srmod_simp.ann$se*1.96)
+srmod_simp.ann$uci <- srmod_simp.ann$fit+(srmod_simp.ann$se*1.96)
+head(srmod_simp.ann)
+
+#perennial
+srmod_simp.per <- predictSE(mod=persimp2,newdata=nd1,type="response",se.fit = T)
+srmod_simp.per <- data.frame(nd1, fit = srmod_simp.per$fit, se = srmod_simp.per$se.fit)
+srmod_simp.per$lci <- srmod_simp.per$fit-(srmod_simp.per$se*1.96)
+srmod_simp.per$uci <- srmod_simp.per$fit+(srmod_simp.per$se*1.96)
+head(srmod_simp.per)
+
+#forb
+srmod_simp.for <- predictSE(mod=forsimp2,newdata=nd1,type="response",se.fit = T)
+srmod_simp.for <- data.frame(nd1, fit = srmod_simp.for$fit, se = srmod_simp.for$se.fit)
+srmod_simp.for$lci <- srmod_simp.for$fit-(srmod_simp.for$se*1.96)
+srmod_simp.for$uci <- srmod_simp.for$fit+(srmod_simp.for$se*1.96)
+head(srmod_simp.for)
+
+#grass
+srmod_simp.gra <- predictSE(mod=grasimp2,newdata=nd1,type="response",se.fit = T)
+srmod_simp.gra <- data.frame(nd1, fit = srmod_simp.gra$fit, se = srmod_simp.gra$se.fit)
+srmod_simp.gra$lci <- srmod_simp.gra$fit-(srmod_simp.gra$se*1.96)
+srmod_simp.gra$uci <- srmod_simp.gra$fit+(srmod_simp.gra$se*1.96)
+head(srmod_simp.gra)
+
+#sedge
+srmod_simp.sed <- predictSE(mod=sedsimp2,newdata=nd1,type="response",se.fit = T)
+srmod_simp.sed <- data.frame(nd1, fit = srmod_simp.sed$fit, se = srmod_simp.sed$se.fit)
+srmod_simp.sed$lci <- srmod_simp.sed$fit-(srmod_simp.sed$se*1.96)
+srmod_simp.sed$uci <- srmod_simp.sed$fit+(srmod_simp.sed$se*1.96)
+head(srmod_simp.sed)
+
+#native grass
+srmod_simp.natgra <- predictSE(mod=natgrasimp2,newdata=nd1,type="response",se.fit = T)
+srmod_simp.natgra <- data.frame(nd1, fit = srmod_simp.natgra$fit, se = srmod_simp.natgra$se.fit)
+srmod_simp.natgra$lci <- srmod_simp.natgra$fit-(srmod_simp.natgra$se*1.96)
+srmod_simp.natgra$uci <- srmod_simp.natgra$fit+(srmod_simp.natgra$se*1.96)
+head(srmod_simp.natgra)
+
+#exotic grass
+srmod_simp.exogra <- predictSE(mod=exograsimp2,newdata=nd1,type="response",se.fit = T)
+srmod_simp.exogra <- data.frame(nd1, fit = srmod_simp.exogra$fit, se = srmod_simp.exogra$se.fit)
+srmod_simp.exogra$lci <- srmod_simp.exogra$fit-(srmod_simp.exogra$se*1.96)
+srmod_simp.exogra$uci <- srmod_simp.exogra$fit+(srmod_simp.exogra$se*1.96)
+head(srmod_simp.exogra)
+
+#native forb
+srmod_simp.natfor <- predictSE(mod=natforsimp2,newdata=nd1,type="response",se.fit = T)
+srmod_simp.natfor <- data.frame(nd1, fit = srmod_simp.natfor$fit, se = srmod_simp.natfor$se.fit)
+srmod_simp.natfor$lci <- srmod_simp.natfor$fit-(srmod_simp.natfor$se*1.96)
+srmod_simp.natfor$uci <- srmod_simp.natfor$fit+(srmod_simp.natfor$se*1.96)
+head(srmod_simp.natfor)
+
+#exotic forb
+srmod_simp.exofor <- predictSE(mod=exoforsimp2,newdata=nd1,type="response",se.fit = T)
+srmod_simp.exofor <- data.frame(nd1, fit = srmod_simp.exofor$fit, se = srmod_simp.exofor$se.fit)
+srmod_simp.exofor$lci <- srmod_simp.exofor$fit-(srmod_simp.exofor$se*1.96)
+srmod_simp.exofor$uci <- srmod_simp.exofor$fit+(srmod_simp.exofor$se*1.96)
+head(srmod_simp.exofor)
+
+#non leg forb
+srmod_simp.nlegfor <- predictSE(mod=nlegforsimp2,newdata=nd1,type="response",se.fit = T)
+srmod_simp.nlegfor <- data.frame(nd1, fit = srmod_simp.nlegfor$fit, se = srmod_simp.nlegfor$se.fit)
+srmod_simp.nlegfor$lci <- srmod_simp.nlegfor$fit-(srmod_simp.nlegfor$se*1.96)
+srmod_simp.nlegfor$uci <- srmod_simp.nlegfor$fit+(srmod_simp.nlegfor$se*1.96)
+head(srmod_simp.nlegfor)
+
+#leg forb
+srmod_simp.legfor <- predictSE(mod=legforsimp2,newdata=nd1,type="response",se.fit = T)
+srmod_simp.legfor <- data.frame(nd1, fit = srmod_simp.legfor$fit, se = srmod_simp.legfor$se.fit)
+srmod_simp.legfor$lci <- srmod_simp.legfor$fit-(srmod_simp.legfor$se*1.96)
+srmod_simp.legfor$uci <- srmod_simp.legfor$fit+(srmod_simp.legfor$se*1.96)
+head(srmod_simp.legfor)
+
+#invsimpson plotting
+dev.new(width=9,height=15,dpi=160,pointsize=12, noRStudioGD = T)
+par(mfrow=c(5,3),mar=c(4,4,1.5,1), mgp=c(2.5,1,0))
+
+#all
+plot(c(1:4), srmod_simp.all$fit, xlim=c(0.5,4.5), pch=20, xaxt="n", ylim=c((min(srmod_simp.all$lci)), max(srmod_simp.all$uci)), ylab="InvSimpson Diversity", xlab="", las=1, cex=2.5,type="n")
+arrows(c(1:4), srmod_simp.all$lci, c(1:4), srmod_simp.all$uci, length=0.05, code=3, angle=90)
+axis(side=1, at=c(1:4), labels=x_labels, tick=F, cex.axis=0.8)
+title(main = "(a) All", line = 0.5,adj=0, cex.main=0.95)
+points(c(1:4), srmod_simp.all$fit,col=c(rep("chartreuse4",2),rep("orange",2)), pch=20, cex=2.5)
+
+#native
+plot(c(1:4), srmod_simp.nat$fit, xlim=c(0.5,4.5), pch=20, xaxt="n", ylim=c((min(srmod_simp.nat$lci)), max(srmod_simp.nat$uci)), ylab="InvSimpson Diversity", xlab="", las=1, cex=2.5,type="n")
+arrows(c(1:4), srmod_simp.nat$lci, c(1:4), srmod_simp.nat$uci, length=0.05, code=3, angle=90)
+axis(side=1, at=c(1:4), labels=x_labels, tick=F, cex.axis=0.8)
+title(main = "(b) Native", line = 0.5,adj=0, cex.main=0.95)
+points(c(1:4), srmod_simp.nat$fit,col=c(rep("chartreuse4",2),rep("orange",2)), pch=20, cex=2.5)
+
+#exotic
+plot(c(1:4), srmod_simp.exo$fit, xlim=c(0.5,4.5), pch=20, xaxt="n", ylim=c((min(srmod_simp.exo$lci)), max(srmod_simp.exo$uci)), ylab="InvSimpson Diversity", xlab="", las=1, cex=2.5,type="n")
+arrows(c(1:4), srmod_simp.exo$lci, c(1:4), srmod_simp.exo$uci, length=0.05, code=3, angle=90)
+axis(side=1, at=c(1:4), labels=x_labels, tick=F, cex.axis=0.8)
+title(main = "(c) Exotic", line = 0.5,adj=0, cex.main=0.95)
+points(c(1:4), srmod_simp.exo$fit,col=c(rep("chartreuse4",2),rep("orange",2)), pch=20, cex=2.5)
+
+#annual
+plot(c(1:4), srmod_simp.ann$fit, xlim=c(0.5,4.5), pch=20, xaxt="n", ylim=c((min(srmod_simp.ann$lci)), max(srmod_simp.ann$uci)), ylab="InvSimpson Diversity", xlab="", las=1, cex=2.5,type="n")
+arrows(c(1:4), srmod_simp.ann$lci, c(1:4), srmod_simp.ann$uci, length=0.05, code=3, angle=90)
+axis(side=1, at=c(1:4), labels=x_labels, tick=F, cex.axis=0.8)
+title(main = "(d) Annual", line = 0.5,adj=0, cex.main=0.95)
+points(c(1:4), srmod_simp.ann$fit,col=c(rep("chartreuse4",2),rep("orange",2)), pch=20, cex=2.5)
+
+#perennial
+plot(c(1:4), srmod_simp.per$fit, xlim=c(0.5,4.5), pch=20, xaxt="n", ylim=c((min(srmod_simp.per$lci)), max(srmod_simp.per$uci)), ylab="InvSimpson Diversity", xlab="", las=1, cex=2.5,type="n")
+arrows(c(1:4), srmod_simp.per$lci, c(1:4), srmod_simp.per$uci, length=0.05, code=3, angle=90)
+axis(side=1, at=c(1:4), labels=x_labels, tick=F, cex.axis=0.8)
+title(main = "(e) Perennial", line = 0.5,adj=0, cex.main=0.95)
+points(c(1:4), srmod_simp.per$fit,col=c(rep("chartreuse4",2),rep("orange",2)), pch=20, cex=2.5)
+
+#forb
+plot(c(1:4), srmod_simp.for$fit, xlim=c(0.5,4.5), pch=20, xaxt="n", ylim=c((min(srmod_simp.for$lci)), max(srmod_simp.for$uci)), ylab="InvSimpson Diversity", xlab="", las=1, cex=2.5,type="n")
+arrows(c(1:4), srmod_simp.for$lci, c(1:4), srmod_simp.for$uci, length=0.05, code=3, angle=90)
+axis(side=1, at=c(1:4), labels=x_labels, tick=F, cex.axis=0.8)
+title(main = "(f) Forb", line = 0.5,adj=0, cex.main=0.95)
+points(c(1:4), srmod_simp.for$fit,col=c(rep("chartreuse4",2),rep("orange",2)), pch=20, cex=2.5)
+
+#grass
+plot(c(1:4), srmod_simp.gra$fit, xlim=c(0.5,4.5), pch=20, xaxt="n", ylim=c((min(srmod_simp.gra$lci)), max(srmod_simp.gra$uci)), ylab="InvSimpson Diversity", xlab="", las=1, cex=2.5,type="n")
+arrows(c(1:4), srmod_simp.gra$lci, c(1:4), srmod_simp.gra$uci, length=0.05, code=3, angle=90)
+axis(side=1, at=c(1:4), labels=x_labels, tick=F, cex.axis=0.8)
+title(main = "(g) Grass", line = 0.5,adj=0, cex.main=0.95)
+points(c(1:4), srmod_simp.gra$fit,col=c(rep("chartreuse4",2),rep("orange",2)), pch=20, cex=2.5)
+
+#native grass
+plot(c(1:4), srmod_simp.natgra$fit, xlim=c(0.5,4.5), pch=20, xaxt="n", ylim=c((min(srmod_simp.natgra$lci)), max(srmod_simp.natgra$uci)), ylab="InvSimpson Diversity", xlab="", las=1, cex=2.5,type="n")
+arrows(c(1:4), srmod_simp.natgra$lci, c(1:4), srmod_simp.natgra$uci, length=0.05, code=3, angle=90)
+axis(side=1, at=c(1:4), labels=x_labels, tick=F, cex.axis=0.8)
+title(main = "(h) Native Grass", line = 0.5,adj=0, cex.main=0.95)
+points(c(1:4), srmod_simp.natgra$fit,col=c(rep("chartreuse4",2),rep("orange",2)), pch=20, cex=2.5)
+
+#exotic grass
+plot(c(1:4), srmod_simp.exogra$fit, xlim=c(0.5,4.5), pch=20, xaxt="n", ylim=c((min(srmod_simp.exogra$lci)), max(srmod_simp.exogra$uci)), ylab="InvSimpson Diversity", xlab="", las=1, cex=2.5,type="n")
+arrows(c(1:4), srmod_simp.exogra$lci, c(1:4), srmod_simp.exogra$uci, length=0.05, code=3, angle=90)
+axis(side=1, at=c(1:4), labels=x_labels, tick=F, cex.axis=0.8)
+title(main = "(i) Exotic Grass", line = 0.5,adj=0, cex.main=0.95)
+points(c(1:4), srmod_simp.exogra$fit,col=c(rep("chartreuse4",2),rep("orange",2)), pch=20, cex=2.5)
+
+#native forb
+plot(c(1:4), srmod_simp.natfor$fit, xlim=c(0.5,4.5), pch=20, xaxt="n", ylim=c((min(srmod_simp.natfor$lci)), max(srmod_simp.natfor$uci)), ylab="InvSimpson Diversity", xlab="", las=1, cex=2.5,type="n")
+arrows(c(1:4), srmod_simp.natfor$lci, c(1:4), srmod_simp.natfor$uci, length=0.05, code=3, angle=90)
+axis(side=1, at=c(1:4), labels=x_labels, tick=F, cex.axis=0.8)
+title(main = "(j) Native Forb", line = 0.5,adj=0, cex.main=0.95)
+points(c(1:4), srmod_simp.natfor$fit,col=c(rep("chartreuse4",2),rep("orange",2)), pch=20, cex=2.5)
+
+#exotic forb
+plot(c(1:4), srmod_simp.exofor$fit, xlim=c(0.5,4.5), pch=20, xaxt="n", ylim=c((min(srmod_simp.exofor$lci)), max(srmod_simp.exofor$uci)), ylab="InvSimpson Diversity", xlab="", las=1, cex=2.5,type="n")
+arrows(c(1:4), srmod_simp.exofor$lci, c(1:4), srmod_simp.exofor$uci, length=0.05, code=3, angle=90)
+axis(side=1, at=c(1:4), labels=x_labels, tick=F, cex.axis=0.8)
+title(main = "(k) Exotic Forb", line = 0.5,adj=0, cex.main=0.95)
+points(c(1:4), srmod_simp.exofor$fit,col=c(rep("chartreuse4",2),rep("orange",2)), pch=20, cex=2.5)
+
+#non leg forb
+plot(c(1:4), srmod_simp.nlegfor$fit, xlim=c(0.5,4.5), pch=20, xaxt="n", ylim=c((min(srmod_simp.nlegfor$lci)), max(srmod_simp.nlegfor$uci)), ylab="InvSimpson Diversity", xlab="", las=1, cex=2.5,type="n")
+arrows(c(1:4), srmod_simp.nlegfor$lci, c(1:4), srmod_simp.nlegfor$uci, length=0.05, code=3, angle=90)
+axis(side=1, at=c(1:4), labels=x_labels, tick=F, cex.axis=0.8)
+title(main = "(l) Non-leg Forb", line = 0.5,adj=0, cex.main=0.95)
+points(c(1:4), srmod_simp.nlegfor$fit,col=c(rep("chartreuse4",2),rep("orange",2)), pch=20, cex=2.5)
+
+#leg forb
+plot(c(1:4), srmod_simp.legfor$fit, xlim=c(0.5,4.5), pch=20, xaxt="n", ylim=c((min(srmod_simp.legfor$lci)), max(srmod_simp.legfor$uci)), ylab="Species Richness", xlab="", las=1, cex=2.5,type="n")
+arrows(c(1:4), srmod_simp.legfor$lci, c(1:4), srmod_simp.legfor$uci, length=0.05, code=3, angle=90)
+axis(side=1, at=c(1:4), labels=x_labels, tick=F, cex.axis=0.8)
+title(main = "(m) Leg Forb", line = 0.5,adj=0, cex.main=0.95)
+points(c(1:4), srmod_simp.legfor$fit,col=c(rep("chartreuse4",2),rep("orange",2)), pch=20, cex=2.5)
+
+par(xpd=NA)
+legend(8,2.3, legend=c("Control", "Burn"), col = c("chartreuse4", "orange"),pch=c(20, 20), cex = (1.45), title = "Legend")
+par(xpd=F)
+
+#simp?
+#div1$agsimp <- diversity(AGmat, index = "invsimpson")
+
+#div1$agsr <- apply(AGmat, MARGIN = 1, FUN = function(x) length(which(x > 0)))
+
+div1$agsimp <- diversity(AGmat, index ="invsimpson")
+div1$bgsimp <- diversity(BGmat, index ="invsimpson")
+div4$simp <- c(div1$agsimp, div1$bgsimp)
+
+# ----
+
+# pcoa & other analyses ----
+
+head(div8[,1:10]);dim(div8)
+which(duplicated(colnames(div8)))
+dist1 <- vegdist(div8, method = "bray") # dissimilarity matrix using bray-curtis distance indices on the varespec dataset native to vegan
+head(dist1)
+length(dist1)
+str(dist1)
+
+pcoaVS <- pco(dist1, negvals = "zero", dround = 0) # if negvals = 0 sets all negative eigenvalues to zero; if = "rm" corrects for negative eigenvalues using method 1 of Legendre and Anderson 1999
+summary(pcoaVS)
+
+plot(pcoaVS$vectors[, 1], pcoaVS$vectors[, 2], 
+     xlab = "PCoA1", ylab = "PCoA2", main = "PCoA Plot")
+
+pov2 <- summary(pcoaVS)$importance[2,]
+
+
+dev.new(height=8,width=8,dpi=80,pointsize=14,noRStudioGD = T)
+plot(pcoaVS$vectors[,1], pcoaVS$vectors[,2], type = "p", xlab = "PCoA1", ylab = "PCoA2",
+     axes = TRUE, main = "PCoA (ecodist) on varespec data")
+
+text(pcoaVS$vectors[,1], pcoaVS$vectors[,2], labels(dist1), 
+     cex = 0.9, xpd = TRUE)
+
+pco1 <- pco(dist1, negvals = "zero", dround = 0)
+dev.new(height=8,width=8,dpi=80,pointsize=14,noRStudioGD = T)
+plot(pco1$vectors[,1], pco1$vectors[,2],
+     xlab = "PCoA1", ylab = "PCoA2", main = "PCoA plot")
+
+
+
+shapes<-c(15,17)
+
+shapes<-shapes[as.factor(pcadata2$burn_trt)]
+col.1<-c("grey60","grey20")
+col.1<-col.1[as.factor(pcadata2$burn_trt)]
+View(shapes)
+View(col.1)
+
+plot(pcadata2$pca.comp1,pcadata2$pca.comp2,pch=shapes, xlab="",ylab="",cex=2,col=alpha(col.1,1))
+legend("bottomright",legend=c("Control Sites", "Burn Sites"),pch=c(15,17),pt.cex=2,col=c("grey60","grey20"))
+
+
+pcoaVS$values # eigenvalue for each component. This is a measure of the variance explained by each dimension
+pcoaVS$vectors # eigenvectors. Each column contains the scores for that dimension.
+
+
+# Project unstandardized and standardized species on the PCoA ordination plot
+
+res <- pcoa(dist1)
+
+dev.new(height=8,width=8,dpi=80,pointsize=14,noRStudioGD = T)
+par(mfrow=c(1,2))
+biplot(res, div8)
+biplot(res, div8.st)
+
+par(mfrow=c(1,2))
+biplot(res, div8, dir.axis1=-1, dir.axis2=-1)
+biplot(res, div8.st, dir.axis1=-1, dir.axis2=-1)
+
+summary(res)
+
+#write.table(div8, file = "01_data/div8.txt", sep = "\t", row.names = TRUE, col.names = NA)
+
+
+
+
+
+
+
+V1 <- data.frame(quadratID = rownames(pcoaVS$vectors[1]),X1 = pcoaVS$vectors[1])
+head(div4);dim(div4)
+div9 <- div4
+div9$quadratID2 <- paste(div9$quadratID,div9$ab, sep = ".")
+head(div9)
+div10 <- merge(div9,V1,by.x = "quadratID2", by.y = "quadratID", all.x = T, all.y = F)
+head(div10);dim(div10)
+
+
+X1_mod<-lmer(X1~ab*burn_trt+(1|transect), data=div10)
+summary(X1_mod)
+
+
+
+unique_species_codes <- unique(BGspecid$code)
+
+total_abundance <- 0
+
+# Loop through each unique species code and sum the counts
+for (code in unique_species_codes) {
+  total_abundance <- total_abundance + sum(tdata$count[tdata$code == code])
+}
+
+# ----
+
+
 #import plant full (already imported and subsetted to soil core sites)
 #pfull<-read.table("01_data/plant_full.txt",header=T)
 #head(pfull,4);dim(pfull)
