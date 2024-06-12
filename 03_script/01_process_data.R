@@ -69,7 +69,7 @@ head(AGspecall);dim(AGspecall)
 #AGspec <-AGspecall[AGspecall$location == "1" | AGspecall$location == "2",]
 AGspec <-combospec[combospec$location == "1" | combospec$location == "2",]
 head(AGspec,4);dim(AGspec)
-
+#change
 #t37-46 AG species list excl. morphospecies
 #AGspecid <- AGspecall[(AGspecall$location == "1" | AGspecall$location == "2") & AGspecall$speciesID == "1",]
 #AGspecid <- combospec[(combospec$location == "1") | combospec$location == "2" & combospec$speciesID == "1", ]
