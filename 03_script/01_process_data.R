@@ -2,7 +2,7 @@
 
 # Author Caitlin Gaskell
 
-#---- libraries
+# ---- libraries
 library(VennDiagram)
 library(lme4)
 library(vegan)
@@ -17,7 +17,10 @@ library(lmerTest)
 library(ecodist)
 library(ape)
 
-#---- loading data
+# ---- load workspace:
+load("04_workspaces/seedbank_analysis.RData")
+
+# ---- import data ----
 
 #combined species list of above and below ground, including non identified
 combospec<-read.table("01_data/combinedspecies.txt",header=T)
@@ -69,7 +72,7 @@ head(AGspecall);dim(AGspecall)
 #AGspec <-AGspecall[AGspecall$location == "1" | AGspecall$location == "2",]
 AGspec <-combospec[combospec$location == "1" | combospec$location == "2",]
 head(AGspec,4);dim(AGspec)
-#change
+
 #t37-46 AG species list excl. morphospecies
 #AGspecid <- AGspecall[(AGspecall$location == "1" | AGspecall$location == "2") & AGspecall$speciesID == "1",]
 #AGspecid <- combospec[(combospec$location == "1") | combospec$location == "2" & combospec$speciesID == "1", ]
@@ -117,26 +120,29 @@ AGdata[which(AGdata$species=="Sonchus oleraceus"),]
 #no. species not in below ground data (false)
 table(AGspec$sp %in% BGspecid$code)
 
+# ----
 
-#above/below species occurrence VENN diagram:
+# ---- VENN diagram ----
+
+# above/below species occurrence VENN diagram:
 
 # Summarise overlap:
 belowonly <- sum((combospec$location == "0" & combospec$speciesID == "1") + (combospec$location == "2" & combospec$speciesID == "1"))
 aboveonly <- sum((combospec$location == "1" & combospec$speciesID == "1") + (combospec$location == "2" & combospec$speciesID == "1"))
 overlap <- sum(combospec$location == "2" & combospec$speciesID == "1")
 
-#plot
-dev.new(width=6,height=4,dpi=160,pointsize=12, noRStudioGD = T)
+# plot
+dev.new(width=4,height=4,dpi=160,pointsize=12, noRStudioGD = T)
 par(mar=c(4,4,4,4))
-venn.plot<-draw.pairwise.venn(belowonly,aboveonly,overlap, category=c("Seedbank","Vegetation"),scaled=F,fill=rgb(0,0,0,0.5),fontfamily="sans",cat.fontfamily="sans",cex=1, cat.pos=c(2,10),lwd=1)
+venn.plot<-draw.pairwise.venn(belowonly,aboveonly,overlap, category=c("Below ground\nseedbank","Above ground\nvegetation"),scaled=F,fill=rgb(0,0,0,0.2),fontfamily="sans",cat.fontfamily="sans",cex=1, cat.pos=c(10,-10), cat.dist=c(0.05,0.05),lwd=1)
 
 pdf(file="venn.pdf",width=4,height=4,pointsize=12)
 par(mar=c(4,4,1,1))
 grid.draw(venn.plot)
 dev.off()
+# ----
 
-
-#----define functional groups
+# ---- define functional groups ----
 head(BGspecid,4);dim(BGspecid)
 head(AGspecid,4);dim(AGspecid)
 
@@ -153,6 +159,8 @@ head(AGspecid,4);dim(AGspecid)
 #sedges
 #exotic grasses
 #native grasses
+
+# Below ground
 
 BG.native <- BGspecid$code[which(BGspecid$origin == "Native")]
 BG.exotic <- BGspecid$code[which(BGspecid$origin == "Exotic")]
@@ -171,8 +179,7 @@ BG.exotic_forb <- BGspecid$code[which(BGspecid$form == "Herb" & BGspecid$origin 
 BG.leg_forb <- BGspecid$code[which(BGspecid$form == "Herb" & BGspecid$legume == "1")]
 BG.nonleg_forb <- BGspecid$code[which(BGspecid$form == "Herb" & BGspecid$legume == "0")]
 
-
-
+# Above ground
 AG.native <- AGspecid$code[which(AGspecid$origin == "Native")]
 AG.exotic <- AGspecid$code[which(AGspecid$origin == "Exotic")]
 AG.annual <- AGspecid$code[which(AGspecid$life_span == "Annual" | AGspecid$life_span == "Biennial")]
@@ -195,6 +202,40 @@ AG.nonleg_forb <- AGspecid$code[which(AGspecid$form == "Herb" & AGspecid$legume 
 #adding AG.shrub back into group.df returns dim(X) must have a positive length when running for loop?
 #make a df of functional groups:
 group.df <- data.frame(group = c("BG.native","BG.exotic","BG.annual","BG.perr", "BG.leg", "BG.tree","BG.shrub","BG.forb","BG.grass","BG.sedge","BG.native_grass", "BG.exotic_grass", "BG.native_forb", "BG.exotic_forb", "BG.leg_forb", "BG.nonleg_forb", "AG.native","AG.exotic","AG.annual","AG.perr","AG.leg", "AG.tree","AG.shrub","AG.forb","AG.grass","AG.sedge", "AG.native_grass","AG.exotic_grass","AG.native_forb", "AG.exotic_forb", "AG.leg_forb", "AG.nonleg_forb"))
+
+# ----
+
+# ---- site x species matrix ----
+
+#AG ssm
+head(AGdata); dim(AGdata)
+length(unique(AGdata$quadratID))
+AGmat <- as.data.frame.matrix(xtabs(cover~quadratID + code, data=AGdata))
+head(AGmat[, 1:10]);dim(AGmat)
+
+#BG ssm
+head(combospec); dim(combospec)
+head(tdata); dim(tdata)
+#tdataiD
+head(BGspecid,4);dim(BGspecid)
+
+tdataID <- tdata[which(tdata$code %in% BGspecid$code), ]
+head(tdataID,4);dim(tdataID)
+
+length(unique(tdataID$code))
+
+BGmat <- as.data.frame.matrix(xtabs(count~quadratID + code, data=tdataID))
+head(BGmat[, 1:10]);dim(BGmat)
+
+which(duplicated(colnames(BGmat)))
+colnames(BGmat)
+
+#these should all be true:
+table(rownames(AGmat) %in% rownames(BGmat))
+
+# ----
+
+# ---- species richness of functional groups ----
 
 rich.data<-list()
 simp.data<-list()
@@ -227,47 +268,14 @@ for (i in 1:nrow(group.df)){
 rich.res<-data.frame(do.call(cbind,rich.data))
 colnames(rich.res)<-group.df$group
 
-
-#------ separate above and below ssm construction
-
-#AG ssm
-head(AGdata); dim(AGdata)
-length(unique(AGdata$quadratID))
-AGmat <- as.data.frame.matrix(xtabs(cover~quadratID + code, data=AGdata))
-head(AGmat[, 1:10]);dim(AGmat)
-
-#BG ssm
-head(combospec); dim(combospec)
-head(tdata); dim(tdata)
-#tdataiD
-head(BGspecid,4);dim(BGspecid)
-
-tdataID <- tdata[which(tdata$code %in% BGspecid$code), ]
-head(tdataID,4);dim(tdataID)
-
-length(unique(tdataID$code))
-
-BGmat <- as.data.frame.matrix(xtabs(count~quadratID + code, data=tdataID))
-head(BGmat[, 1:10]);dim(BGmat)
-
-which(duplicated(colnames(BGmat)))
-colnames(BGmat)
-
-#these should all be true:
-table(rownames(AGmat) %in% rownames(BGmat))
-
-#constructing ssm
-head(sdata,4);dim(sdata)
-
+# All species richness
 div1 <- sdata
-
 
 #AG species richness
 div1$agsr <- apply(AGmat, MARGIN = 1, FUN = function(x) length(which(x > 0)))
 
 #BG species richness
 div1$bgsr <- apply(BGmat, MARGIN = 1, FUN = function(x) length(which(x>0)))
-
 
 head(div1);dim(div1)
 head(rich.res); dim(rich.res)
@@ -279,20 +287,13 @@ rich.res <- data.frame(quadratID = rownames(rich.res),rich.res)
 
 cnt_rich<-merge(div1,rich.res, by="quadratID", all.x = T, all.y = F)
 
-#shan.res<-data.frame(do.call(cbind,shan.data))
-#colnames(shan.res)<-group_df$group
-#cnt_shan<-cbind(cnt,shan.res)
-
 head(cnt_rich,3); dim(cnt_rich)
-#head(cnt_shan,3)
 head(group.df)
-
 
 colnames(cnt_rich)[which(colnames(cnt_rich) %in% c("agsr","bgsr"))] <- c("AG.all", "BG.all")
 
 AG.all <- colnames(AGmat)
 BG.all <- colnames(BGmat)
-
 
 group.df <- data.frame(group=c("AG.all", "BG.all", group.df$group))
 
@@ -303,16 +304,19 @@ for (i in 1:nrow(group.df)){
   group.df$no_species[i]<-length(get(var.thisrun))
 }
 
-#
+# Add labels to group data
 gdf<-group.df
 gdf
 
 gdf$ylab<-c("AG all","BG all","BG Native","BG Exotic","BG Annual","BG Perennial","BG Legume","BG Tree","BG Shrub","BG Forb","BG Grass","BG Sedge","BG Native Grass","BG Exotic Grass", "BG Native Forb", "BG Exotic Forb", "BG Leguminous Forb", "BG Non-leguminous Forb", "AG Native","AG Exotic","AG Annual","AG Perennial","AG Legume","AG Tree","AG Shrub","AG Forb","AG Grass","AG Sedge","AG Native Grass","AG Exotic Grass", "AG Native Forb", "AG Exotic Forb", "AG Leguminous Forb", "AG Non-leguminous Forb")
 
+# save.image("04_workspaces/seedbank_analysis.RData")
 
-#bwplot(div1$bgsr ~ div1$burn_trt)
+# ----
 
-#div4 & div5
+# prepare data for analysis ----
+
+# div4 & div5
 div2 <- cnt_rich[, 1:5]
 head(div2);dim(div2)
 
@@ -336,205 +340,197 @@ head(BG.sr,3); dim(BG.sr)
 length(colnames(AG.sr))
 length(colnames(BG.sr))
 
-#should all be true
+# should all be true
 colnames(AG.sr)==colnames(BG.sr)
 
 all.sr<-rbind(AG.sr,BG.sr)
 head(all.sr,3); dim(all.sr)
 
+# factorise explanatory variables
 div4<-cbind(div3,all.sr)
 head(div4,3); dim(div4)
 div4$burn_trt <- factor(div4$burn_trt, levels = c("Control","Burn"))
 div4$ab <- factor(div4$ab, levels = c("above","below"))
 
-div5$burn_trt <- factor(div5$burn_trt, levels = c("Control","Burn"))
-div5$ab <- factor(div5$ab, levels = c("above","below"))
+# save.image("04_workspaces/seedbank_analysis.RData")
 
-head(div5);dim(div5)
-str(div5)
+# ----
 
-#bwplot
-dev.new(width=10,height=4,dpi=160,pointsize=12, noRStudioGD = T)
+# model species richness ----
 
-par(mfrow = c(1, 2),mar=c(4,4,1,1))
-boxplot(sr ~ ab, data = div5, las = 1, ylab = "species richness", xlab = "")
+#---- SR GLMERs: all interactions insignificant and removed; additive models used as final models
 
-boxplot(sr ~ ab + burn_trt, data = div5, las = 1, ylab = "species richness", xlab = "", cex.axis = 0.7)
+# Species richness (alpha diversity)
 
-#----SR GLMERS. all interactions insignificant, additive models used in all further analysis.
+# All species
+srmod_all.int<-glmer(all~ab*burn_trt+(1|transect), family="poisson", data=div4)
+summary(srmod_all.int)
 
-#alpha glmer
 srmod_all<-glmer(all~ab+burn_trt+(1|transect), family="poisson", data=div4)
 summary(srmod_all)
-#srmod_all.int<-glmer(all~ab*burn_trt+(1|transect), family="poisson", data=div4)
-#summary(srmod_all.int)
 
+# native
+srmod_nat.int<-glmer(native~ab*burn_trt+(1|transect), family="poisson", data=div4)
+summary(srmod_nat.int)
 
-
-#native
 srmod_nat<-glmer(native~ab+burn_trt+(1|transect), family="poisson", data=div4)
 summary(srmod_nat)
-#srmod_nat.int<-glmer(native~ab*burn_trt+(1|transect), family="poisson", data=div4)
-#summary(srmod_nat.int)
 
+# exotic
+srmod_exo.int<-glmer(exotic~ab*burn_trt+(1|transect), family="poisson", data=div4)
+summary(srmod_exo.int)
 
-#exotic
 srmod_exo<-glmer(exotic~ab+burn_trt+(1|transect), family="poisson", data=div4)
 summary(srmod_exo)
-#srmod_exo.int<-glmer(exotic~ab*burn_trt+(1|transect), family="poisson", data=div4)
-#summary(srmod_exo.int)
 
+# annual
+srmod_ann.int<-glmer(annual~ab*burn_trt+(1|transect), family="poisson", data=div4)
+summary(srmod_ann.int)
 
-#annual
 srmod_ann<-glmer(annual~ab+burn_trt+(1|transect), family="poisson", data=div4)
 summary(srmod_ann)
 
-#srmod_ann.int<-glmer(annual~ab*burn_trt+(1|transect), family="poisson", data=div4)
-#summary(srmod_ann.int)
+# perennial
+srmod_per.int<-glmer(perr~ab*burn_trt+(1|transect), family="poisson", data=div4)
+summary(srmod_per.int)
 
-
-#perennial
 srmod_per<-glmer(perr~ab+burn_trt+(1|transect), family="poisson", data=div4)
 summary(srmod_per)
 
-#srmod_per.int<-glmer(perr~ab*burn_trt+(1|transect), family="poisson", data=div4)
-#summary(srmod_per.int)
+# legume (response is constant)
+srmod_leg1.int<-glmer(leg~ab*burn_trt+(1|transect), family="poisson", data=div4)
+summary(srmod_leg1.int)
 
+srmod_leg<-glmer(leg~ab+burn_trt+(1|transect), family="poisson", data=div4)
+summary(srmod_leg)
 
-#legume
-#srmod_leg1<-glmer(leg~ab*burn_trt+(1|transect), family="poisson", data=div4)
-#summary(srmod_leg1)
+# tree #no isSingular error?
+srmod_tree.int<-glmer(tree~ab*burn_trt+(1|transect), family="poisson", data=div4)
+summary(srmod_tree.int)
 
-#srmod_leg<-glmer(leg~ab+burn_trt+(1|transect), family="poisson", data=div4)
-#summary(srmod_leg)
-
-
-#tree #no isSingular error?
 srmod_tree<-glmer(tree~ab+burn_trt+(1|transect), family="poisson", data=div4)
 summary(srmod_tree)
 
-#srmod_tree.int<-glmer(tree~ab*burn_trt+(1|transect), family="poisson", data=div4)
-#summary(srmod_tree.int)
+# shrub #negative lci?
+srmod_shr.int<-glmer(shrub~ab*burn_trt+(1|transect), family="poisson", data=div4)
+summary(srmod_shr.int)
 
-
-#shrub #negative lci?
 srmod_shr<-glmer(shrub~ab+burn_trt+(1|transect), family="poisson", data=div4)
 summary(srmod_shr)
 
-#srmod_shr.int<-glmer(shrub~ab*burn_trt+(1|transect), family="poisson", data=div4)
-#summary(srmod_shr.int)
+# forb
 
+srmod_for.int<-glmer(forb~ab*burn_trt+(1|transect), family="poisson", data=div4)
+summary(srmod_for.int)
 
-#forb
 srmod_for<-glmer(forb~ab+burn_trt+(1|transect), family="poisson", data=div4)
 summary(srmod_for)
 
-#srmod_for.int<-glmer(forb~ab*burn_trt+(1|transect), family="poisson", data=div4)
-#summary(srmod_for.int)
+# grass
 
+srmod_gra.int<-glmer(grass~ab*burn_trt+(1|transect), family="poisson", data=div4)
+summary(srmod_gra.int)
 
-#grass
 srmod_gra<-glmer(grass~ab+burn_trt+(1|transect), family="poisson", data=div4)
 summary(srmod_gra)
 
-#srmod_gra.int<-glmer(grass~ab*burn_trt+(1|transect), family="poisson", data=div4)
-#summary(srmod_gra.int)
+# sedge
 
+srmod_sed.int<-glmer(sedge~ab*burn_trt+(1|transect), family="poisson", data=div4)
+summary(srmod_sed.int)
 
-#sedge
 srmod_sed<-glmer(sedge~ab+burn_trt+(1|transect), family="poisson", data=div4)
 summary(srmod_sed)
 
-#srmod_sed.int<-glmer(sedge~ab*burn_trt+(1|transect), family="poisson", data=div4)
-#summary(srmod_sed.int)
+# native_grass
 
-#native_grass
+srmod_natgra.int<-glmer(native_grass~ab*burn_trt+(1|transect), family="poisson", data=div4)
+summary(srmod_natgra.int)
+
 srmod_natgra<-glmer(native_grass~ab+burn_trt+(1|transect), family="poisson", data=div4)
 summary(srmod_natgra)
 
-#srmod_natgra.int<-glmer(native_grass~ab*burn_trt+(1|transect), family="poisson", data=div4)
-#summary(srmod_natgra.int)
+# exotic_grass
 
-#exotic_grass
+srmod_exogra.int<-glmer(exotic_grass~ab*burn_trt+(1|transect), family="poisson", data=div4)
+summary(srmod_exogra.int)
+
 srmod_exogra<-glmer(exotic_grass~ab+burn_trt+(1|transect), family="poisson", data=div4)
 summary(srmod_exogra)
 
-#srmod_exogra.int<-glmer(exotic_grass~ab*burn_trt+(1|transect), family="poisson", data=div4)
-#summary(srmod_exogra.int)
-
-#native_forb
-#srmod_natfor.int<-glmer(native_forb~ab*burn_trt+(1|transect), family="poisson", data=div4)
-#summary(srmod_natfor.int)
+# native_forb
+srmod_natfor.int<-glmer(native_forb~ab*burn_trt+(1|transect), family="poisson", data=div4)
+summary(srmod_natfor.int)
 
 srmod_natfor<-glmer(native_forb~ab+burn_trt+(1|transect), family="poisson", data=div4)
 summary(srmod_natfor)
 
-#exotic_forb
-#srmod_exofor.int<-glmer(exotic_forb~ab*burn_trt+(1|transect), family="poisson", data=div4)
-#summary(srmod_exofor.int)
+# exotic_forb
+srmod_exofor.int<-glmer(exotic_forb~ab*burn_trt+(1|transect), family="poisson", data=div4)
+summary(srmod_exofor.int)
 
 srmod_exofor<-glmer(exotic_forb~ab+burn_trt+(1|transect), family="poisson", data=div4)
 summary(srmod_exofor)
 
-#leg_forb
-#srmod_legfor.int<-glmer(leg_forb~ab*burn_trt+(1|transect), family="poisson", data=div4)
-#summary(srmod_legfor.int)
+# leg_forb
+srmod_legfor.int<-glmer(leg_forb~ab*burn_trt+(1|transect), family="poisson", data=div4)
+summary(srmod_legfor.int)
 
 srmod_legfor<-glmer(leg_forb~ab+burn_trt+(1|transect), family="poisson", data=div4)
 summary(srmod_legfor)
 
-
-#nonleg_forb
-#srmod_nonlegfor.int<-glmer(nonleg_forb~ab*burn_trt+(1|transect), family="poisson", data=div4)
-#summary(srmod_nonlegfor.int)
+# nonleg_forb
+srmod_nonlegfor.int<-glmer(nonleg_forb~ab*burn_trt+(1|transect), family="poisson", data=div4)
+summary(srmod_nonlegfor.int)
 
 srmod_nonlegfor<-glmer(nonleg_forb~ab+burn_trt+(1|transect), family="poisson", data=div4)
 summary(srmod_nonlegfor)
 
+# save.image("04_workspaces/seedbank_analysis.RData")
 
-#---
-#ND for all models
+# ----
+
+# model estimates: species richness ----
+
+# ND for all models
 
 nd1 <- expand.grid(ab = factor(c("above", "below"), levels = c("above", "below")),
                    burn_trt = factor(c("Control", "Burn"), levels = c("Control", "Burn")))
 
-#alpha glmer
+# all species 
 srmod_all1 <- predictSE(mod=srmod_all,newdata=nd1,type="response",se.fit = T)
 srmod_all1 <- data.frame(nd1, fit = srmod_all1$fit, se = srmod_all1$se.fit)
 srmod_all1$lci <- srmod_all1$fit-(srmod_all1$se*1.96)
 srmod_all1$uci <- srmod_all1$fit+(srmod_all1$se*1.96)
 head(srmod_all1)
 
-#native glmer
+# native 
 srmod_nat1 <- predictSE(mod=srmod_nat,newdata=nd1,type="response",se.fit = T)
 srmod_nat1 <- data.frame(nd1, fit = srmod_nat1$fit, se = srmod_nat1$se.fit)
 srmod_nat1$lci <- srmod_nat1$fit-(srmod_nat1$se*1.96)
 srmod_nat1$uci <- srmod_nat1$fit+(srmod_nat1$se*1.96)
 head(srmod_nat1)
 
-
-#exotic glmer
+# exotic 
 srmod_exo1 <- predictSE(mod=srmod_exo,newdata=nd1,type="response",se.fit = T)
 srmod_exo1 <- data.frame(nd1, fit = srmod_exo1$fit, se = srmod_exo1$se.fit)
 srmod_exo1$lci <- srmod_exo1$fit-(srmod_exo1$se*1.96)
 srmod_exo1$uci <- srmod_exo1$fit+(srmod_exo1$se*1.96)
 head(srmod_exo1)
 
-#annual
+# annual
 srmod_ann1 <- predictSE(mod=srmod_ann,newdata=nd1,type="response",se.fit = T)
 srmod_ann1 <- data.frame(nd1, fit = srmod_ann1$fit, se = srmod_ann1$se.fit)
 srmod_ann1$lci <- srmod_ann1$fit-(srmod_ann1$se*1.96)
 srmod_ann1$uci <- srmod_ann1$fit+(srmod_ann1$se*1.96)
 head(srmod_ann1)
 
-
-#perennial
+# perennial
 srmod_per1 <- predictSE(mod=srmod_per,newdata=nd1,type="response",se.fit = T)
 srmod_per1 <- data.frame(nd1, fit = srmod_per1$fit, se = srmod_per1$se.fit)
 srmod_per1$lci <- srmod_per1$fit-(srmod_per1$se*1.96)
 srmod_per1$uci <- srmod_per1$fit+(srmod_per1$se*1.96)
 head(srmod_per1)
-
 
 #legume
 #srmod_leg1 <- predictSE(mod=srmod_leg,newdata=nd1,type="response",se.fit = T)
@@ -543,96 +539,89 @@ head(srmod_per1)
 #srmod_leg1$uci <- srmod_leg1$fit+(srmod_leg1$se*1.96)
 #head(srmod_leg1)
 
-
-#tree
+# tree
 srmod_tree1 <- predictSE(mod=srmod_tree,newdata=nd1,type="response",se.fit = T)
 srmod_tree1 <- data.frame(nd1, fit = srmod_tree1$fit, se = srmod_tree1$se.fit)
 srmod_tree1$lci <- srmod_tree1$fit-(srmod_tree1$se*1.96)
 srmod_tree1$uci <- srmod_tree1$fit+(srmod_tree1$se*1.96)
 head(srmod_tree1)
 
-
-#shrub
+# shrub
 srmod_shr1 <- predictSE(mod=srmod_shr,newdata=nd1,type="response",se.fit = T)
 srmod_shr1 <- data.frame(nd1, fit = srmod_shr1$fit, se = srmod_shr1$se.fit)
 srmod_shr1$lci <- srmod_shr1$fit-(srmod_shr1$se*1.96)
 srmod_shr1$uci <- srmod_shr1$fit+(srmod_shr1$se*1.96)
 head(srmod_shr1)
 
-
-
-#forb
+# forb
 srmod_for1 <- predictSE(mod=srmod_for,newdata=nd1,type="response",se.fit = T)
 srmod_for1 <- data.frame(nd1, fit = srmod_for1$fit, se = srmod_for1$se.fit)
 srmod_for1$lci <- srmod_for1$fit-(srmod_for1$se*1.96)
 srmod_for1$uci <- srmod_for1$fit+(srmod_for1$se*1.96)
 head(srmod_for1)
 
-#grass
+# grass
 srmod_gra1 <- predictSE(mod=srmod_gra,newdata=nd1,type="response",se.fit = T)
 srmod_gra1 <- data.frame(nd1, fit = srmod_gra1$fit, se = srmod_gra1$se.fit)
 srmod_gra1$lci <- srmod_gra1$fit-(srmod_gra1$se*1.96)
 srmod_gra1$uci <- srmod_gra1$fit+(srmod_gra1$se*1.96)
 head(srmod_gra1)
 
-
-#sedge
+# sedge
 srmod_sed1 <- predictSE(mod=srmod_sed,newdata=nd1,type="response",se.fit = T)
 srmod_sed1 <- data.frame(nd1, fit = srmod_sed1$fit, se = srmod_sed1$se.fit)
 srmod_sed1$lci <- srmod_sed1$fit-(srmod_sed1$se*1.96)
 srmod_sed1$uci <- srmod_sed1$fit+(srmod_sed1$se*1.96)
 head(srmod_sed1)
 
-#native grass
+# native grass
 srmod_natgra1 <- predictSE(mod=srmod_natgra,newdata=nd1,type="response",se.fit = T)
 srmod_natgra1 <- data.frame(nd1, fit = srmod_natgra1$fit, se = srmod_natgra1$se.fit)
 srmod_natgra1$lci <- srmod_natgra1$fit-(srmod_natgra1$se*1.96)
 srmod_natgra1$uci <- srmod_natgra1$fit+(srmod_natgra1$se*1.96)
 head(srmod_natgra1)
 
-
-#exotic grass
+# exotic grass
 srmod_exogra1 <- predictSE(mod=srmod_exogra,newdata=nd1,type="response",se.fit = T)
 srmod_exogra1 <- data.frame(nd1, fit = srmod_exogra1$fit, se = srmod_exogra1$se.fit)
 srmod_exogra1$lci <- srmod_exogra1$fit-(srmod_exogra1$se*1.96)
 srmod_exogra1$uci <- srmod_exogra1$fit+(srmod_exogra1$se*1.96)
 head(srmod_exogra1)
 
-
-#native forb
+# native forb
 srmod_natfor1 <- predictSE(mod=srmod_natfor,newdata=nd1,type="response",se.fit = T)
 srmod_natfor1 <- data.frame(nd1, fit = srmod_natfor1$fit, se = srmod_natfor1$se.fit)
 srmod_natfor1$lci <- srmod_natfor1$fit-(srmod_natfor1$se*1.96)
 srmod_natfor1$uci <- srmod_natfor1$fit+(srmod_natfor1$se*1.96)
 head(srmod_natfor1)
 
-
-#exotic forb
+# exotic forb
 srmod_exofor1 <- predictSE(mod=srmod_exofor,newdata=nd1,type="response",se.fit = T)
 srmod_exofor1 <- data.frame(nd1, fit = srmod_exofor1$fit, se = srmod_exofor1$se.fit)
 srmod_exofor1$lci <- srmod_exofor1$fit-(srmod_exofor1$se*1.96)
 srmod_exofor1$uci <- srmod_exofor1$fit+(srmod_exofor1$se*1.96)
 head(srmod_exofor1)
 
-
-#leguminous forb
+# leguminous forb
 srmod_legfor1 <- predictSE(mod=srmod_legfor,newdata=nd1,type="response",se.fit = T)
 srmod_legfor1 <- data.frame(nd1, fit = srmod_legfor1$fit, se = srmod_legfor1$se.fit)
 srmod_legfor1$lci <- srmod_legfor1$fit-(srmod_legfor1$se*1.96)
 srmod_legfor1$uci <- srmod_legfor1$fit+(srmod_legfor1$se*1.96)
 head(srmod_legfor1)
 
-
-#non-leguminous forb
+# non-leguminous forb
 srmod_nonlegfor1 <- predictSE(mod=srmod_nonlegfor,newdata=nd1,type="response",se.fit = T)
 srmod_nonlegfor1 <- data.frame(nd1, fit = srmod_nonlegfor1$fit, se = srmod_nonlegfor1$se.fit)
 srmod_nonlegfor1$lci <- srmod_nonlegfor1$fit-(srmod_nonlegfor1$se*1.96)
 srmod_nonlegfor1$uci <- srmod_nonlegfor1$fit+(srmod_nonlegfor1$se*1.96)
 head(srmod_nonlegfor1)
 
+# save.image("04_workspaces/seedbank_analysis.RData")
 
-#----
-#species richness plotting
+# ----
+
+# plot species richness ----
+
 head(srmod_all1)
 head(srmod_nat1)
 head(srmod_exo1)
@@ -646,107 +635,110 @@ head(srmod_sed1)
 head(srmod_natgra1)
 head(srmod_exogra1)
 
-
 x_labels <- c("AG", "BG", "AG", "BG")
 gdf
 
-dev.new(width=9,height=15,dpi=160,pointsize=12, noRStudioGD = T)
-par(mfrow=c(5,3),mar=c(4,4,1.5,1), mgp=c(2.5,1,0))
+dev.new(width=8.27,height=11.69,dpi=70,pointsize=18, noRStudioGD = T)
+par(mfrow=c(5,3),mar=c(4,4,1.5,1), mgp=c(2.4,1,0))
 
-#alpha sr
+# all sr
 plot(c(1:4), srmod_all1$fit, xlim=c(0.5,4.5), pch=20, xaxt="n", ylim=c((min(srmod_all1$lci)), max(srmod_all1$uci)), ylab="Species Richness", xlab="", las=1, cex=2.5,type="n")
 arrows(c(1:4), srmod_all1$lci, c(1:4), srmod_all1$uci, length=0.05, code=3, angle=90)
-axis(side=1, at=c(1:4), labels=x_labels, tick=F, cex.axis=0.8)
+axis(side=1, at=c(1:4), labels=x_labels, tick=T, cex.axis=0.8)
 title(main = "(a) Total", line = 0.5,adj=0, cex.main=0.95)
 points(c(1:4), srmod_all1$fit,col=c(rep("chartreuse4",2),rep("orange",2)), pch=20, cex=2.5)
 
-#native
+# native
 plot(c(1:4), srmod_nat1$fit, xlim=c(0.5,4.5), pch=20, xaxt="n", ylim=c((min(srmod_nat1$lci)), max(srmod_nat1$uci)), ylab="Species Richness", xlab="", las=1, cex=2.5)
 arrows(c(1:4), srmod_nat1$lci, c(1:4), srmod_nat1$uci, length=0.05, code=3, angle=90)
-axis(side=1, at=c(1:4), labels=x_labels, tick=F, cex.axis=0.8)
+axis(side=1, at=c(1:4), labels=x_labels, tick=T, cex.axis=0.8)
 title(main = "(b) Native", line = 0.5,adj=0, cex.main=0.95)
 points(c(1:4), srmod_nat1$fit,col=c(rep("chartreuse4",2),rep("orange",2)), pch=20, cex=2.5)
      
-#exotic
+# exotic
 plot(c(1:4), srmod_exo1$fit, xlim=c(0.5,4.5), pch=20, xaxt="n", ylim=c((min(srmod_exo1$lci)), max(srmod_exo1$uci)), ylab="Species Richness", xlab="", las=1, cex=2.5)
 arrows(c(1:4), srmod_exo1$lci, c(1:4), srmod_exo1$uci, length=0.05, code=3, angle=90)
-axis(side=1, at=c(1:4), labels=x_labels, tick=F, cex.axis=0.8)
+axis(side=1, at=c(1:4), labels=x_labels, tick=T, cex.axis=0.8)
 title(main = "(c) Exotic", line = 0.5,adj=0, cex.main=0.95)
 points(c(1:4), srmod_exo1$fit,col=c(rep("chartreuse4",2),rep("orange",2)), pch=20, cex=2.5)
 
-#annual
+# annual
 plot(c(1:4), srmod_ann1$fit, xlim=c(0.5,4.5), pch=20, xaxt="n", ylim=c((min(srmod_ann1$lci)), max(srmod_ann1$uci)), ylab="Species Richness", xlab="", las=1, cex=2.5)
 arrows(c(1:4), srmod_ann1$lci, c(1:4), srmod_ann1$uci, length=0.05, code=3, angle=90)
-axis(side=1, at=c(1:4), labels=x_labels, tick=F, cex.axis=0.8)
+axis(side=1, at=c(1:4), labels=x_labels, tick=T, cex.axis=0.8)
 title(main = "(d) Annual", line = 0.5,adj=0, cex.main=0.95)
 points(c(1:4), srmod_ann1$fit,col=c(rep("chartreuse4",2),rep("orange",2)), pch=20, cex=2.5)
 
-#perennial
+# perennial
 plot(c(1:4), srmod_per1$fit, xlim=c(0.5,4.5), pch=20, xaxt="n", ylim=c((min(srmod_per1$lci)), max(srmod_per1$uci)), ylab="Species Richness", xlab="", las=1, cex=2.5)
 arrows(c(1:4), srmod_per1$lci, c(1:4), srmod_per1$uci, length=0.05, code=3, angle=90)
-axis(side=1, at=c(1:4), labels=x_labels, tick=F, cex.axis=0.8)
+axis(side=1, at=c(1:4), labels=x_labels, tick=T, cex.axis=0.8)
 title(main = "(e) Perennial", line = 0.5,adj=0, cex.main=0.95)
 points(c(1:4), srmod_per1$fit,col=c(rep("chartreuse4",2),rep("orange",2)), pch=20, cex=2.5)
 
-#forb
+# forb
 plot(c(1:4), srmod_for1$fit, xlim=c(0.5,4.5), pch=20, xaxt="n", ylim=c((min(srmod_for1$lci)), max(srmod_for1$uci)), ylab="Species Richness", xlab="", las=1, cex=2.5)
 arrows(c(1:4), srmod_for1$lci, c(1:4), srmod_for1$uci, length=0.05, code=3, angle=90)
-axis(side=1, at=c(1:4), labels=x_labels, tick=F, cex.axis=0.8)
+axis(side=1, at=c(1:4), labels=x_labels, tick=T, cex.axis=0.8)
 title(main = "(f) Forb", line = 0.5,adj=0, cex.main=0.95)
 points(c(1:4), srmod_for1$fit,col=c(rep("chartreuse4",2),rep("orange",2)), pch=20, cex=2.5)
 
-#grass
+# grass
 plot(c(1:4), srmod_gra1$fit, xlim=c(0.5,4.5), pch=20, xaxt="n", ylim=c((min(srmod_gra1$lci)), max(srmod_gra1$uci)), ylab="Species Richness", xlab="", las=1, cex=2.5)
 arrows(c(1:4), srmod_gra1$lci, c(1:4), srmod_gra1$uci, length=0.05, code=3, angle=90)
-axis(side=1, at=c(1:4), labels=x_labels, tick=F, cex.axis=0.8)
+axis(side=1, at=c(1:4), labels=x_labels, tick=T, cex.axis=0.8)
 title(main = "(g) Grass", line = 0.5,adj=0, cex.main=0.95)
 points(c(1:4), srmod_gra1$fit,col=c(rep("chartreuse4",2),rep("orange",2)), pch=20, cex=2.5)
 
-#native grass
+# native grass
 plot(c(1:4), srmod_natgra1$fit, xlim=c(0.5,4.5), pch=20, xaxt="n", ylim=c((min(srmod_natgra1$lci)), max(srmod_natgra1$uci)), ylab="Species Richness", xlab="", las=1, cex=2.5)
 arrows(c(1:4), srmod_natgra1$lci, c(1:4), srmod_natgra1$uci, length=0.05, code=3, angle=90)
-axis(side=1, at=c(1:4), labels=x_labels, tick=F, cex.axis=0.8)
+axis(side=1, at=c(1:4), labels=x_labels, tick=T, cex.axis=0.8)
 title(main = "(h) Native Grass", line = 0.5,adj=0, cex.main=0.95)
 points(c(1:4), srmod_natgra1$fit,col=c(rep("chartreuse4",2),rep("orange",2)), pch=20, cex=2.5)
 
-#exotic grass
+# exotic grass
 plot(c(1:4), srmod_exogra1$fit, xlim=c(0.5,4.5), pch=20, xaxt="n", ylim=c((min(srmod_exogra1$lci)), max(srmod_exogra1$uci)), ylab="Species Richness", xlab="", las=1, cex=2.5)
 arrows(c(1:4), srmod_exogra1$lci, c(1:4), srmod_exogra1$uci, length=0.05, code=3, angle=90)
-axis(side=1, at=c(1:4), labels=x_labels, tick=F, cex.axis=0.8)
+axis(side=1, at=c(1:4), labels=x_labels, tick=T, cex.axis=0.8)
 title(main = "(i) Exotic Grass", line = 0.5,adj=0, cex.main=0.95)
 points(c(1:4), srmod_exogra1$fit,col=c(rep("chartreuse4",2),rep("orange",2)), pch=20, cex=2.5)
 
-#native forbs
+# native forbs
 plot(c(1:4), srmod_natfor1$fit, xlim=c(0.5,4.5), pch=20, xaxt="n", ylim=c((min(srmod_natfor1$lci)), max(srmod_natfor1$uci)), ylab="Species Richness", xlab="", las=1, cex=2.5,type="n")
 arrows(c(1:4), srmod_natfor1$lci, c(1:4), srmod_natfor1$uci, length=0.05, code=3, angle=90)
-axis(side=1, at=c(1:4), labels=x_labels, tick=F, cex.axis=0.8)
+axis(side=1, at=c(1:4), labels=x_labels, tick=T, cex.axis=0.8)
 title(main = "(j) Native Forb", line = 0.5,adj=0, cex.main=0.95)
 points(c(1:4), srmod_natfor1$fit,col=c(rep("chartreuse4",2),rep("orange",2)), pch=20, cex=2.5)
 
-#exotic forbs
+# exotic forbs
 plot(c(1:4), srmod_exofor1$fit, xlim=c(0.5,4.5), pch=20, xaxt="n", ylim=c((min(srmod_exofor1$lci)), max(srmod_exofor1$uci)), ylab="Species Richness", xlab="", las=1, cex=2.5,type="n")
 arrows(c(1:4), srmod_exofor1$lci, c(1:4), srmod_exofor1$uci, length=0.05, code=3, angle=90)
-axis(side=1, at=c(1:4), labels=x_labels, tick=F, cex.axis=0.8)
+axis(side=1, at=c(1:4), labels=x_labels, tick=T, cex.axis=0.8)
 title(main = "(k) Exotic Forb", line = 0.5,adj=0, cex.main=0.95)
 points(c(1:4), srmod_exofor1$fit,col=c(rep("chartreuse4",2),rep("orange",2)), pch=20, cex=2.5)
 
-#non-leguminous forbs
+# non-leguminous forbs
 plot(c(1:4), srmod_legfor1$fit, xlim=c(0.5,4.5), pch=20, xaxt="n", ylim=c((min(srmod_nonlegfor1$lci)), max(srmod_nonlegfor1$uci)), ylab="Species Richness", xlab="", las=1, cex=2.5,type="n")
 arrows(c(1:4), srmod_nonlegfor1$lci, c(1:4), srmod_nonlegfor1$uci, length=0.05, code=3, angle=90)
-axis(side=1, at=c(1:4), labels=x_labels, tick=F, cex.axis=0.8)
-title(main = "(l) Non-leg Forb", line = 0.5,adj=0, cex.main=0.95)
+axis(side=1, at=c(1:4), labels=x_labels, tick=T, cex.axis=0.8)
+title(main = "(l) Non-leguminous Forb", line = 0.5,adj=0, cex.main=0.95)
 points(c(1:4), srmod_nonlegfor1$fit,col=c(rep("chartreuse4",2),rep("orange",2)), pch=20, cex=2.5)
 
-#leguminous forbs
+# leguminous forbs
 plot(c(1:4), srmod_legfor1$fit, xlim=c(0.5,4.5), pch=20, xaxt="n", ylim=c((min(srmod_legfor1$lci)), max(srmod_legfor1$uci)), ylab="Species Richness", xlab="", las=1, cex=2.5,type="n")
 arrows(c(1:4), srmod_legfor1$lci, c(1:4), srmod_legfor1$uci, length=0.05, code=3, angle=90)
-axis(side=1, at=c(1:4), labels=x_labels, tick=F, cex.axis=0.8)
-title(main = "(m) Leg Forb", line = 0.5,adj=0, cex.main=0.95)
+axis(side=1, at=c(1:4), labels=x_labels, tick=T, cex.axis=0.8)
+title(main = "(m) Leguminous Forb", line = 0.5,adj=0, cex.main=0.95)
 points(c(1:4), srmod_legfor1$fit,col=c(rep("chartreuse4",2),rep("orange",2)), pch=20, cex=2.5)
 
 par(xpd=NA)
-legend(8,2.9, legend=c("Control", "Burn"), col = c("chartreuse4", "orange"),pch=c(20, 20), cex = (1.45), title = "Legend")
+legend(7,2.9, legend=c("Control", "Burn"), col = c("chartreuse4", "orange"),pch=c(20, 20), cex = (1),pt.cex=2, title = NULL,bty="o")
 par(xpd=F)
+
+# save.image("04_workspaces/seedbank_analysis.RData")
+
+# ----
 
 # ssm construction - creating an above and below matrix with 117 columns and 30 rows to merge into one.
 AGmat2 <- AGmat
