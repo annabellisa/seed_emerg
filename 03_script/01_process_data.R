@@ -6,8 +6,8 @@
 library(VennDiagram)
 library(lme4)
 library(vegan)
-library(abdiv)
-library(divo)
+# library(abdiv)
+# library(divo)
 library(AICcmodavg)
 library(stringr)
 library(tidyr)
@@ -132,14 +132,15 @@ aboveonly <- sum((combospec$location == "1" & combospec$speciesID == "1") + (com
 overlap <- sum(combospec$location == "2" & combospec$speciesID == "1")
 
 # plot
-dev.new(width=4,height=4,dpi=160,pointsize=12, noRStudioGD = T)
-par(mar=c(4,4,4,4))
-venn.plot<-draw.pairwise.venn(belowonly,aboveonly,overlap, category=c("Below ground\nseedbank","Above ground\nvegetation"),scaled=F,fill=rgb(0,0,0,0.2),fontfamily="sans",cat.fontfamily="sans",cex=1, cat.pos=c(10,-10), cat.dist=c(0.05,0.05),lwd=1)
+dev.new(width=4,height=4,dpi=120,pointsize=16, noRStudioGD = T)
+par(mar=c(0,4,4,4))
+venn.plot<-draw.pairwise.venn(belowonly,aboveonly,overlap, inverted = F, category=c("Below ground\nseedbank","Above ground\nvegetation"),scaled=F,fill=rgb(0,0,0,0.2),fontfamily="sans",cat.fontfamily="sans",cex=1.5, lwd=1, cat.pos=c(342,18),cat.dist=c(0.06 ,0.06), cat.cex=rep(1.2,2), cat.just=list(c(0, 0.4), c(1,0.4)))
 
-pdf(file="venn.pdf",width=4,height=4,pointsize=12)
+pdf(file="Fig2_Venn.pdf",width=4,height=4,pointsize=16)
 par(mar=c(4,4,1,1))
 grid.draw(venn.plot)
 dev.off()
+
 # ----
 
 # ---- Define functional groups ----
