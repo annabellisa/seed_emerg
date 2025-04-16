@@ -134,7 +134,7 @@ overlap <- sum(combospec$location == "2" & combospec$speciesID == "1")
 # plot
 dev.new(width=4,height=4,dpi=120,pointsize=16, noRStudioGD = T)
 par(mar=c(0,4,4,4))
-venn.plot<-draw.pairwise.venn(belowonly,aboveonly,overlap, inverted = F, category=c("Below ground\nseedbank","Above ground\nvegetation"),scaled=F,fill=rgb(0,0,0,0.2),fontfamily="sans",cat.fontfamily="sans",cex=1.5, lwd=1, cat.pos=c(342,18),cat.dist=c(0.06 ,0.06), cat.cex=rep(1.2,2), cat.just=list(c(0, 0.4), c(1,0.4)))
+venn.plot<-draw.pairwise.venn(belowonly,aboveonly,overlap, inverted = F, category=c("Below ground\nseedbank","Above ground\nvegetation"),scaled=F,fill=rgb(0,0,0,0.2),fontfamily="sans",cat.fontfamily="sans",cex=1.5, lwd=1, cat.pos=c(342,18),cat.dist=c(0.07 ,0.07), cat.cex=rep(1.2,2), cat.just=list(c(0, 0.4), c(1,0.4)))
 
 pdf(file="Fig2_Venn.pdf",width=4,height=4,pointsize=16)
 par(mar=c(4,4,1,1))
@@ -621,7 +621,26 @@ head(srmod_nonlegfor1)
 
 # ----
 
-# Species richness: estimates ----
+# Species richness: plot estimates ----
+
+# Make new plot with total species richness only for the main document (because the responses are all the same). Remove total from the multi-group figure and put the multi-group in the SI. 
+
+dev.new(width=5,height=3.5,dpi=120,pointsize=16, noRStudioGD = T)
+par(mar=c(3.5,4,0.5,1), mgp=c(2.4,1,0), oma=c(0,0,0,4))
+
+# all sr
+plot(c(1:4), srmod_all1$fit, xlim=c(0.5,4.5), pch=20, xaxt="n", ylim=c((min(srmod_all1$lci)), max(srmod_all1$uci)), ylab="Species Richness", xlab="", las=1, cex=2.5,type="n")
+arrows(c(1:4), srmod_all1$lci, c(1:4), srmod_all1$uci, length=0.05, code=3, angle=90)
+axis(side=1, at=c(1:4), labels=x_labels, tick=T, cex.axis=0.8, mgp=c(2,0.5,0))
+title(xlab="Position",mgp=c(2,1,0))
+title(main = "", line = 0.5,adj=0, cex.main=0.95)
+points(c(1:4), srmod_all1$fit,col=c(rep("chartreuse4",2),rep("orange",2)), pch=20, cex=2.5)
+
+par(xpd=NA)
+legend(4.8,33, legend=c("Control", "Burn"), col = c("chartreuse4", "orange"),pch=c(20, 20), cex = (1),pt.cex=2, title = NULL,bty="n")
+par(xpd=F)
+
+# Functional groups species richness for SI:
 
 head(srmod_all1)
 head(srmod_nat1)
@@ -639,103 +658,109 @@ head(srmod_exogra1)
 x_labels <- c("AG", "BG", "AG", "BG")
 gdf
 
-dev.new(width=8.27,height=11.69,dpi=70,pointsize=18, noRStudioGD = T)
-par(mfrow=c(5,3),mar=c(4,4,1.5,1), mgp=c(2.4,1,0))
-
-# all sr
-plot(c(1:4), srmod_all1$fit, xlim=c(0.5,4.5), pch=20, xaxt="n", ylim=c((min(srmod_all1$lci)), max(srmod_all1$uci)), ylab="Species Richness", xlab="", las=1, cex=2.5,type="n")
-arrows(c(1:4), srmod_all1$lci, c(1:4), srmod_all1$uci, length=0.05, code=3, angle=90)
-axis(side=1, at=c(1:4), labels=x_labels, tick=T, cex.axis=0.8)
-title(main = "(a) Total", line = 0.5,adj=0, cex.main=0.95)
-points(c(1:4), srmod_all1$fit,col=c(rep("chartreuse4",2),rep("orange",2)), pch=20, cex=2.5)
+dev.new(width=9,height=10,dpi=60,pointsize=18, noRStudioGD = T)
+par(mfrow=c(4,3),mar=c(3.5,4,1.5,1), mgp=c(2.4,1,0), oma=c(0,0,0,6))
 
 # native
 plot(c(1:4), srmod_nat1$fit, xlim=c(0.5,4.5), pch=20, xaxt="n", ylim=c((min(srmod_nat1$lci)), max(srmod_nat1$uci)), ylab="Species Richness", xlab="", las=1, cex=2.5)
 arrows(c(1:4), srmod_nat1$lci, c(1:4), srmod_nat1$uci, length=0.05, code=3, angle=90)
-axis(side=1, at=c(1:4), labels=x_labels, tick=T, cex.axis=0.8)
-title(main = "(b) Native", line = 0.5,adj=0, cex.main=0.95)
+axis(side=1, at=c(1:4), labels=x_labels, tick=T, cex.axis=0.8, mgp=c(3,0.5,0))
+title(main = "(a) Native", line = 0.5,adj=0, cex.main=0.95)
+title(xlab="Position",mgp=c(1.8,1,0))
 points(c(1:4), srmod_nat1$fit,col=c(rep("chartreuse4",2),rep("orange",2)), pch=20, cex=2.5)
-     
+
 # exotic
 plot(c(1:4), srmod_exo1$fit, xlim=c(0.5,4.5), pch=20, xaxt="n", ylim=c((min(srmod_exo1$lci)), max(srmod_exo1$uci)), ylab="Species Richness", xlab="", las=1, cex=2.5)
 arrows(c(1:4), srmod_exo1$lci, c(1:4), srmod_exo1$uci, length=0.05, code=3, angle=90)
-axis(side=1, at=c(1:4), labels=x_labels, tick=T, cex.axis=0.8)
-title(main = "(c) Exotic", line = 0.5,adj=0, cex.main=0.95)
+axis(side=1, at=c(1:4), labels=x_labels, tick=T, cex.axis=0.8, mgp=c(3,0.5,0))
+title(main = "(b) Exotic", line = 0.5,adj=0, cex.main=0.95)
+title(xlab="Position",mgp=c(1.8,1,0))
 points(c(1:4), srmod_exo1$fit,col=c(rep("chartreuse4",2),rep("orange",2)), pch=20, cex=2.5)
 
 # annual
 plot(c(1:4), srmod_ann1$fit, xlim=c(0.5,4.5), pch=20, xaxt="n", ylim=c((min(srmod_ann1$lci)), max(srmod_ann1$uci)), ylab="Species Richness", xlab="", las=1, cex=2.5)
 arrows(c(1:4), srmod_ann1$lci, c(1:4), srmod_ann1$uci, length=0.05, code=3, angle=90)
-axis(side=1, at=c(1:4), labels=x_labels, tick=T, cex.axis=0.8)
-title(main = "(d) Annual", line = 0.5,adj=0, cex.main=0.95)
+axis(side=1, at=c(1:4), labels=x_labels, tick=T, cex.axis=0.8, mgp=c(3,0.5,0))
+title(main = "(c) Annual", line = 0.5,adj=0, cex.main=0.95)
+title(xlab="Position",mgp=c(1.8,1,0))
 points(c(1:4), srmod_ann1$fit,col=c(rep("chartreuse4",2),rep("orange",2)), pch=20, cex=2.5)
+
+par(xpd=NA)
+legend(5.5,8.2, legend=c("Control", "Burn"), col = c("chartreuse4", "orange"),pch=c(20, 20), cex = (1),pt.cex=2, title = NULL,bty="o")
+par(xpd=F)
 
 # perennial
 plot(c(1:4), srmod_per1$fit, xlim=c(0.5,4.5), pch=20, xaxt="n", ylim=c((min(srmod_per1$lci)), max(srmod_per1$uci)), ylab="Species Richness", xlab="", las=1, cex=2.5)
 arrows(c(1:4), srmod_per1$lci, c(1:4), srmod_per1$uci, length=0.05, code=3, angle=90)
-axis(side=1, at=c(1:4), labels=x_labels, tick=T, cex.axis=0.8)
-title(main = "(e) Perennial", line = 0.5,adj=0, cex.main=0.95)
+axis(side=1, at=c(1:4), labels=x_labels, tick=T, cex.axis=0.8, mgp=c(3,0.5,0))
+title(main = "(d) Perennial", line = 0.5,adj=0, cex.main=0.95)
+title(xlab="Position",mgp=c(1.8,1,0))
 points(c(1:4), srmod_per1$fit,col=c(rep("chartreuse4",2),rep("orange",2)), pch=20, cex=2.5)
 
 # forb
 plot(c(1:4), srmod_for1$fit, xlim=c(0.5,4.5), pch=20, xaxt="n", ylim=c((min(srmod_for1$lci)), max(srmod_for1$uci)), ylab="Species Richness", xlab="", las=1, cex=2.5)
 arrows(c(1:4), srmod_for1$lci, c(1:4), srmod_for1$uci, length=0.05, code=3, angle=90)
-axis(side=1, at=c(1:4), labels=x_labels, tick=T, cex.axis=0.8)
-title(main = "(f) Forb", line = 0.5,adj=0, cex.main=0.95)
+axis(side=1, at=c(1:4), labels=x_labels, tick=T, cex.axis=0.8, mgp=c(3,0.5,0))
+title(main = "(e) Forb", line = 0.5,adj=0, cex.main=0.95)
+title(xlab="Position",mgp=c(1.8,1,0))
 points(c(1:4), srmod_for1$fit,col=c(rep("chartreuse4",2),rep("orange",2)), pch=20, cex=2.5)
 
 # grass
 plot(c(1:4), srmod_gra1$fit, xlim=c(0.5,4.5), pch=20, xaxt="n", ylim=c((min(srmod_gra1$lci)), max(srmod_gra1$uci)), ylab="Species Richness", xlab="", las=1, cex=2.5)
 arrows(c(1:4), srmod_gra1$lci, c(1:4), srmod_gra1$uci, length=0.05, code=3, angle=90)
-axis(side=1, at=c(1:4), labels=x_labels, tick=T, cex.axis=0.8)
-title(main = "(g) Grass", line = 0.5,adj=0, cex.main=0.95)
+axis(side=1, at=c(1:4), labels=x_labels, tick=T, cex.axis=0.8, mgp=c(3,0.5,0))
+title(main = "(f) Grass", line = 0.5,adj=0, cex.main=0.95)
+title(xlab="Position",mgp=c(1.8,1,0))
 points(c(1:4), srmod_gra1$fit,col=c(rep("chartreuse4",2),rep("orange",2)), pch=20, cex=2.5)
 
 # native grass
 plot(c(1:4), srmod_natgra1$fit, xlim=c(0.5,4.5), pch=20, xaxt="n", ylim=c((min(srmod_natgra1$lci)), max(srmod_natgra1$uci)), ylab="Species Richness", xlab="", las=1, cex=2.5)
 arrows(c(1:4), srmod_natgra1$lci, c(1:4), srmod_natgra1$uci, length=0.05, code=3, angle=90)
-axis(side=1, at=c(1:4), labels=x_labels, tick=T, cex.axis=0.8)
-title(main = "(h) Native Grass", line = 0.5,adj=0, cex.main=0.95)
+axis(side=1, at=c(1:4), labels=x_labels, tick=T, cex.axis=0.8, mgp=c(3,0.5,0))
+title(main = "(g) Native Grass", line = 0.5,adj=0, cex.main=0.95)
+title(xlab="Position",mgp=c(1.8,1,0))
 points(c(1:4), srmod_natgra1$fit,col=c(rep("chartreuse4",2),rep("orange",2)), pch=20, cex=2.5)
 
 # exotic grass
 plot(c(1:4), srmod_exogra1$fit, xlim=c(0.5,4.5), pch=20, xaxt="n", ylim=c((min(srmod_exogra1$lci)), max(srmod_exogra1$uci)), ylab="Species Richness", xlab="", las=1, cex=2.5)
 arrows(c(1:4), srmod_exogra1$lci, c(1:4), srmod_exogra1$uci, length=0.05, code=3, angle=90)
-axis(side=1, at=c(1:4), labels=x_labels, tick=T, cex.axis=0.8)
-title(main = "(i) Exotic Grass", line = 0.5,adj=0, cex.main=0.95)
+axis(side=1, at=c(1:4), labels=x_labels, tick=T, cex.axis=0.8, mgp=c(3,0.5,0))
+title(main = "(h) Exotic Grass", line = 0.5,adj=0, cex.main=0.95)
+title(xlab="Position",mgp=c(1.8,1,0))
 points(c(1:4), srmod_exogra1$fit,col=c(rep("chartreuse4",2),rep("orange",2)), pch=20, cex=2.5)
 
 # native forbs
 plot(c(1:4), srmod_natfor1$fit, xlim=c(0.5,4.5), pch=20, xaxt="n", ylim=c((min(srmod_natfor1$lci)), max(srmod_natfor1$uci)), ylab="Species Richness", xlab="", las=1, cex=2.5,type="n")
 arrows(c(1:4), srmod_natfor1$lci, c(1:4), srmod_natfor1$uci, length=0.05, code=3, angle=90)
-axis(side=1, at=c(1:4), labels=x_labels, tick=T, cex.axis=0.8)
-title(main = "(j) Native Forb", line = 0.5,adj=0, cex.main=0.95)
+axis(side=1, at=c(1:4), labels=x_labels, tick=T, cex.axis=0.8, mgp=c(3,0.5,0))
+title(main = "(i) Native Forb", line = 0.5,adj=0, cex.main=0.95)
+title(xlab="Position",mgp=c(1.8,1,0))
 points(c(1:4), srmod_natfor1$fit,col=c(rep("chartreuse4",2),rep("orange",2)), pch=20, cex=2.5)
 
 # exotic forbs
 plot(c(1:4), srmod_exofor1$fit, xlim=c(0.5,4.5), pch=20, xaxt="n", ylim=c((min(srmod_exofor1$lci)), max(srmod_exofor1$uci)), ylab="Species Richness", xlab="", las=1, cex=2.5,type="n")
 arrows(c(1:4), srmod_exofor1$lci, c(1:4), srmod_exofor1$uci, length=0.05, code=3, angle=90)
-axis(side=1, at=c(1:4), labels=x_labels, tick=T, cex.axis=0.8)
-title(main = "(k) Exotic Forb", line = 0.5,adj=0, cex.main=0.95)
+axis(side=1, at=c(1:4), labels=x_labels, tick=T, cex.axis=0.8, mgp=c(3,0.5,0))
+title(main = "(j) Exotic Forb", line = 0.5,adj=0, cex.main=0.95)
+title(xlab="Position",mgp=c(1.8,1,0))
 points(c(1:4), srmod_exofor1$fit,col=c(rep("chartreuse4",2),rep("orange",2)), pch=20, cex=2.5)
 
 # non-leguminous forbs
 plot(c(1:4), srmod_legfor1$fit, xlim=c(0.5,4.5), pch=20, xaxt="n", ylim=c((min(srmod_nonlegfor1$lci)), max(srmod_nonlegfor1$uci)), ylab="Species Richness", xlab="", las=1, cex=2.5,type="n")
 arrows(c(1:4), srmod_nonlegfor1$lci, c(1:4), srmod_nonlegfor1$uci, length=0.05, code=3, angle=90)
-axis(side=1, at=c(1:4), labels=x_labels, tick=T, cex.axis=0.8)
-title(main = "(l) Non-leguminous Forb", line = 0.5,adj=0, cex.main=0.95)
+axis(side=1, at=c(1:4), labels=x_labels, tick=T, cex.axis=0.8, mgp=c(3,0.5,0))
+title(main = "(k) Non-leguminous Forb", line = 0.5,adj=0, cex.main=0.9)
+title(xlab="Position",mgp=c(1.8,1,0))
 points(c(1:4), srmod_nonlegfor1$fit,col=c(rep("chartreuse4",2),rep("orange",2)), pch=20, cex=2.5)
 
 # leguminous forbs
 plot(c(1:4), srmod_legfor1$fit, xlim=c(0.5,4.5), pch=20, xaxt="n", ylim=c((min(srmod_legfor1$lci)), max(srmod_legfor1$uci)), ylab="Species Richness", xlab="", las=1, cex=2.5,type="n")
 arrows(c(1:4), srmod_legfor1$lci, c(1:4), srmod_legfor1$uci, length=0.05, code=3, angle=90)
-axis(side=1, at=c(1:4), labels=x_labels, tick=T, cex.axis=0.8)
-title(main = "(m) Leguminous Forb", line = 0.5,adj=0, cex.main=0.95)
+axis(side=1, at=c(1:4), labels=x_labels, tick=T, cex.axis=0.8, mgp=c(3,0.5,0))
+title(main = "(l) Leguminous Forb", line = 0.5,adj=0, cex.main=0.95)
+title(xlab="Position",mgp=c(1.8,1,0))
 points(c(1:4), srmod_legfor1$fit,col=c(rep("chartreuse4",2),rep("orange",2)), pch=20, cex=2.5)
 
-par(xpd=NA)
-legend(7,2.9, legend=c("Control", "Burn"), col = c("chartreuse4", "orange"),pch=c(20, 20), cex = (1),pt.cex=2, title = NULL,bty="o")
-par(xpd=F)
 
 # save.image("04_workspaces/seedbank_analysis.RData")
 
