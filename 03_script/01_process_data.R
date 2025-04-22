@@ -623,6 +623,7 @@ head(srmod_nonlegfor1)
 
 # Species richness: plot estimates ----
 
+# April 2025 update
 # Make new plot with total species richness only for the main document (because the responses are all the same). Remove total from the multi-group figure and put the multi-group in the SI. 
 
 dev.new(width=5,height=3.5,dpi=120,pointsize=16, noRStudioGD = T)
