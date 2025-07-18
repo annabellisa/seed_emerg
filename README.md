@@ -20,7 +20,7 @@ Caitlin Gaskell and Annabel Smith (unless otherwise stated within script)
 
 ## Manuscript
 
-Gaskell C, Campbell SD, Wolff D, Lebbink G, McFarline L, Smith AL (in preparation). Diverse soil seedbanks are resilient to low-intensity prescribed fire in a subtropical grassy woodland.
+Gaskell C, Campbell SD, Wolff D, Lebbink G, Smith AL (in preparation). Diverse soil seedbanks are resilient to low-intensity prescribed fire in a subtropical grassy woodland.
 
 ## License
 
