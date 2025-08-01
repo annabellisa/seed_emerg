@@ -627,15 +627,34 @@ x_labels2 <- c("above", "below", "above", "below")
 x_labels <- c("AG", "BG", "AG", "BG")
 x_lab_at<-c(0.8,1.9,3.1,4.2)
 
+# define vectors to jitter raw data:
+head(div4,2); dim(div4)
+
+all.c.ab<-div4$all[div4$burn_trt=="Control" & div4$ab=="above"]
+all.c.bl<-div4$all[div4$burn_trt=="Control" & div4$ab=="below"]
+all.b.ab<-div4$all[div4$burn_trt=="Burn" & div4$ab=="above"]
+all.b.bl<-div4$all[div4$burn_trt=="Burn" & div4$ab=="below"]
+
+raw.lim<-c(all.c.ab,all.c.bl,all.b.ab,all.b.bl)
+
+
 dev.new(width=5,height=3.5,dpi=120,pointsize=16, noRStudioGD = T)
 par(mar=c(3.5,4,0.5,1), mgp=c(2.4,1,0), oma=c(0,0,0,4))
 
 # all sr
-plot(c(1:4), srmod_all1$fit, xlim=c(0.5,4.5), pch=20, xaxt="n", ylim=c((min(srmod_all1$lci)), max(srmod_all1$uci)), ylab="Species Richness", xlab="", las=1, cex=2.5,type="n")
-arrows(c(1:4), srmod_all1$lci, c(1:4), srmod_all1$uci, length=0.05, code=3, angle=90)
-axis(side=1, at=x_lab_at, labels=x_labels2, tick=T, cex.axis=0.8, mgp=c(2,0.5,0))
+plot(c(1:4), srmod_all1$fit, xlim=c(0.5,4.5), pch=20, xaxt="n", ylim=c((min(c(srmod_all1$lci,raw.lim))), max(c(srmod_all1$uci,raw.lim))), ylab="Species Richness", xlab="", las=1, cex=2.5,type="n")
+
+axis(side=1, at=x_lab_at, labels=x_labels2, tick=F, cex.axis=0.8, mgp=c(2,0.5,0))
+axis(side=1, at=1:4, labels=NA, tick=T, cex.axis=0.8, mgp=c(2,0.5,0))
 title(xlab="Position",mgp=c(2,1,0))
 title(main = "", line = 0.5,adj=0, cex.main=0.95)
+
+points(jitter(rep(1,length(all.c.ab)),factor=4),all.c.ab,col=alpha("chartreuse4",0.5), pch=20, cex=0.5)
+points(jitter(rep(2,length(all.c.bl)),factor=4),all.c.bl,col=alpha("chartreuse4",0.5), pch=20, cex=0.5)
+points(jitter(rep(3,length(all.b.ab)),factor=4),all.b.ab,col=alpha("orange",0.5), pch=20, cex=0.5)
+points(jitter(rep(4,length(all.b.bl)),factor=4),all.b.bl,col=alpha("orange",0.5), pch=20, cex=0.5)
+
+arrows(c(1:4), srmod_all1$lci, c(1:4), srmod_all1$uci, length=0.05, code=3, angle=90)
 points(c(1:4), srmod_all1$fit,col=c(rep("chartreuse4",2),rep("orange",2)), pch=20, cex=2.5)
 
 par(xpd=NA)
@@ -1234,45 +1253,124 @@ head(srmod_beta.legfor)
 # June 2025 update
 # Make new plot for beta diversity, showing the variation for total, native, exotic, annual and perennial for the main document (to show the variation in responses). Plot all other functional groups with additive effects in the SI. 
 
+# define vectors to jitter raw data:
+{
+head(div4,2); dim(div4)
+div4$ab
+div4$burn_trt
+beta.all # interaction
+beta.nat
+beta.exo
+beta.ann
+beta.per
+
+b.all.c.ab<-div4$beta.all[div4$burn_trt=="Control" & div4$ab=="above"]
+b.all.c.bl<-div4$beta.all[div4$burn_trt=="Control" & div4$ab=="below"]
+b.all.b.ab<-div4$beta.all[div4$burn_trt=="Burn" & div4$ab=="above"]
+b.all.b.bl<-div4$beta.all[div4$burn_trt=="Burn" & div4$ab=="below"]
+b.all.raw.lim<-c(b.all.c.ab,b.all.c.bl,b.all.b.ab,b.all.b.bl)
+
+b.nat.c.ab<-div4$beta.nat[div4$burn_trt=="Control" & div4$ab=="above"]
+b.nat.c.bl<-div4$beta.nat[div4$burn_trt=="Control" & div4$ab=="below"]
+b.nat.b.ab<-div4$beta.nat[div4$burn_trt=="Burn" & div4$ab=="above"]
+b.nat.b.bl<-div4$beta.nat[div4$burn_trt=="Burn" & div4$ab=="below"]
+b.nat.raw.lim<-c(b.nat.c.ab,b.nat.c.bl,b.nat.b.ab,b.nat.b.bl)
+
+b.exo.c.ab<-div4$beta.exo[div4$burn_trt=="Control" & div4$ab=="above"]
+b.exo.c.bl<-div4$beta.exo[div4$burn_trt=="Control" & div4$ab=="below"]
+b.exo.b.ab<-div4$beta.exo[div4$burn_trt=="Burn" & div4$ab=="above"]
+b.exo.b.bl<-div4$beta.nat[div4$burn_trt=="Burn" & div4$ab=="below"]
+b.exo.raw.lim<-c(b.exo.c.ab,b.exo.c.bl,b.exo.b.ab,b.exo.b.bl)
+
+b.ann.c.ab<-div4$beta.ann[div4$burn_trt=="Control" & div4$ab=="above"]
+b.ann.c.bl<-div4$beta.ann[div4$burn_trt=="Control" & div4$ab=="below"]
+b.ann.b.ab<-div4$beta.ann[div4$burn_trt=="Burn" & div4$ab=="above"]
+b.ann.b.bl<-div4$beta.ann[div4$burn_trt=="Burn" & div4$ab=="below"]
+b.ann.raw.lim<-c(b.ann.c.ab,b.ann.c.bl,b.ann.b.ab,b.ann.b.bl)
+
+b.per.c.ab<-div4$beta.per[div4$burn_trt=="Control" & div4$ab=="above"]
+b.per.c.bl<-div4$beta.per[div4$burn_trt=="Control" & div4$ab=="below"]
+b.per.b.ab<-div4$beta.per[div4$burn_trt=="Burn" & div4$ab=="above"]
+b.per.b.bl<-div4$beta.per[div4$burn_trt=="Burn" & div4$ab=="below"]
+b.per.raw.lim<-c(b.per.c.ab,b.per.c.bl,b.per.b.ab,b.per.b.bl)
+
+} # close jitter vectors
+
+
 dev.new(width=6,height=7.5,dpi=60,pointsize=18, noRStudioGD = T)
-par(mfrow=c(3,2),mar=c(3.5,4,1.5,1), mgp=c(1.8,1,0), oma=c(0,0,0,0))
+par(mfrow=c(3,2),mar=c(3.5,4,1.5,1), mgp=c(2.2,1,0), oma=c(0,0,0,0))
 
 # all
-plot(c(1:4), srmod_beta.all$fit, xlim=c(0.5,4.5), pch=20, xaxt="n", ylim=c((min(srmod_beta.all$lci)), max(srmod_beta.all$uci)), ylab="Beta Diversity", xlab="Position", las=1, cex=2.5,type="n")
+plot(c(1:4), srmod_beta.all$fit, xlim=c(0.5,4.5), pch=20, xaxt="n", ylim=c((min(c(b.all.raw.lim,srmod_beta.all$lci))), max(c(b.all.raw.lim,srmod_beta.all$uci))), ylab="Beta Diversity", xlab="", las=1, cex=2.5,type="n")
+title(xlab="Position", mgp=c(1.8,1,0))
+
+points(jitter(rep(1,length(b.all.c.ab)),factor=4),b.all.c.ab,col=alpha("chartreuse4",0.5), pch=20, cex=0.5)
+points(jitter(rep(2,length(b.all.c.bl)),factor=4),b.all.c.bl,col=alpha("chartreuse4",0.5), pch=20, cex=0.5)
+points(jitter(rep(3,length(b.all.b.ab)),factor=4),b.all.b.ab,col=alpha("orange",0.5), pch=20, cex=0.5)
+points(jitter(rep(4,length(b.all.b.bl)),factor=4),b.all.b.bl,col=alpha("orange",0.5), pch=20, cex=0.5)
+
 arrows(c(1:4), srmod_beta.all$lci, c(1:4), srmod_beta.all$uci, length=0.05, code=3, angle=90)
 axis(side=1, at=1:4, labels=x_labels2, tick=T, cex.axis=0.8, mgp=c(3,0.5,0))
 title(main = "(a) Total (interaction)", line = 0.5,adj=0, cex.main=0.95, font.main=1)
 points(c(1:4), srmod_beta.all$fit,col=c(rep("chartreuse4",2),rep("orange",2)), pch=20, cex=2.5)
 
 par(xpd=NA)
-legend(6.5,9.8, legend=c("Control", "Burn"), col = c("chartreuse4", "orange"),pch=c(20, 20), cex = (1),pt.cex=2, title = NULL,bty="n")
+legend(6.5,15, legend=c("Control", "Burn"), col = c("chartreuse4", "orange"),pch=c(20, 20), cex = (1),pt.cex=2, title = NULL,bty="n")
 par(xpd=F)
 
 plot(1:10,1:10, type="n",xaxt="n",yaxt="n", bty="n", ylab="",xlab="")
 
 # native
-plot(c(1:4), srmod_beta.nat$fit, xlim=c(0.5,4.5), pch=20, xaxt="n", ylim=c((min(srmod_beta.nat$lci)), max(srmod_beta.nat$uci)), ylab="Beta Diversity", xlab="Position", las=1, cex=2.5,type="n")
+plot(c(1:4), srmod_beta.nat$fit, xlim=c(0.5,4.5), pch=20, xaxt="n", ylim=c((min(c(b.nat.raw.lim,srmod_beta.nat$lci))), max(c(b.nat.raw.lim,srmod_beta.nat$uci))), ylab="Beta Diversity", xlab="", las=1, cex=2.5,type="n")
+title(xlab="Position", mgp=c(1.8,1,0))
+
+points(jitter(rep(1,length(b.nat.c.ab)),factor=4),b.nat.c.ab,col=alpha("chartreuse4",0.5), pch=20, cex=0.5)
+points(jitter(rep(2,length(b.nat.c.bl)),factor=4),b.nat.c.bl,col=alpha("chartreuse4",0.5), pch=20, cex=0.5)
+points(jitter(rep(3,length(b.nat.b.ab)),factor=4),b.nat.b.ab,col=alpha("orange",0.5), pch=20, cex=0.5)
+points(jitter(rep(4,length(b.nat.b.bl)),factor=4),b.nat.b.bl,col=alpha("orange",0.5), pch=20, cex=0.5)
+
 arrows(c(1:4), srmod_beta.nat$lci, c(1:4), srmod_beta.nat$uci, length=0.05, code=3, angle=90)
 axis(side=1, at=1:4, labels=x_labels2,  tick=T, cex.axis=0.8, mgp=c(3,0.5,0))
 title(main = "(b) Native", line = 0.5,adj=0, cex.main=0.95, font.main=1)
 points(c(1:4), srmod_beta.nat$fit,col=c(rep("chartreuse4",2),rep("orange",2)), pch=20, cex=2.5)
 
 # exotic
-plot(c(1:4), srmod_beta.exo$fit, xlim=c(0.5,4.5), pch=20, xaxt="n", ylim=c((min(srmod_beta.exo$lci)), max(srmod_beta.exo$uci)), ylab="Beta Diversity", xlab="Position", las=1, cex=2.5,type="n")
+plot(c(1:4), srmod_beta.exo$fit, xlim=c(0.5,4.5), pch=20, xaxt="n", ylim=c((min(c(b.exo.raw.lim,srmod_beta.exo$lci))), max(c(b.exo.raw.lim,srmod_beta.exo$uci))), ylab="Beta Diversity", xlab="", las=1, cex=2.5,type="n")
+title(xlab="Position", mgp=c(1.8,1,0))
+
+points(jitter(rep(1,length(b.exo.c.ab)),factor=4),b.exo.c.ab,col=alpha("chartreuse4",0.5), pch=20, cex=0.5)
+points(jitter(rep(2,length(b.exo.c.bl)),factor=4),b.exo.c.bl,col=alpha("chartreuse4",0.5), pch=20, cex=0.5)
+points(jitter(rep(3,length(b.exo.b.ab)),factor=4),b.exo.b.ab,col=alpha("orange",0.5), pch=20, cex=0.5)
+points(jitter(rep(4,length(b.exo.b.bl)),factor=4),b.exo.b.bl,col=alpha("orange",0.5), pch=20, cex=0.5)
+
 arrows(c(1:4), srmod_beta.exo$lci, c(1:4), srmod_beta.exo$uci, length=0.05, code=3, angle=90)
 axis(side=1, at=1:4, labels=x_labels2, tick=T, cex.axis=0.8, mgp=c(3,0.5,0))
 title(main = "(c) Exotic", line = 0.5,adj=0, cex.main=0.95, font.main=1)
 points(c(1:4), srmod_beta.exo$fit,col=c(rep("chartreuse4",2),rep("orange",2)), pch=20, cex=2.5)
 
 # annual
-plot(c(1:4), srmod_beta.ann$fit, xlim=c(0.5,4.5), pch=20, xaxt="n", ylim=c((min(srmod_beta.ann$lci)), max(srmod_beta.ann$uci)), ylab="Beta Diversity", xlab="Position", las=1, cex=2.5,type="n")
+plot(c(1:4), srmod_beta.ann$fit, xlim=c(0.5,4.5), pch=20, xaxt="n", ylim=c((min(c(b.ann.raw.lim,srmod_beta.ann$lci))), max(c(b.ann.raw.lim,srmod_beta.ann$uci))), ylab="Beta Diversity", xlab="", las=1, cex=2.5,type="n")
+title(xlab="Position", mgp=c(1.8,1,0))
+
+points(jitter(rep(1,length(b.ann.c.ab)),factor=4),b.ann.c.ab,col=alpha("chartreuse4",0.5), pch=20, cex=0.5)
+points(jitter(rep(2,length(b.ann.c.bl)),factor=4),b.ann.c.bl,col=alpha("chartreuse4",0.5), pch=20, cex=0.5)
+points(jitter(rep(3,length(b.ann.b.ab)),factor=4),b.ann.b.ab,col=alpha("orange",0.5), pch=20, cex=0.5)
+points(jitter(rep(4,length(b.ann.b.bl)),factor=4),b.ann.b.bl,col=alpha("orange",0.5), pch=20, cex=0.5)
+
 arrows(c(1:4), srmod_beta.ann$lci, c(1:4), srmod_beta.ann$uci, length=0.05, code=3, angle=90)
 axis(side=1, at=1:4, labels=x_labels2, tick=T, cex.axis=0.8, mgp=c(3,0.5,0))
 title(main = "(d) Annual (interaction)", line = 0.5,adj=0, cex.main=0.95, font.main=1)
 points(c(1:4), srmod_beta.ann$fit,col=c(rep("chartreuse4",2),rep("orange",2)), pch=20, cex=2.5)
 
 # perennial
-plot(c(1:4), srmod_beta.per$fit, xlim=c(0.5,4.5), pch=20, xaxt="n", ylim=c((min(srmod_beta.per$lci)), max(srmod_beta.per$uci)), ylab="Beta Diversity", xlab="Position", las=1, cex=2.5,type="n")
+plot(c(1:4), srmod_beta.per$fit, xlim=c(0.5,4.5), pch=20, xaxt="n", ylim=c((min(srmod_beta.per$lci)), max(srmod_beta.per$uci)), ylab="Beta Diversity", xlab="", las=1, cex=2.5,type="n")
+title(xlab="Position", mgp=c(1.8,1,0))
+
+points(jitter(rep(1,length(b.per.c.ab)),factor=4),b.per.c.ab,col=alpha("chartreuse4",0.5), pch=20, cex=0.5)
+points(jitter(rep(2,length(b.per.c.bl)),factor=4),b.per.c.bl,col=alpha("chartreuse4",0.5), pch=20, cex=0.5)
+points(jitter(rep(3,length(b.per.b.ab)),factor=4),b.per.b.ab,col=alpha("orange",0.5), pch=20, cex=0.5)
+points(jitter(rep(4,length(b.per.b.bl)),factor=4),b.per.b.bl,col=alpha("orange",0.5), pch=20, cex=0.5)
+
 arrows(c(1:4), srmod_beta.per$lci, c(1:4), srmod_beta.per$uci, length=0.05, code=3, angle=90)
 axis(side=1, at=1:4, labels=x_labels2, tick=T, cex.axis=0.8, mgp=c(3,0.5,0))
 title(main = "(e) Perennial (interaction)", line = 0.5,adj=0, cex.main=0.95, font.main=1)
