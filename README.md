@@ -3,8 +3,7 @@
 R scripts for analysing seedling emergence data post-fire
 
 # Latest Release (Archived)
-# update this when the internet is working
-# [![DOI](https://zenodo.org/badge/604401015.svg)](https://zenodo.org/records/15259359)
+# [![DOI](https://zenodo.org/badge/604401015.svg)](https://zenodo.org/records/16552304)
 
 ## Content Description
 
@@ -24,7 +23,7 @@ Caitlin Gaskell and Annabel Smith (unless otherwise stated within script)
 
 ## Manuscript
 
-Gaskell C, Campbell SD, Wolff D, Lebbink G, Smith AL (in preparation). Diverse soil seedbanks are resilient to low-intensity prescribed fire in a subtropical grassy woodland.
+Gaskell C, Campbell SD, Wolff D, Lebbink G, Smith AL (under review). Diverse soil seedbanks are resilient to low-intensity prescribed fire in a subtropical grassy woodland.
 
 ## License
 
