@@ -2,6 +2,10 @@
 
 R scripts for analysing seedling emergence data post-fire
 
+# Latest Release (Archived)
+# update this when the internet is working
+# [![DOI](https://zenodo.org/badge/604401015.svg)](https://zenodo.org/records/15259359)
+
 ## Content Description
 
 01_data: Plant community data and associated site data
