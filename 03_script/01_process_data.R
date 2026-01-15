@@ -837,6 +837,23 @@ head(BGmat2[,1:10],3); dim(BGmat2)
 
 # ---- PCA ----
 
+# Update 15 Jan 2026
+# Note the defaults in prcomp: (center = TRUE, scale. = FALSE), so we have not scaled the variables at this stage. 
+
+# Another issue pointed out by R1: "Principal Components Analysis assumes that species responses to the underlying ecological gradients are linear, which is not always true for ecological data. An alternative that does not require an assumption of linearity is non-metric multidimensional scaling (NMDS). There are ways to check for homogeneity (and thus suitability for PCA; here is one source: https://www.davidzeleny.net/anadat-r/doku.php/en:ordination). Please justify your choice of PCA as a suitable approach for this project."
+
+# The Zeleny source recommends: "calculate DCA (detrended by segments) on your data, and check the length of the first DCA axis (which is scaled in units of standard deviation, S.D.). The length of first DCA axis > 4 S.D. indicates a heterogeneous dataset on which unimodal methods should be used, while the length < 3 S.D. indicates a homogeneous dataset for which linear methods are suitable."
+
+# One explanation for homogeneity from this source is that their: "dataset contains relatively homogenous species composition, since the sampled grassland patches all belong to the same or very closely related vegetation types, which makes this dataset suitable for PCA."
+
+# DCA can be done in vegan with decorana()
+
+dca1<-decorana(div6)
+dca1
+
+# The length of the first DCA is < 4 (2.8558), so we apparently have homogeneous data, meaning PCA is suitable for this data set. 
+
+# This is the original PCA script from the first submission:
 pca1 <- prcomp(div6)
 pca1
 summary(pca1)
