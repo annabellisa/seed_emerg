@@ -2,8 +2,7 @@
 
 R scripts for analysing seedling emergence data post-fire
 
-# Latest Release (Archived)
-# [![DOI](https://zenodo.org/badge/604401015.svg)](https://zenodo.org/records/16552304)
+# Latest Release (Archived) [![DOI](https://zenodo.org/badge/604401015.svg)](https://zenodo.org/records/16552304)
 
 ## Content Description
 
