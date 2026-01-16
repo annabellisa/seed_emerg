@@ -12,6 +12,7 @@ library(lmerTest)
 library(ecodist)
 library(ape)
 library(scales)
+library(vegan)
 
 # ---- load workspace:
 load("04_workspaces/seedbank_analysis.RData")
@@ -838,9 +839,9 @@ head(BGmat2[,1:10],3); dim(BGmat2)
 # ---- PCA ----
 
 # Update 15 Jan 2026
-# Note the defaults in prcomp: (center = TRUE, scale. = FALSE), so we have not scaled the variables at this stage. 
+# Note the defaults in prcomp: (center = TRUE, scale. = FALSE), so we have not scaled the variables. 
 
-# Another issue pointed out by R1: "Principal Components Analysis assumes that species responses to the underlying ecological gradients are linear, which is not always true for ecological data. An alternative that does not require an assumption of linearity is non-metric multidimensional scaling (NMDS). There are ways to check for homogeneity (and thus suitability for PCA; here is one source: https://www.davidzeleny.net/anadat-r/doku.php/en:ordination). Please justify your choice of PCA as a suitable approach for this project."
+# Review Comment from R1: "Principal Components Analysis assumes that species responses to the underlying ecological gradients are linear, which is not always true for ecological data. An alternative that does not require an assumption of linearity is non-metric multidimensional scaling (NMDS). There are ways to check for homogeneity (and thus suitability for PCA; here is one source: https://www.davidzeleny.net/anadat-r/doku.php/en:ordination). Please justify your choice of PCA as a suitable approach for this project."
 
 # The Zeleny source recommends: "calculate DCA (detrended by segments) on your data, and check the length of the first DCA axis (which is scaled in units of standard deviation, S.D.). The length of first DCA axis > 4 S.D. indicates a heterogeneous dataset on which unimodal methods should be used, while the length < 3 S.D. indicates a homogeneous dataset for which linear methods are suitable."
 
@@ -960,6 +961,72 @@ plot(pcadata2$pca.comp2,pcadata2$pca.comp3,pch=shapes, xlab="PC2",ylab="PC3",cex
 mtext("(d)",3,0.4,F,adj=0)
 # text(x=c(0.69979374), y=c(-6.582940182), labels= c("T10_06"), pos=2)
 # text(x=c(-7.32836938), y=c(1.416516483), labels= c("T26_20"), pos=4)
+
+# save.image("04_workspaces/seedbank_analysis.RData")
+
+# ----
+
+# Explore distance-based ordination ----
+
+# Is nMDS better for presence / absence data? According to Bolker on this page, yes. 
+# https://stats.stackexchange.com/questions/623005/can-i-conduct-a-pca-on-binary-presence-absence-data
+
+# However, the nMDS doesn't have 'axes' like a PCA and can not be used in downstream analyses:
+# https://www.researchgate.net/post/Can_you_use_NMDS_site_scores_in_a_regression
+
+# So let's have a look and see how the results compare to PCA
+# The figure below shows the nMDS produces a very similar outcome to PCA: almost all of the dissimilarity is captured by the above/below differences, and very little by the burn treatment. As with the PCA, the first nMDS axis is capturing almost all of the dissimilarity between above and below ground, with the other two axes contributing little. 
+
+head(div6);dim(div6)
+
+mds1<-metaMDS(div6, distance = "bray", k=4, trymax = 50)
+str(mds1)
+plot(mds1, xlim=c(-2,2))
+
+# Extract relevant data:
+mds.dat<-data.frame(mds1$points)
+mds.dat$quadratID2<-rownames(mds.dat)
+table(rownames(mds.dat) %in% nd2$quadratID2)
+
+rownames(mds.dat)<-1:nrow(mds.dat)
+head(nd2);dim(nd2)
+head(mds.dat,3); dim(mds.dat)
+
+mds.dat1<-merge(nd2, mds.dat, by="quadratID2")
+
+# MDS sites:
+head(mds.dat1,3); dim(mds.dat1)
+
+mds.dat.sp<-data.frame(mds1$species)
+head(mds.dat.sp,3); dim(mds.dat.sp)
+
+shapes2<-c(15,17)
+shapes2<-shapes2[as.factor(mds.dat1$ab)]
+col.2<-c("grey60","grey20")
+col.2<-col.1[as.factor(mds.dat1$burn_trt)]
+
+dev.new(height=6,width=8,dpi=80,pointsize=14,noRStudioGD = T)
+par(mar=c(4,4,2,2),mfrow=c(2,2),mgp=c(2.2,0.8,0), oma=c(0,0,0,7))
+
+# 1 vs 2
+plot(mds.dat.sp$MDS1, mds.dat.sp$MDS2, pch=3,col="red", xlab="NMDS1",ylab="NMDS2",las=1)
+points(mds.dat1$MDS1,mds.dat1$MDS2,pch=shapes,col=alpha(col.1,1),cex=1.5)
+mtext("(a)",3,0.4,F,adj=0)
+
+# 1 vs 3
+plot(mds.dat.sp$MDS1, mds.dat.sp$MDS3, pch=3,col="red", xlab="NMDS1",ylab="NMDS3",las=1)
+points(mds.dat1$MDS1,mds.dat1$MDS3,pch=shapes,col=alpha(col.1,1),cex=1.5)
+mtext("(b)",3,0.4,F,adj=0)
+
+# Add legend
+par(xpd=NA)
+legend(1,2, legend=c("Control Above", "Control Below", "Burnt Above", "Burnt Below", "Species"), col = c("grey60", "grey60", "grey20", "grey20","red"),pch=c(c(15, 17, 15, 17,3)))
+par(xpd=F)
+
+# 2 vs 3
+plot(mds.dat.sp$MDS2, mds.dat.sp$MDS3, pch=3,col="red", xlab="NMDS2",ylab="NMDS3",las=1)
+points(mds.dat1$MDS2,mds.dat1$MDS3,pch=shapes,col=alpha(col.1,1),cex=1.5)
+mtext("(c)",3,0.4,F,adj=0)
 
 # save.image("04_workspaces/seedbank_analysis.RData")
 
