@@ -1052,16 +1052,20 @@ comp.all<-beta.div.comp(div6,coef = "J")
 comp.ag<-beta.div.comp(AGmat,coef = "J")
 head(AGmat[,1:10]);dim(AGmat)
 
-# belopw:
+# below:
 comp.bg<-beta.div.comp(BGmat,coef = "J")
 head(BGmat[,1:10]);dim(BGmat)
+
+# triangle.plot order is left, bottom, right
+
+# put them in the same order as Podani and Schmera, and other implementations of the method (i.e. left = rich diff; bottom=similarity; right = replacement). 
 
 # Extract components - above ground
 repl.ag <- comp.ag$repl
 rich.ag <- comp.ag$rich
 # Podani & Schmera use similarity (S=1-D)
 sim.ag <- 1 - comp.ag$D
-tri.ag <- data.frame(cbind(sim.ag, repl.ag, rich.ag))
+tri.ag <- data.frame(cbind(rich.ag, sim.ag, repl.ag))
 table(rowSums(tri.ag))
 head(tri.ag,3); dim(tri.ag)
 
@@ -1070,28 +1074,50 @@ repl.bg <- comp.bg$repl
 rich.bg <- comp.bg$rich
 # Podani & Schmera use similarity (S=1-D)
 sim.bg <- 1 - comp.bg$D
-tri.bg <- data.frame(cbind(sim.bg, repl.bg, rich.bg))
+tri.bg <- data.frame(cbind(rich.bg, sim.bg, repl.bg))
 table(rowSums(tri.bg))
 head(tri.bg,3); dim(tri.bg)
 
+# Extract components - all plots
+repl.all <- comp.all$repl
+rich.all <- comp.all$rich
+# Podani & Schmera use similarity (S=1-D)
+sim.all <- 1 - comp.all$D
+tri.all <- data.frame(cbind(rich.all, sim.all, repl.all))
+table(rowSums(tri.all))
+head(tri.all,3); dim(tri.all)
+
+
 # label = c("Similarity", "Replacement", "Richness Diff"), 
 
-dev.new(width=9,height=3,dpi=60,pointsize=18, noRStudioGD = T)
+dev.new(width=9,height=3,dpi=60, pointsize=18, noRStudioGD = T)
 par(mfrow=c(1,3),mgp=c(2.2,1,0), mar=c(4,6,4,6),oma=c(0,0,0,0))
 
-triangle.plot(tri.ag,scale=F, show.position = F)
-text(-0.5,0.5,labels="similarity", col="red", srt=60)
-text(0,-0.5,labels="replacement", col="red", srt=0)
-text(0.5,0.5,labels="richness diff.", col="red", srt=300)
+triangle.plot(tri.ag,scale=F, show.position = F, labeltriangle = F)
+
+text(-0.4,0.5,labels="richness diff.", col="black", srt=60)
+text(0,-0.55,labels="similarity", col="black", srt=0)
+text(0.5,0.5,labels="replacement", col="black", srt=300)
+
+mtext("(a) above ground", side=3, line=2.5, adj=0)
 
 triangle.plot(tri.bg,scale=F, show.position = F)
-text(-0.5,0.5,labels="similarity", col="red", srt=60)
-text(0,-0.5,labels="replacement", col="red", srt=0)
-text(0.5,0.5,labels="richness diff.", col="red", srt=300)
+
+text(-0.5,0.5,labels="richness diff.", col="red", srt=60)
+text(0,-0.6,labels="similarity", col="red", srt=0)
+text(0.5,0.5,labels="replacement", col="red", srt=300)
+
+mtext("(b) below ground", side=3, line=2.5, adj=0)
+
+triangle.plot(tri.all,scale=F, show.position = F)
+
+text(-0.5,0.5,labels="richness diff.", col="red", srt=60)
+text(0,-0.6,labels="similarity", col="red", srt=0)
+text(0.5,0.5,labels="replacement", col="red", srt=300)
+
+mtext("(c) above and below", side=3, line=2.5, adj=0)
 
 
-
-mtext("similarity", side=2, line=3,col="red",)
 
 beta.div(AGmat)$LCBD
 
