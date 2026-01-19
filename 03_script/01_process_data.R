@@ -7,12 +7,13 @@ library(VennDiagram)
 library(lme4)
 library(vegan)
 library(AICcmodavg)
-library(dplyr)
 library(lmerTest)
 library(ecodist)
 library(ape)
 library(scales)
 library(vegan)
+library(adespatial)
+library(ade4)
 
 # ---- load workspace:
 load("04_workspaces/seedbank_analysis.RData")
@@ -1034,6 +1035,72 @@ mtext("(c)",3,0.4,F,adj=0)
 
 # Beta diversity: data set-up ----
 
+# 2026 revision
+
+# adespatial methods; both Podani and Schmera (2011) and Baselga (2010) methods are implementable in this package
+
+head(div6);dim(div6)
+head(div4);dim(div4)
+head(AGmat[,1:10]);dim(AGmat)
+head(BGmat[,1:10]);dim(BGmat)
+
+# above and below combined:
+head(div6);dim(div6)
+comp.all<-beta.div.comp(div6,coef = "J")
+
+# above:
+comp.ag<-beta.div.comp(AGmat,coef = "J")
+head(AGmat[,1:10]);dim(AGmat)
+
+# belopw:
+comp.bg<-beta.div.comp(BGmat,coef = "J")
+head(BGmat[,1:10]);dim(BGmat)
+
+# Extract components - above ground
+repl.ag <- comp.ag$repl
+rich.ag <- comp.ag$rich
+# Podani & Schmera use similarity (S=1-D)
+sim.ag <- 1 - comp.ag$D
+tri.ag <- data.frame(cbind(sim.ag, repl.ag, rich.ag))
+table(rowSums(tri.ag))
+head(tri.ag,3); dim(tri.ag)
+
+# Extract components - below ground
+repl.bg <- comp.bg$repl
+rich.bg <- comp.bg$rich
+# Podani & Schmera use similarity (S=1-D)
+sim.bg <- 1 - comp.bg$D
+tri.bg <- data.frame(cbind(sim.bg, repl.bg, rich.bg))
+table(rowSums(tri.bg))
+head(tri.bg,3); dim(tri.bg)
+
+# label = c("Similarity", "Replacement", "Richness Diff"), 
+
+dev.new(width=9,height=3,dpi=60,pointsize=18, noRStudioGD = T)
+par(mfrow=c(1,3),mgp=c(2.2,1,0), mar=c(4,6,4,6),oma=c(0,0,0,0))
+
+triangle.plot(tri.ag,scale=F, show.position = F)
+text(-0.5,0.5,labels="similarity", col="red", srt=60)
+text(0,-0.5,labels="replacement", col="red", srt=0)
+text(0.5,0.5,labels="richness diff.", col="red", srt=300)
+
+triangle.plot(tri.bg,scale=F, show.position = F)
+text(-0.5,0.5,labels="similarity", col="red", srt=60)
+text(0,-0.5,labels="replacement", col="red", srt=0)
+text(0.5,0.5,labels="richness diff.", col="red", srt=300)
+
+
+
+mtext("similarity", side=2, line=3,col="red",)
+
+beta.div(AGmat)$LCBD
+
+
+
+
+
+
+# Original script, first submission
 # all
 head(div4);dim(div4)
 head(AGmat[,1:10]);dim(AGmat)
