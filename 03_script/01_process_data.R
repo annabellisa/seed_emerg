@@ -1037,7 +1037,11 @@ mtext("(c)",3,0.4,F,adj=0)
 
 # 2026 revision
 
-# adespatial methods; both Podani and Schmera (2011) and Baselga (2010) methods are implementable in this package
+# Whittaker's beta diversity is problematic. 
+
+# Ricotta & Burrascano (2009) explain "...since Whittaker's βW summarizes the turnover in species composition of a given set of plots with a single scalar, it cannot be used for testing for differences in beta diversity among different sets of plots."
+
+# adespatial; Podani and Schmera (2011) and Baselga (2010) methods are implementable in this package
 
 head(div6);dim(div6)
 head(div4);dim(div4)
@@ -1047,14 +1051,17 @@ head(BGmat[,1:10]);dim(BGmat)
 # above and below combined:
 head(div6);dim(div6)
 comp.all<-beta.div.comp(div6,coef = "J")
+comp.all$part
 
 # above:
 comp.ag<-beta.div.comp(AGmat,coef = "J")
 head(AGmat[,1:10]);dim(AGmat)
+comp.ag$part
 
 # below:
 comp.bg<-beta.div.comp(BGmat,coef = "J")
 head(BGmat[,1:10]);dim(BGmat)
+comp.bg$part
 
 # triangle.plot order is left, bottom, right
 
@@ -1087,41 +1094,132 @@ tri.all <- data.frame(cbind(rich.all, sim.all, repl.all))
 table(rowSums(tri.all))
 head(tri.all,3); dim(tri.all)
 
-
-# label = c("Similarity", "Replacement", "Richness Diff"), 
+# Adding labels manually to control parameters, but they can be checked by adding the default: labeltriangle = T
 
 dev.new(width=9,height=3,dpi=60, pointsize=18, noRStudioGD = T)
 par(mfrow=c(1,3),mgp=c(2.2,1,0), mar=c(4,6,4,6),oma=c(0,0,0,0))
 
 triangle.plot(tri.ag,scale=F, show.position = F, labeltriangle = F)
 
-text(-0.4,0.5,labels="richness diff.", col="black", srt=60)
-text(0,-0.55,labels="similarity", col="black", srt=0)
-text(0.5,0.5,labels="replacement", col="black", srt=300)
+text(-0.45,0.25,labels="richness difference", col="black", srt=60)
+text(0,-0.52,labels="similarity", col="black", srt=0)
+text(0.45,0.25,labels="replacement", col="black", srt=300)
 
-mtext("(a) above ground", side=3, line=2.5, adj=0)
+mtext("(a) above ground", side=3, line=2.5, adj=0.5, cex=0.8)
 
-triangle.plot(tri.bg,scale=F, show.position = F)
+triangle.plot(tri.bg,scale=F, show.position = F, labeltriangle = F)
 
-text(-0.5,0.5,labels="richness diff.", col="red", srt=60)
-text(0,-0.6,labels="similarity", col="red", srt=0)
-text(0.5,0.5,labels="replacement", col="red", srt=300)
+text(-0.45,0.25,labels="richness difference", col="black", srt=60)
+text(0,-0.52,labels="similarity", col="black", srt=0)
+text(0.45,0.25,labels="replacement", col="black", srt=300)
 
-mtext("(b) below ground", side=3, line=2.5, adj=0)
+mtext("(b) below ground", side=3, line=2.5, adj=0.5, cex=0.8)
 
-triangle.plot(tri.all,scale=F, show.position = F)
+triangle.plot(tri.all,scale=F, show.position = F, labeltriangle = F)
 
-text(-0.5,0.5,labels="richness diff.", col="red", srt=60)
-text(0,-0.6,labels="similarity", col="red", srt=0)
-text(0.5,0.5,labels="replacement", col="red", srt=300)
+text(-0.45,0.25,labels="richness difference", col="black", srt=60)
+text(0,-0.52,labels="similarity", col="black", srt=0)
+text(0.45,0.25,labels="replacement", col="black", srt=300)
 
-mtext("(c) above and below", side=3, line=2.5, adj=0)
+mtext("(c) above and below", side=3, line=2.5, adj=0.5, cex=0.8)
 
 
+# Re-calculate beta diversity using the distance-based method in adespatial
+
+# For the original analysis we calculated beta diversity separately for each position (i.e. gamma was total species richness under ground and above ground, separately). Burn treatments were combined. 
 
 beta.div(AGmat)$LCBD
+comp.all$part$LCBD
 
+gdf
+head(div4);dim(div4)
 
+# These are the quadrat x species matrices:
+head(div6[,1:10]);dim(div6)
+head(AGmat[,1:10]);dim(AGmat)
+head(BGmat[,1:10]);dim(BGmat)
+
+# Make an output file to store the new values
+head(div2);dim(div2)
+head(div3);dim(div3)
+bd.dat<-div3
+
+bd.dat$quadratID2<-paste(bd.dat$quadratID,bd.dat$ab,sep=".")
+head(bd.dat,3);dim(bd.dat)
+
+head(gdf)
+
+gdf$gr<-substr(gdf$group,start = unlist(gregexpr("[.]",gdf$group))+1,stop=nchar(gdf$group))
+
+# First, calculate beta diversity for all functional groups following the same process as the original analysis - i.e. separately for above and below ground. 
+
+head(AGmat[,1:10], 3);dim(AGmat)
+head(BGmat[,1:10],3);dim(BGmat)
+
+ag.out<-data.frame(quadratID=div2$quadratID)
+above.out<-ag.out
+below.out<-ag.out
+above.out$ab<-factor("above", levels=c("above","below"))
+below.out$ab<-factor("below", levels=c("above","below"))
+
+both.out<-bd.dat[,c("quadratID2", "ab")]
+both.out$ab<-as.factor(both.out$ab)
+
+head(above.out); dim(above.out)
+head(below.out); dim(below.out)
+head(both.out); dim(both.out)
+
+head(gdf); dim(gdf)
+
+for (i in 1:length(unique(gdf$gr))){
+  
+  gr.thisrun<-gdf$gr[i]
+  
+  lines.thisrun<-which(gdf$gr %in% gr.thisrun)
+  groups.thisrun<-gdf$group[lines.thisrun]
+  
+  ag.thisrun<-get(groups.thisrun[grep("AG",groups.thisrun)])
+  bg.thisrun<-get(groups.thisrun[grep("BG",groups.thisrun)])
+  
+  both.thisrun<-unique(c(ag.thisrun, bg.thisrun))
+  
+  ag.mat<-AGmat[,ag.thisrun]
+  bg.mat<-BGmat[,bg.thisrun]
+  
+  both.mat<-div6[,both.thisrun]
+  
+  head(ag.mat, 3);dim(ag.mat)
+  head(bg.mat,3);dim(bg.mat)
+  head(both.mat,3);dim(both.mat)
+  
+  ag.obj<-beta.div(ag.mat, method = "jaccard")
+  bg.obj<-beta.div(bg.mat, method = "jaccard")
+  both.obj<-beta.div(both.mat, method="jaccard")
+  
+  bd.ag<-data.frame(quadratID=names(ag.obj$LCBD),bd=ag.obj$LCBD)
+  bd.bg<-data.frame(quadratID=names(bg.obj$LCBD),bd=bg.obj$LCBD)
+  both.bg<-data.frame(quadratID2=names(both.obj$LCBD),bd=both.obj$LCBD)
+  rownames(bd.ag)<-1:nrow(bd.ag)
+  rownames(bd.bg)<-1:nrow(bd.bg)
+  
+  ag.dat<-merge(above.out, bd.ag, by="quadratID")
+  bg.dat<-merge(below.out, bd.bg, by="quadratID")
+  both.dat<-merge(both.out, both.bg, by="quadratID2")
+  both.dat<-both.dat[order(both.dat$ab, both.dat$quadratID2),]
+  rownames(both.bg)<-1:nrow(both.bg)
+  
+  dat.both<-rbind(ag.dat, bg.dat)
+  colnames(dat.both)[grep("bd", colnames(dat.both))]<-gr.thisrun
+  
+  head(dat.both); dim(dat.both)
+  head(both.dat); dim(both.dat)
+  
+  
+  
+  head(bd.ag)
+  head(bd.bg)
+  
+}
 
 
 
