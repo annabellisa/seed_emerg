@@ -1041,6 +1041,8 @@ mtext("(c)",3,0.4,F,adj=0)
 
 # Ricotta & Burrascano (2009) explain "...since Whittaker's βW summarizes the turnover in species composition of a given set of plots with a single scalar, it cannot be used for testing for differences in beta diversity among different sets of plots."
 
+# Legendre et al. (2005) talk about 'levels of abstraction', and that when the interest is in beta diversity between 'groups of sites' distance based approaches are necessary. Raw data based approaches are suitable for "studying variation of community composition among sites".
+
 # adespatial; Podani and Schmera (2011) and Baselga (2010) methods are implementable in this package
 
 head(div6);dim(div6)
