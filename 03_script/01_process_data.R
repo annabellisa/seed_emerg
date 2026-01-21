@@ -145,19 +145,21 @@ dev.off()
 head(BGspecid,4);dim(BGspecid)
 head(AGspecid,4);dim(AGspecid)
 
-#groups to analyse:
-#all
-#native
-#exotic
-#annual
-#perennial
-#tree
-#shrub
-#forb
-#grass
-#sedges
-#exotic grasses
-#native grasses
+# analyse 13 groups:
+
+# all
+# native
+# exotic
+# annual
+# perennial
+# forb
+# grass
+# native grasses
+# exotic grasses
+# native forb
+# exotic forb
+# non-leguminous forb
+# leguminous forb
 
 # Below ground
 
@@ -165,12 +167,8 @@ BG.native <- BGspecid$code[which(BGspecid$origin == "Native")]
 BG.exotic <- BGspecid$code[which(BGspecid$origin == "Exotic")]
 BG.annual <- BGspecid$code[which(BGspecid$life_span == "Annual" | BGspecid$life_span == "Biennial" | BGspecid$life_span == "Annual/Biennial")]
 BG.perr <- BGspecid$code[which(BGspecid$life_span == "Perennial")]
-BG.leg <- BGspecid$code[which(BGspecid$form == "Legume")]
-BG.tree <- BGspecid$code[which(BGspecid$form == "Tree")]
-BG.shrub <- BGspecid$code[which(BGspecid$form == "Shrub")]
 BG.forb <- BGspecid$code[which(BGspecid$form == "Herb")]
 BG.grass <- BGspecid$code[which(BGspecid$form == "Grass")]
-BG.sedge <- BGspecid$code[which(BGspecid$form == "Sedge/Rush")]
 BG.native_grass <- BGspecid$code[which(BGspecid$form == "Grass" & BGspecid$origin == "Native")]
 BG.exotic_grass <- BGspecid$code[which(BGspecid$form == "Grass" & BGspecid$origin == "Exotic")]
 BG.native_forb <- BGspecid$code[which(BGspecid$form == "Herb" & BGspecid$origin == "Native")]
@@ -178,17 +176,20 @@ BG.exotic_forb <- BGspecid$code[which(BGspecid$form == "Herb" & BGspecid$origin 
 BG.leg_forb <- BGspecid$code[which(BGspecid$form == "Herb" & BGspecid$legume == "1")]
 BG.nonleg_forb <- BGspecid$code[which(BGspecid$form == "Herb" & BGspecid$legume == "0")]
 
+# Not analysed
+# BG.tree <- BGspecid$code[which(BGspecid$form == "Tree")]
+# BG.shrub <- BGspecid$code[which(BGspecid$form == "Shrub")]
+# BG.sedge <- BGspecid$code[which(BGspecid$form == "Sedge/Rush")]
+# BG.leg <- BGspecid$code[which(BGspecid$legume == 1)]
+
+
 # Above ground
 AG.native <- AGspecid$code[which(AGspecid$origin == "Native")]
 AG.exotic <- AGspecid$code[which(AGspecid$origin == "Exotic")]
 AG.annual <- AGspecid$code[which(AGspecid$life_span == "Annual" | AGspecid$life_span == "Biennial")]
 AG.perr <- AGspecid$code[which(AGspecid$life_span == "Perennial")]
-AG.leg <- AGspecid$code[which(AGspecid$form == "Legume")]
-AG.tree <- AGspecid$code[which(AGspecid$form == "Tree")]
-AG.shrub <- AGspecid$code[which(AGspecid$form == "Shrub")]
 AG.forb <- AGspecid$code[which(AGspecid$form == "Herb" | AGspecid$form == "Vine")]
 AG.grass <- AGspecid$code[which(AGspecid$form == "Grass")]
-AG.sedge <- AGspecid$code[which(AGspecid$form == "Sedge/Rush")]
 AG.native_grass <- AGspecid$code[which(AGspecid$form == "Grass" & AGspecid$origin == "Native")]
 AG.exotic_grass <- AGspecid$code[which(AGspecid$form == "Grass" & AGspecid$origin == "Exotic")]
 AG.native_forb <- AGspecid$code[which(AGspecid$form == "Herb" & AGspecid$origin == "Native")]
@@ -196,10 +197,16 @@ AG.exotic_forb <- AGspecid$code[which(AGspecid$form == "Herb" & AGspecid$origin 
 AG.leg_forb <- AGspecid$code[which(AGspecid$form == "Herb" & AGspecid$legume == "1")]
 AG.nonleg_forb <- AGspecid$code[which(AGspecid$form == "Herb" & AGspecid$legume == "0")]
 
-#put AGshrub back in group when 5x5 data added
-#"AG.shrub", "AG.leg", "BG.leg"
-#adding AG.shrub back into group.df returns dim(X) must have a positive length when running for loop?
-#make a df of functional groups:
+# Not analysed
+# AG.leg <- AGspecid$code[which(AGspecid$legume == 1)]
+# AG.tree <- AGspecid$code[which(AGspecid$form == "Tree")]
+# AG.shrub <- AGspecid$code[which(AGspecid$form == "Shrub")]
+# AG.sedge <- AGspecid$code[which(AGspecid$form == "Sedge/Rush")]
+
+# put AGshrub back in group when 5x5 data added
+# "AG.shrub", "AG.leg", "BG.leg"
+# adding AG.shrub back into group.df returns dim(X) must have a positive length when running for loop?
+# make a df of functional groups:
 group.df <- data.frame(group = c("BG.native","BG.exotic","BG.annual","BG.perr", "BG.leg", "BG.tree","BG.shrub","BG.forb","BG.grass","BG.sedge","BG.native_grass", "BG.exotic_grass", "BG.native_forb", "BG.exotic_forb", "BG.leg_forb", "BG.nonleg_forb", "AG.native","AG.exotic","AG.annual","AG.perr","AG.leg", "AG.tree","AG.shrub","AG.forb","AG.grass","AG.sedge", "AG.native_grass","AG.exotic_grass","AG.native_forb", "AG.exotic_forb", "AG.leg_forb", "AG.nonleg_forb"))
 
 # ----
@@ -396,27 +403,6 @@ summary(srmod_per.int)
 srmod_per<-glmer(perr~ab+burn_trt+(1|transect), family="poisson", data=div4)
 summary(srmod_per)
 
-# legume (response is constant)
-srmod_leg1.int<-glmer(leg~ab*burn_trt+(1|transect), family="poisson", data=div4)
-summary(srmod_leg1.int)
-
-srmod_leg<-glmer(leg~ab+burn_trt+(1|transect), family="poisson", data=div4)
-summary(srmod_leg)
-
-# tree #no isSingular error?
-srmod_tree.int<-glmer(tree~ab*burn_trt+(1|transect), family="poisson", data=div4)
-summary(srmod_tree.int)
-
-srmod_tree<-glmer(tree~ab+burn_trt+(1|transect), family="poisson", data=div4)
-summary(srmod_tree)
-
-# shrub #negative lci?
-srmod_shr.int<-glmer(shrub~ab*burn_trt+(1|transect), family="poisson", data=div4)
-summary(srmod_shr.int)
-
-srmod_shr<-glmer(shrub~ab+burn_trt+(1|transect), family="poisson", data=div4)
-summary(srmod_shr)
-
 # forb
 
 srmod_for.int<-glmer(forb~ab*burn_trt+(1|transect), family="poisson", data=div4)
@@ -432,14 +418,6 @@ summary(srmod_gra.int)
 
 srmod_gra<-glmer(grass~ab+burn_trt+(1|transect), family="poisson", data=div4)
 summary(srmod_gra)
-
-# sedge
-
-srmod_sed.int<-glmer(sedge~ab*burn_trt+(1|transect), family="poisson", data=div4)
-summary(srmod_sed.int)
-
-srmod_sed<-glmer(sedge~ab+burn_trt+(1|transect), family="poisson", data=div4)
-summary(srmod_sed)
 
 # native_grass
 
@@ -531,27 +509,6 @@ srmod_per1$lci <- srmod_per1$fit-(srmod_per1$se*1.96)
 srmod_per1$uci <- srmod_per1$fit+(srmod_per1$se*1.96)
 head(srmod_per1)
 
-#legume
-#srmod_leg1 <- predictSE(mod=srmod_leg,newdata=nd1,type="response",se.fit = T)
-#srmod_leg1 <- data.frame(nd1, fit = srmod_leg1$fit, se = srmod_leg1$se.fit)
-#srmod_leg1$lci <- srmod_leg1$fit-(srmod_leg1$se*1.96)
-#srmod_leg1$uci <- srmod_leg1$fit+(srmod_leg1$se*1.96)
-#head(srmod_leg1)
-
-# tree
-srmod_tree1 <- predictSE(mod=srmod_tree,newdata=nd1,type="response",se.fit = T)
-srmod_tree1 <- data.frame(nd1, fit = srmod_tree1$fit, se = srmod_tree1$se.fit)
-srmod_tree1$lci <- srmod_tree1$fit-(srmod_tree1$se*1.96)
-srmod_tree1$uci <- srmod_tree1$fit+(srmod_tree1$se*1.96)
-head(srmod_tree1)
-
-# shrub
-srmod_shr1 <- predictSE(mod=srmod_shr,newdata=nd1,type="response",se.fit = T)
-srmod_shr1 <- data.frame(nd1, fit = srmod_shr1$fit, se = srmod_shr1$se.fit)
-srmod_shr1$lci <- srmod_shr1$fit-(srmod_shr1$se*1.96)
-srmod_shr1$uci <- srmod_shr1$fit+(srmod_shr1$se*1.96)
-head(srmod_shr1)
-
 # forb
 srmod_for1 <- predictSE(mod=srmod_for,newdata=nd1,type="response",se.fit = T)
 srmod_for1 <- data.frame(nd1, fit = srmod_for1$fit, se = srmod_for1$se.fit)
@@ -565,13 +522,6 @@ srmod_gra1 <- data.frame(nd1, fit = srmod_gra1$fit, se = srmod_gra1$se.fit)
 srmod_gra1$lci <- srmod_gra1$fit-(srmod_gra1$se*1.96)
 srmod_gra1$uci <- srmod_gra1$fit+(srmod_gra1$se*1.96)
 head(srmod_gra1)
-
-# sedge
-srmod_sed1 <- predictSE(mod=srmod_sed,newdata=nd1,type="response",se.fit = T)
-srmod_sed1 <- data.frame(nd1, fit = srmod_sed1$fit, se = srmod_sed1$se.fit)
-srmod_sed1$lci <- srmod_sed1$fit-(srmod_sed1$se*1.96)
-srmod_sed1$uci <- srmod_sed1$fit+(srmod_sed1$se*1.96)
-head(srmod_sed1)
 
 # native grass
 srmod_natgra1 <- predictSE(mod=srmod_natgra,newdata=nd1,type="response",se.fit = T)
@@ -1126,37 +1076,50 @@ text(0.45,0.25,labels="replacement", col="black", srt=300)
 mtext("(c) above and below", side=3, line=2.5, adj=0.5, cex=0.8)
 
 
-# Re-calculate beta diversity using the distance-based method in adespatial
+# Re-calculate beta diversity using a distance-based method (beta.div adespatial)
 
-# For the original analysis we calculated beta diversity separately for each position (i.e. gamma was total species richness under ground and above ground, separately). Burn treatments were combined. 
+# For the original analysis we calculated beta diversity separately for each position (i.e. gamma was total species richness under ground and above ground, separately). Burn treatments were combined. But actually this is not appropriate. Cornell and Harrison (2014, AREE) provide a definition: "The species pool can be defined as all the species present in a region that can disperse to a focal locality regardless of their ability to tolerate the prevailing environmental conditions"
 
-beta.div(AGmat)$LCBD
-comp.all$part$LCBD
+# Thus, the MS has been updated to reflect the biogeographic context of our study: "The regional species pool (γ) was defined as total species richness across all 60 quadrats, including both levels of the fire treatment (control, burn) and position (above, below). This definition of γ is suitable for identifying biotic and abiotic filters that shape patterns of community assembly (such as species losses and gains under different management regimes) at spatial scales where dispersal is possible (Cornell & Harrison 2014). This allowed γ to reflect that seed from the above ground community becomes available to the seedbank below ground, while species in the seedbank are available to recruit above ground."
 
-gdf
-head(div4);dim(div4)
+# Redefine functional groups:
+
+# gdf, group.df and gdf2 all have groups that we are not analysing
+head(gdf)
+
+gdf2<-gdf
+gdf2$gr<-substr(gdf2$group,start = unlist(gregexpr("[.]",gdf2$group))+1,stop=nchar(gdf2$group))
+head(gdf2)
+
+# Make group level df for functional groups, using only the 13 functional groups included in the paper:
+
+gr.df<-data.frame(group=c("all","native","exotic","annual" ,"perr" ,"forb" ,"grass","native_grass","exotic_grass","native_forb","exotic_forb","leg_forb","nonleg_forb"))
+
+ag.groups<-paste("AG.",gr.df$group[2:length(gr.df$group)], sep="")
+bg.groups<-paste("BG.",gr.df$group[2:length(gr.df$group)], sep="")
+
+gr.df$AG.n<-c(NA,unlist(lapply(ag.groups, FUN=function(x) length(get(x)))))
+gr.df$BG.n<-c(NA,unlist(lapply(bg.groups, FUN=function(x) length(get(x)))))
+gr.df$AG.n[1]<-ncol(AGmat)
+gr.df$BG.n[1]<-ncol(BGmat)
+
+# Add total species richness:
+gr.df$all<-NA
+for(i in 1:length(ag.groups)){
+  group.thisurn<-c(ag.groups[i],bg.groups[i])
+  gr.df$all[i+1]<-length(unique(unlist(lapply(group.thisurn,function(x)get(x)))))
+  }
+# write.table(gr.df, file="out.txt", sep="\t", row.names = F, quote=F)
+
+# This is the output from the original Whittaker definition:
+head(div4,3);dim(div4)
 
 # These are the quadrat x species matrices:
 head(div6[,1:10]);dim(div6)
 head(AGmat[,1:10]);dim(AGmat)
 head(BGmat[,1:10]);dim(BGmat)
 
-# Make an output file to store the new values
-head(div2);dim(div2)
-head(div3);dim(div3)
-bd.dat<-div3
-
-bd.dat$quadratID2<-paste(bd.dat$quadratID,bd.dat$ab,sep=".")
-head(bd.dat,3);dim(bd.dat)
-
-head(gdf)
-
-gdf$gr<-substr(gdf$group,start = unlist(gregexpr("[.]",gdf$group))+1,stop=nchar(gdf$group))
-
-# First, calculate beta diversity for all functional groups following the same process as the original analysis - i.e. separately for above and below ground. 
-
-head(AGmat[,1:10], 3);dim(AGmat)
-head(BGmat[,1:10],3);dim(BGmat)
+# Make output files to store new values
 
 ag.out<-data.frame(quadratID=div2$quadratID)
 above.out<-ag.out
@@ -1171,57 +1134,97 @@ head(above.out); dim(above.out)
 head(below.out); dim(below.out)
 head(both.out); dim(both.out)
 
-head(gdf); dim(gdf)
+# Make data file for new analysis:
+head(div2);dim(div2)
+head(div3);dim(div3)
+bd.dat<-div3
 
-for (i in 1:length(unique(gdf$gr))){
+# Put final data in bd.dat
+bd.dat$quadratID2<-paste(bd.dat$quadratID,bd.dat$ab,sep=".")
+head(bd.dat,3);dim(bd.dat)
+
+# Calculate beta diversity for all functional groups using the 117 quadrat by species matrix
+
+head(div6[,1:10]);dim(div6)
+head(AGmat[,1:10], 3);dim(AGmat)
+head(BGmat[,1:10],3);dim(BGmat)
+
+head(gdf2); dim(gdf2)
+
+gr.toanalyse<-unique(gr.df$group)
+
+bd.outlist<-list()
+
+### **** UP TO HERE, some were not running because the old groups that were not included were still in the list. I've updated the list of groups, now this should run. 
+
+## However, some are returning NaN, even though the parameters are the same. Is it because there's a site included with no species?
+
+for (i in 1:length(gr.toanalyse)){
   
-  gr.thisrun<-gdf$gr[i]
+  gr.thisrun<-gr.toanalyse[i]
   
-  lines.thisrun<-which(gdf$gr %in% gr.thisrun)
-  groups.thisrun<-gdf$group[lines.thisrun]
+  lines.thisrun<-which(gdf2$gr %in% gr.thisrun)
+  groups.thisrun<-gdf2$group[lines.thisrun]
   
   ag.thisrun<-get(groups.thisrun[grep("AG",groups.thisrun)])
   bg.thisrun<-get(groups.thisrun[grep("BG",groups.thisrun)])
   
   both.thisrun<-unique(c(ag.thisrun, bg.thisrun))
   
-  ag.mat<-AGmat[,ag.thisrun]
-  bg.mat<-BGmat[,bg.thisrun]
+  # ag.mat<-AGmat[,ag.thisrun]
+  # bg.mat<-BGmat[,bg.thisrun]
   
   both.mat<-div6[,both.thisrun]
-  
-  head(ag.mat, 3);dim(ag.mat)
-  head(bg.mat,3);dim(bg.mat)
+
   head(both.mat,3);dim(both.mat)
   
-  ag.obj<-beta.div(ag.mat, method = "jaccard")
-  bg.obj<-beta.div(bg.mat, method = "jaccard")
+  # ag.obj<-beta.div(ag.mat, method = "jaccard")
+  # bg.obj<-beta.div(bg.mat, method = "jaccard")
   both.obj<-beta.div(both.mat, method="jaccard")
   
-  bd.ag<-data.frame(quadratID=names(ag.obj$LCBD),bd=ag.obj$LCBD)
-  bd.bg<-data.frame(quadratID=names(bg.obj$LCBD),bd=bg.obj$LCBD)
-  both.bg<-data.frame(quadratID2=names(both.obj$LCBD),bd=both.obj$LCBD)
-  rownames(bd.ag)<-1:nrow(bd.ag)
-  rownames(bd.bg)<-1:nrow(bd.bg)
+  # bd.ag<-data.frame(quadratID=names(ag.obj$LCBD),bd=ag.obj$LCBD)
+  # bd.bg<-data.frame(quadratID=names(bg.obj$LCBD),bd=bg.obj$LCBD)
+  bd.both<-data.frame(quadratID2=names(both.obj$LCBD),bd=both.obj$LCBD)
   
-  ag.dat<-merge(above.out, bd.ag, by="quadratID")
-  bg.dat<-merge(below.out, bd.bg, by="quadratID")
-  both.dat<-merge(both.out, both.bg, by="quadratID2")
+  # rownames(bd.ag)<-1:nrow(bd.ag)
+  # rownames(bd.bg)<-1:nrow(bd.bg)
+  rownames(bd.both)<-1:nrow(bd.both)
+  
+  head(bd.both); dim(bd.both)
+  
+  # ag.dat<-merge(above.out, bd.ag, by="quadratID")
+  # bg.dat<-merge(below.out, bd.bg, by="quadratID")
+  both.dat<-merge(both.out, bd.both, by="quadratID2")
   both.dat<-both.dat[order(both.dat$ab, both.dat$quadratID2),]
-  rownames(both.bg)<-1:nrow(both.bg)
+  rownames(both.dat)<-1:nrow(both.dat)
   
-  dat.both<-rbind(ag.dat, bg.dat)
-  colnames(dat.both)[grep("bd", colnames(dat.both))]<-gr.thisrun
+  # dat.sep<-rbind(ag.dat, bg.dat)
+  # colnames(dat.sep)[grep("bd", colnames(dat.sep))]<-gr.thisrun
+  colnames(both.dat)[grep("bd", colnames(both.dat))]<-gr.thisrun
   
-  head(dat.both); dim(dat.both)
   head(both.dat); dim(both.dat)
   
+  bd.outlist[[i]]<-both.dat
   
-  
-  head(bd.ag)
-  head(bd.bg)
-  
-}
+} # close bd 
+
+
+# Save all species output and explore the difference between calculating beta diversity separately above and below, vs the whole matrix together (these have been saved in the workspace and blanked in the loop): 
+
+all.gamma.separate<-dat.sep # calculated separately
+all.gamma.together<-both.dat # calculated together
+head(all.gamma.separate); dim(all.gamma.separate) 
+head(all.gamma.together); dim(all.gamma.together)
+
+dev.new(width=9,height=4,dpi=60, pointsize=18, noRStudioGD = T)
+par(mfrow=c(1,2),mgp=c(2.2,1,0), mar=c(4,5,1,1),oma=c(0,0,0,0), font.main=1)
+
+plot(all.gamma.separate$ab, all.gamma.separate$all, las=1, xlab="position", ylab="", main="All species (y separate)", font.main=1, cex.main=0.9)
+title(ylab="beta diversity", mgp=c(3.5,1,0))
+plot(all.gamma.together$ab, all.gamma.together$all, las=1, xlab="position", ylab="", main="All species (y together)", font.main=1, cex.main=0.9)
+title(ylab="beta diversity", mgp=c(3.5,1,0))
+
+# save.image("04_workspaces/seedbank_analysis.RData")
 
 
 
