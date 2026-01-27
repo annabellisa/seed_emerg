@@ -11,12 +11,16 @@ library(lmerTest)
 library(ecodist)
 library(ape)
 library(scales)
-library(vegan)
 library(adespatial)
 library(ade4)
+library(glmmADMB)
 
 # ---- load workspace:
 load("04_workspaces/seedbank_analysis.RData")
+
+# Load functions:
+invisible(lapply(paste("02_functions/",dir("02_functions"),sep=""), function(x) source(x)))
+
 
 # ---- Import data ----
 
@@ -987,13 +991,15 @@ mtext("(c)",3,0.4,F,adj=0)
 
 # 2026 revision
 
-# Whittaker's beta diversity is problematic. 
+# R1: "For evaluating beta diversity, I encourage you to consider some more complex beta diversity indices (see Pondani and Schmera 2011 Oikos, and subsequent papers). You could also partition beta diversity into nestedness and turnover components (nestedness = low diversity plots being subsets of high diversity plots; turnover = changes in species identity; see Baselga 2010 Global Ecology and Biogeography). That partitioning can provide additional insight into the biological mechanisms driving changes in species composition. These metrics can be calculated with the adespatial R package."
+
+# Whittaker's beta diversity is problematic anyway. 
 
 # Ricotta & Burrascano (2009) explain "...since Whittaker's βW summarizes the turnover in species composition of a given set of plots with a single scalar, it cannot be used for testing for differences in beta diversity among different sets of plots."
 
 # Legendre et al. (2005) talk about 'levels of abstraction', and that when the interest is in beta diversity between 'groups of sites' distance based approaches are necessary. Raw data based approaches are suitable for "studying variation of community composition among sites".
 
-# adespatial; Podani and Schmera (2011) and Baselga (2010) methods are implementable in this package
+# wrt partitioning, Podani and Schmera (2011) and Baselga (2010) methods are implementable inadespatial
 
 head(div6);dim(div6)
 head(div4);dim(div4)
@@ -1075,12 +1081,11 @@ text(0.45,0.25,labels="replacement", col="black", srt=300)
 
 mtext("(c) above and below", side=3, line=2.5, adj=0.5, cex=0.8)
 
-
 # Re-calculate beta diversity using a distance-based method (beta.div adespatial)
 
-# For the original analysis we calculated beta diversity separately for each position (i.e. gamma was total species richness under ground and above ground, separately). Burn treatments were combined. But actually this is not appropriate. Cornell and Harrison (2014, AREE) provide a definition: "The species pool can be defined as all the species present in a region that can disperse to a focal locality regardless of their ability to tolerate the prevailing environmental conditions"
+# Originally, we calculated beta diversity separately for each position (i.e. gamma was total species richness under ground and above ground, separately). Burn treatments were combined. But actually this is not appropriate. Cornell and Harrison (2014, AREE) provide a definition: "The species pool can be defined as all the species present in a region that can disperse to a focal locality regardless of their ability to tolerate the prevailing environmental conditions"
 
-# Thus, the MS has been updated to reflect the biogeographic context of our study: "The regional species pool (γ) was defined as total species richness across all 60 quadrats, including both levels of the fire treatment (control, burn) and position (above, below). This definition of γ is suitable for identifying biotic and abiotic filters that shape patterns of community assembly (such as species losses and gains under different management regimes) at spatial scales where dispersal is possible (Cornell & Harrison 2014). This allowed γ to reflect that seed from the above ground community becomes available to the seedbank below ground, while species in the seedbank are available to recruit above ground."
+# The MS has been updated to reflect the biogeographic context of our study: "The regional species pool (γ) was defined as total species richness across all 60 quadrats, including both levels of the fire treatment (control, burn) and position (above, below). This definition of γ is suitable for identifying biotic and abiotic filters that shape patterns of community assembly (such as species losses and gains under different management regimes) at spatial scales where dispersal is possible (Cornell & Harrison 2014). This allowed γ to reflect that seed from the above ground community becomes available to the seedbank below ground, while species in the seedbank are available to recruit above ground."
 
 # Redefine functional groups:
 
@@ -1155,9 +1160,11 @@ gr.toanalyse<-unique(gr.df$group)
 
 bd.outlist<-list()
 
-### **** UP TO HERE, some were not running because the old groups that were not included were still in the list. I've updated the list of groups, now this should run. 
+# some were not running because old groups that were not included were still in the list. This is now running with the updated the list of groups. 
 
-## However, some are returning NaN, even though the parameters are the same. Is it because there's a site included with no species?
+# However, some are returning NaN, even though the parameters are the same, because these include quadrats with no species:
+# 4 annual; 9 exotic_grass; 11 exotic_forb; 12 leg_forb
+# I added an if to deal with this in the loop and merge back to the main df. 
 
 for (i in 1:length(gr.toanalyse)){
   
@@ -1178,6 +1185,11 @@ for (i in 1:length(gr.toanalyse)){
 
   head(both.mat,3);dim(both.mat)
   
+  if (length(which(rowSums(both.mat)==0))>0) both.mat<-both.mat[-which(rowSums(both.mat)==0),]
+  
+  # table(rowSums(both.mat)) # sites
+  # table(colSums(both.mat)) # species
+  
   # ag.obj<-beta.div(ag.mat, method = "jaccard")
   # bg.obj<-beta.div(bg.mat, method = "jaccard")
   both.obj<-beta.div(both.mat, method="jaccard")
@@ -1191,10 +1203,11 @@ for (i in 1:length(gr.toanalyse)){
   rownames(bd.both)<-1:nrow(bd.both)
   
   head(bd.both); dim(bd.both)
+  head(both.out); dim(both.out)
   
   # ag.dat<-merge(above.out, bd.ag, by="quadratID")
   # bg.dat<-merge(below.out, bd.bg, by="quadratID")
-  both.dat<-merge(both.out, bd.both, by="quadratID2")
+  both.dat<-merge(both.out, bd.both, all.x=T, all.y=F, by="quadratID2")
   both.dat<-both.dat[order(both.dat$ab, both.dat$quadratID2),]
   rownames(both.dat)<-1:nrow(both.dat)
   
@@ -1208,6 +1221,37 @@ for (i in 1:length(gr.toanalyse)){
   
 } # close bd 
 
+head(bd.outlist[[13]])
+
+bd.data<-do.call(cbind,bd.outlist)
+head(bd.data, 3); dim(bd.data)
+
+# If all of these are TRUE, then the quadrat and position (ab) names are all in the correct order after cbind, and the extra ones can simply be removed:
+table(apply(bd.data[,grep("quadratID2", colnames(bd.data))],2,function(x) x==x))
+table(apply(bd.data[,grep("ab", colnames(bd.data))],2,function(x) x==x))
+
+quad.remove<-grep("quadratID2", colnames(bd.data))
+bd.data<-bd.data[,-quad.remove[2:length(quad.remove)]]
+
+ab.remove<-grep("ab", colnames(bd.data))
+bd.data<-bd.data[,-ab.remove[2:length(quad.remove)]]
+
+# the new data needs be structured like div4 for modelling
+head(bd.data, 3); dim(bd.data)
+head(div4, 3); dim(div4) # nrow==60
+
+# div3 is the base
+div7<-div3
+div7$quadratID2<-paste(div7$quadratID, div7$ab, sep=".")
+div7$ab<-NULL
+
+div7<-merge(div7, bd.data, by="quadratID2", all.x=T, all.y=F)
+div7<-div7[order(div7$ab, div7$quadratID2),]
+rownames(div7)<-1:nrow(div7)
+head(div7);dim(div7)
+
+div7$burn_trt<-as.factor(div7$burn_trt)
+div7$transect<-as.factor(div7$transect)
 
 # Save all species output and explore the difference between calculating beta diversity separately above and below, vs the whole matrix together (these have been saved in the workspace and blanked in the loop): 
 
@@ -1226,501 +1270,138 @@ title(ylab="beta diversity", mgp=c(3.5,1,0))
 
 # save.image("04_workspaces/seedbank_analysis.RData")
 
+# Plot new raw beta values:
 
+dev.new(width=7,height=10,dpi=60,pointsize=18, noRStudioGD = T)
+par(mfrow=c(5,3),mar=c(3.5,4,1,1), mgp=c(2,0.5,0), oma=c(0,0,0,0))
 
+head(bd.data, 3); dim(bd.data)
+head(gr.df); dim(gr.df)
 
-# Original script, first submission
-# all
-head(div4);dim(div4)
-head(AGmat[,1:10]);dim(AGmat)
-head(BGmat[,1:10]);dim(BGmat)
+gr.toplot<-colnames(bd.data)[3:ncol(bd.data)]
 
-range(colSums(AGmat))
-range(colSums(BGmat))
+for (i in 1:length(gr.toplot)){
+  gr.thisrun<-gr.toplot[i]
+  plot(bd.data$ab, bd.data[,gr.thisrun], las=1, xlab="", ylab="", main=gr.thisrun, font.main=1, cex.main=0.9, cex.axis=0.8)
+}
 
-AGgam <- ncol(AGmat)
-BGgam <- ncol(BGmat)
+# save.image("04_workspaces/seedbank_analysis.RData")
 
-AGbeta <- AGgam/(div4$all[which(div4$ab == "above")])
-BGbeta <- BGgam/(div4$all[which(div4$ab == "below")])
+# ----
 
-div4$beta.all <- c(AGbeta, BGbeta)
+# Beta diversity: fit models & predict ----
 
-# beta native
-AGbeta.nat <- group.df$no_species[group.df$group == "AG.native"]/(div4$native[which(div4$ab == "above")])
-BGbeta.nat <- group.df$no_species[group.df$group == "BG.native"]/(div4$native[which(div4$ab == "below")])
+head(div7,3);dim(div7)
+head(gr.df); dim(gr.df)
+
+# Manually add y labels
+
+gr.df$ylab<-c("All species","Native", "Exotic", "Annual", "Perennial", "Forb", "Grass", "Native Grass", "Exotic Grass", "Native Forb", "Exotic Forb", "Leguminous Forb", "Non-leguminous Forb")
+
+# The data are positive numeric. 
+# Positive, continuous, numeric, non-integer, bounded by zero. 
+range(div7[,which(colnames(div7)=="all"):ncol(div7)], na.rm=T)
+# hist(unlist(div7[,which(colnames(div7)=="all"):ncol(div7)]))
+
+# So this should be a gamma distribution, which can be stably implemented in glmmadmb with random effects
+
+beta.mod<-list()
+beta.sum<-list()
+beta.coef<-list()
+beta.pred<-list()
+
+gr.df$beta.int.p<-NA
+gr.df$beta.add.fire.p<-NA
+gr.df$beta.add.position.p<-NA
+
+beta.groups<-gr.df$group
+head(div7,3);dim(div7)
+
+for (i in 1:length(beta.groups)){
   
-div4$beta.nat <- c(AGbeta.nat, BGbeta.nat)
-
-# beta exotic
-AGbeta.exo <- group.df$no_species[group.df$group == "AG.exotic"]/(div4$exotic[which(div4$ab == "above")])
-BGbeta.exo <- group.df$no_species[group.df$group == "BG.exotic"]/(div4$exotic[which(div4$ab == "below")])
-
-div4$beta.exo <- c(AGbeta.exo, BGbeta.exo)
-
-# beta exotic
-AGbeta.exo <- group.df$no_species[group.df$group == "AG.exotic"]/(div4$exotic[which(div4$ab == "above")])
-BGbeta.exo <- group.df$no_species[group.df$group == "BG.exotic"]/(div4$exotic[which(div4$ab == "below")])
-
-div4$beta.exo <- c(AGbeta.exo, BGbeta.exo)
-
-# beta annual
-AGbeta.ann <- ifelse(div4$annual[which(div4$ab == "above")] == 0, 0, group.df$no_species[group.df$group == "AG.annual"] /div4$annual[which(div4$ab == "above")])
-BGbeta.ann <- ifelse(div4$annual[which(div4$ab == "below")] == 0, 0, group.df$no_species[group.df$group == "BG.annual"] /div4$annual[which(div4$ab == "below")])
-
-div4$beta.ann <- c(AGbeta.ann, BGbeta.ann)
-
-# beta perennial
-AGbeta.per <- group.df$no_species[group.df$group == "AG.perr"]/(div4$perr[which(div4$ab == "above")])
-BGbeta.per <- group.df$no_species[group.df$group == "BG.perr"]/(div4$perr[which(div4$ab == "below")])
-
-div4$beta.per <- c(AGbeta.per, BGbeta.per)
-
-# beta forb
-AGbeta.for <- group.df$no_species[group.df$group == "AG.forb"]/(div4$forb[which(div4$ab == "above")])
-BGbeta.for <- group.df$no_species[group.df$group == "BG.forb"]/(div4$forb[which(div4$ab == "below")])
-
-div4$beta.for <- c(AGbeta.for, BGbeta.for)
-
-# beta grass
-AGbeta.gra <- group.df$no_species[group.df$group == "AG.grass"]/(div4$grass[which(div4$ab == "above")])
-BGbeta.gra <- group.df$no_species[group.df$group == "BG.grass"]/(div4$grass[which(div4$ab == "below")])
-
-div4$beta.gra <- c(AGbeta.gra, BGbeta.gra)
-
-# beta native grass
-AGbeta.natgra <- group.df$no_species[group.df$group == "AG.native_grass"]/(div4$native_grass[which(div4$ab == "above")])
-BGbeta.natgra <- group.df$no_species[group.df$group == "BG.native_grass"]/(div4$native_grass[which(div4$ab == "below")])
-
-div4$beta.natgra <- c(AGbeta.natgra, BGbeta.natgra)
-
-# beta exotic grass
-AGbeta.exogra <- ifelse(div4$exotic_grass[which(div4$ab == "above")] == 0, 0, group.df$no_species[group.df$group == "AG.exotic_grass"] /div4$exotic_grass[which(div4$ab == "above")])
-BGbeta.exogra <- ifelse(div4$exotic_grass[which(div4$ab == "below")] == 0, 0, group.df$no_species[group.df$group == "BG.exotic_grass"] /div4$exotic_grass[which(div4$ab == "below")])
-
-div4$beta.exogra <- c(AGbeta.exogra, BGbeta.exogra)
-
-# beta native forb
-AGbeta.natfor <- group.df$no_species[group.df$group == "AG.native_forb"]/(div4$native_forb[which(div4$ab == "above")])
-BGbeta.natfor <- group.df$no_species[group.df$group == "BG.native_forb"]/(div4$native_forb[which(div4$ab == "below")])
-
-div4$beta.natfor <- c(AGbeta.natfor, BGbeta.natfor)
-
-# beta exotic forb
-AGbeta.exofor <- ifelse(div4$exotic_forb[which(div4$ab == "above")] == 0, 0, group.df$no_species[group.df$group == "AG.exotic_forb"] /div4$exotic_forb[which(div4$ab == "above")])
-BGbeta.exofor <- ifelse(div4$exotic_forb[which(div4$ab == "below")] == 0, 0, group.df$no_species[group.df$group == "BG.exotic_forb"] /div4$exotic_forb[which(div4$ab == "below")])
-
-div4$beta.exofor <- c(AGbeta.exofor, BGbeta.exofor)
-
-# beta non leguminous forb
-AGbeta.nlegfor <- ifelse(div4$nonleg_forb[which(div4$ab == "above")] == 0, 0, group.df$no_species[group.df$group == "AG.nonleg_forb"] /div4$nonleg_forb[which(div4$ab == "above")])
-BGbeta.nlegfor <- ifelse(div4$nonleg_forb[which(div4$ab == "below")] == 0, 0, group.df$no_species[group.df$group == "BG.nonleg_forb"] /div4$nonleg_forb[which(div4$ab == "below")])
-
-div4$beta.nlegfor <- c(AGbeta.nlegfor, BGbeta.nlegfor)
-
-# beta leguminous forb
-AGbeta.legfor <- ifelse(div4$leg_forb[which(div4$ab == "above")] == 0, 0, group.df$no_species[group.df$group == "AG.leg_forb"] /div4$leg_forb[which(div4$ab == "above")])
-BGbeta.legfor <- ifelse(div4$leg_forb[which(div4$ab == "below")] == 0, 0, group.df$no_species[group.df$group == "BG.leg_forb"] /div4$leg_forb[which(div4$ab == "below")])
-
-div4$beta.legfor <- c(AGbeta.legfor, BGbeta.legfor)
-
-# save.image("04_workspaces/seedbank_analysis.RData")
-
-# ----
-
-# Beta diversity: modelling ----
-
-# beta diversity modelling - lmer. all interactions insignificant except total, annual, perennial. all else uses additive models in further analysis.
-
-# all -> interaction significant
-allbeta<-lmer(beta.all~ab*burn_trt+(1|transect), data=div4)
-summary(allbeta)
-
-# allbeta1<-lmer(beta.all~ab+burn_trt+(1|transect), data=div4)
-# summary(allbeta1)
-
-# native
-natbeta<-lmer(beta.nat~ab*burn_trt+(1|transect), data=div4)
-summary(natbeta)
-
-natbeta2<-lmer(beta.nat~ab+burn_trt+(1|transect), data=div4)
-summary(natbeta2)
-
-# exotic
-exobeta<-lmer(beta.exo~ab*burn_trt+(1|transect), data=div4)
-summary(exobeta)
-
-exobeta2<-lmer(beta.exo~ab+burn_trt+(1|transect), data=div4)
-summary(exobeta2)
-
-# annual - interaction significant
-annbeta<-lmer(beta.ann~ab*burn_trt+(1|transect), data=div4)
-summary(annbeta)
-
-# annbeta2<-lmer(beta.ann~ab+burn_trt+(1|transect), data=div4)
-# summary(annbeta2)
-
-# perennial - interaction significant
-perbeta<-lmer(beta.per~ab*burn_trt+(1|transect), data=div4)
-summary(perbeta)
-
-# perbeta2<-lmer(beta.per~ab+burn_trt+(1|transect), data=div4)
-# summary(perbeta)
-
-# forb
-forbeta<-lmer(beta.for~ab*burn_trt+(1|transect), data=div4)
-summary(forbeta)
-
-forbeta2<-lmer(beta.for~ab+burn_trt+(1|transect), data=div4)
-summary(forbeta2)
-
-# grass
-grabeta<-lmer(beta.gra~ab*burn_trt+(1|transect), data=div4)
-summary(grabeta)
-
-grabeta2<-lmer(beta.gra~ab+burn_trt+(1|transect), data=div4)
-summary(grabeta2)
-
-# native grass
-natgrabeta<-lmer(beta.natgra~ab*burn_trt+(1|transect), data=div4)
-summary(natgrabeta)
-
-natgrabeta2<-lmer(beta.natgra~ab+burn_trt+(1|transect), data=div4)
-summary(natgrabeta2)
-
-# exotic grass
-exograbeta<-lmer(beta.exogra~ab*burn_trt+(1|transect), data=div4)
-summary(exograbeta)
-
-exograbeta2<-lmer(beta.exogra~ab+burn_trt+(1|transect), data=div4)
-summary(exograbeta2)
-
-# native forb
-natforbeta<-lmer(beta.natfor~ab*burn_trt+(1|transect), data=div4)
-summary(natforbeta)
-
-natforbeta2<-lmer(beta.natfor~ab+burn_trt+(1|transect), data=div4)
-summary(natforbeta2)
-
-# exotic forb
-exoforbeta<-lmer(beta.exofor~ab*burn_trt+(1|transect), data=div4)
-summary(exoforbeta)
-
-exoforbeta2<-lmer(beta.exofor~ab+burn_trt+(1|transect), data=div4)
-summary(exoforbeta2)
-
-# non leg forb
-nlegbeta<-lmer(beta.nlegfor~ab*burn_trt+(1|transect), data=div4)
-summary(nlegbeta)
-
-nlegbeta2<-lmer(beta.nlegfor~ab+burn_trt+(1|transect), data=div4)
-summary(nlegbeta2)
-round(summary(nlegbeta2)$coefficient,3)
-
-# leg forb
-legbeta<-lmer(beta.legfor~ab*burn_trt+(1|transect), data=div4)
-summary(legbeta)
-
-legbeta2<-lmer(beta.legfor~ab+burn_trt+(1|transect), data=div4)
-summary(legbeta2)
-round(summary(legbeta2)$coefficient,3)
-
-# save.image("04_workspaces/seedbank_analysis.RData")
-
-# ----
-
-# Beta diversity: model estimates ----
-
-# predictSE beta diversity
-
-# all
-srmod_beta.all <- predictSE(mod=allbeta,newdata=nd1,type="response",se.fit = T)
-srmod_beta.all <- data.frame(nd1, fit = srmod_beta.all$fit, se = srmod_beta.all$se.fit)
-srmod_beta.all$lci <- srmod_beta.all$fit-(srmod_beta.all$se*1.96)
-srmod_beta.all$uci <- srmod_beta.all$fit+(srmod_beta.all$se*1.96)
-head(srmod_beta.all)
-
-# native
-srmod_beta.nat <- predictSE(mod=natbeta2,newdata=nd1,type="response",se.fit = T)
-srmod_beta.nat <- data.frame(nd1, fit = srmod_beta.nat$fit, se = srmod_beta.nat$se.fit)
-srmod_beta.nat$lci <- srmod_beta.nat$fit-(srmod_beta.nat$se*1.96)
-srmod_beta.nat$uci <- srmod_beta.nat$fit+(srmod_beta.nat$se*1.96)
-head(srmod_beta.nat)
-
-# exotic
-srmod_beta.exo <- predictSE(mod=exobeta2,newdata=nd1,type="response",se.fit = T)
-srmod_beta.exo <- data.frame(nd1, fit = srmod_beta.exo$fit, se = srmod_beta.exo$se.fit)
-srmod_beta.exo$lci <- srmod_beta.exo$fit-(srmod_beta.exo$se*1.96)
-srmod_beta.exo$uci <- srmod_beta.exo$fit+(srmod_beta.exo$se*1.96)
-head(srmod_beta.exo)
-
-# annual
-srmod_beta.ann <- predictSE(mod=annbeta,newdata=nd1,type="response",se.fit = T)
-srmod_beta.ann <- data.frame(nd1, fit = srmod_beta.ann$fit, se = srmod_beta.ann$se.fit)
-srmod_beta.ann$lci <- srmod_beta.ann$fit-(srmod_beta.ann$se*1.96)
-srmod_beta.ann$uci <- srmod_beta.ann$fit+(srmod_beta.ann$se*1.96)
-head(srmod_beta.ann)
-
-# perennial
-srmod_beta.per <- predictSE(mod=perbeta,newdata=nd1,type="response",se.fit = T)
-srmod_beta.per <- data.frame(nd1, fit = srmod_beta.per$fit, se = srmod_beta.per$se.fit)
-srmod_beta.per$lci <- srmod_beta.per$fit-(srmod_beta.per$se*1.96)
-srmod_beta.per$uci <- srmod_beta.per$fit+(srmod_beta.per$se*1.96)
-head(srmod_beta.per)
-
-# forb
-srmod_beta.for <- predictSE(mod=forbeta2,newdata=nd1,type="response",se.fit = T)
-srmod_beta.for <- data.frame(nd1, fit = srmod_beta.for$fit, se = srmod_beta.for$se.fit)
-srmod_beta.for$lci <- srmod_beta.for$fit-(srmod_beta.for$se*1.96)
-srmod_beta.for$uci <- srmod_beta.for$fit+(srmod_beta.for$se*1.96)
-head(srmod_beta.for)
-
-# grass
-srmod_beta.gra <- predictSE(mod=grabeta2,newdata=nd1,type="response",se.fit = T)
-srmod_beta.gra <- data.frame(nd1, fit = srmod_beta.gra$fit, se = srmod_beta.gra$se.fit)
-srmod_beta.gra$lci <- srmod_beta.gra$fit-(srmod_beta.gra$se*1.96)
-srmod_beta.gra$uci <- srmod_beta.gra$fit+(srmod_beta.gra$se*1.96)
-head(srmod_beta.gra)
-
-# native grass
-srmod_beta.natgra <- predictSE(mod=natgrabeta2,newdata=nd1,type="response",se.fit = T)
-srmod_beta.natgra <- data.frame(nd1, fit = srmod_beta.natgra$fit, se = srmod_beta.natgra$se.fit)
-srmod_beta.natgra$lci <- srmod_beta.natgra$fit-(srmod_beta.natgra$se*1.96)
-srmod_beta.natgra$uci <- srmod_beta.natgra$fit+(srmod_beta.natgra$se*1.96)
-head(srmod_beta.natgra)
-
-# exotic grass
-srmod_beta.exogra <- predictSE(mod=exograbeta2,newdata=nd1,type="response",se.fit = T)
-srmod_beta.exogra <- data.frame(nd1, fit = srmod_beta.exogra$fit, se = srmod_beta.exogra$se.fit)
-srmod_beta.exogra$lci <- srmod_beta.exogra$fit-(srmod_beta.exogra$se*1.96)
-srmod_beta.exogra$uci <- srmod_beta.exogra$fit+(srmod_beta.exogra$se*1.96)
-head(srmod_beta.exogra)
-
-# native forb
-srmod_beta.natfor <- predictSE(mod=natforbeta2,newdata=nd1,type="response",se.fit = T)
-srmod_beta.natfor <- data.frame(nd1, fit = srmod_beta.natfor$fit, se = srmod_beta.natfor$se.fit)
-srmod_beta.natfor$lci <- srmod_beta.natfor$fit-(srmod_beta.natfor$se*1.96)
-srmod_beta.natfor$uci <- srmod_beta.natfor$fit+(srmod_beta.natfor$se*1.96)
-head(srmod_beta.natfor)
-
-# exotic forb
-srmod_beta.exofor <- predictSE(mod=exoforbeta2,newdata=nd1,type="response",se.fit = T)
-srmod_beta.exofor <- data.frame(nd1, fit = srmod_beta.exofor$fit, se = srmod_beta.exofor$se.fit)
-srmod_beta.exofor$lci <- srmod_beta.exofor$fit-(srmod_beta.exofor$se*1.96)
-srmod_beta.exofor$uci <- srmod_beta.exofor$fit+(srmod_beta.exofor$se*1.96)
-head(srmod_beta.exofor)
-
-# non-leguminous forb
-srmod_beta.nlegfor <- predictSE(mod=nlegbeta2,newdata=nd1,type="response",se.fit = T)
-srmod_beta.nlegfor <- data.frame(nd1, fit = srmod_beta.nlegfor$fit, se = srmod_beta.nlegfor$se.fit)
-srmod_beta.nlegfor$lci <- srmod_beta.nlegfor$fit-(srmod_beta.nlegfor$se*1.96)
-srmod_beta.nlegfor$uci <- srmod_beta.nlegfor$fit+(srmod_beta.nlegfor$se*1.96)
-head(srmod_beta.nlegfor)
-
-# leguminous forb
-srmod_beta.legfor <- predictSE(mod=legbeta2,newdata=nd1,type="response",se.fit = T)
-srmod_beta.legfor <- data.frame(nd1, fit = srmod_beta.legfor$fit, se = srmod_beta.legfor$se.fit)
-srmod_beta.legfor$lci <- srmod_beta.legfor$fit-(srmod_beta.legfor$se*1.96)
-srmod_beta.legfor$uci <- srmod_beta.legfor$fit+(srmod_beta.legfor$se*1.96)
-head(srmod_beta.legfor)
-
-# save.image("04_workspaces/seedbank_analysis.RData")
+  group.thisrun<-beta.groups[i]
+  dat.thisrun<-div7[,c("burn_trt","transect", "ab",group.thisrun)]
+  head(dat.thisrun); dim(dat.thisrun)
+  
+  if(length(which(is.na(dat.thisrun[,group.thisrun])))>0){
+    dat.thisrun<-dat.thisrun[-which(is.na(dat.thisrun[,group.thisrun])),]
+    dat.thisrun<-tidy.df(dat.thisrun)
+    }
+  
+  form.int.thisrun<-paste(group.thisrun,"~ab*burn_trt+(1|transect)",sep="")
+  mod.int.thisrun<-glmmadmb(formula=as.formula(form.int.thisrun), family="gamma", data=dat.thisrun)
+  
+  form.add.thisrun<-paste(group.thisrun,"~ab+burn_trt+(1|transect)",sep="")
+  mod.add.thisrun<-glmmadmb(formula=as.formula(form.add.thisrun), family="gamma", data=dat.thisrun)
+  
+  # Interaction P value: if the P value is < 0.05 the interaction model is better: 
+  int.coef<-data.frame(summary(mod.int.thisrun)$coefficients)
+  int.p<-int.coef[grep(":", rownames(int.coef)),grep("Pr", colnames(int.coef))]
+  gr.df$beta.int.p[i]<-int.p
+  
+  if(int.p>0.05){
+  add.coef<-data.frame(summary(mod.add.thisrun)$coefficients)
+  gr.df$beta.add.fire.p[i]<-add.coef[grep("burn", rownames(add.coef)),grep("Pr", colnames(add.coef))]
+  gr.df$beta.add.position.p[i]<-add.coef[grep("abbelow", rownames(add.coef)),grep("Pr", colnames(add.coef))]
+}
+ 
+   if(int.p<0.05) mod.thisrun<-mod.int.thisrun else mod.thisrun<-mod.add.thisrun
+  
+  beta.mod[[i]]<-mod.thisrun 
+  beta.sum[[i]]<-summary(mod.thisrun)
+  beta.coef[[i]]<-summary(mod.thisrun)$coefficients
+  
+  pred.thisrun<-pred(model=mod.thisrun, new.data = nd1, se.fit = T)
+  
+  beta.pred[[i]]<-pred.thisrun
+  
+} # beta analysis
+
+head(gr.beta)
+
+# save.image("04_Workspaces/processed_data.RData")
 
 # ----
 
 # Beta diversity: plot estimates ----
 
-# June 2025 update
-# Make new plot for beta diversity, showing the variation for total, native, exotic, annual and perennial for the main document (to show the variation in responses). Plot all other functional groups with additive effects in the SI. 
+# June 2025: make plot for beta diversity, showing the variation for total, native, exotic, annual and perennial for the main document (to show the variation in responses). Plot all other functional groups with additive effects in the SI. 
 
-# define vectors to jitter raw data:
-{
-head(div4,2); dim(div4)
-div4$ab
-div4$burn_trt
-beta.all # interaction
-beta.nat
-beta.exo
-beta.ann
-beta.per
+# Jan 2026: update with estimates from distance based beta diversity:
 
-b.all.c.ab<-div4$beta.all[div4$burn_trt=="Control" & div4$ab=="above"]
-b.all.c.bl<-div4$beta.all[div4$burn_trt=="Control" & div4$ab=="below"]
-b.all.b.ab<-div4$beta.all[div4$burn_trt=="Burn" & div4$ab=="above"]
-b.all.b.bl<-div4$beta.all[div4$burn_trt=="Burn" & div4$ab=="below"]
-b.all.raw.lim<-c(b.all.c.ab,b.all.c.bl,b.all.b.ab,b.all.b.bl)
+dev.new(width=8,height=10,dpi=60,pointsize=18, noRStudioGD = T)
+par(mfrow=c(5,3),mar=c(3.5,4,1.5,1), mgp=c(2.2,1,0), oma=c(0,0,0,0))
 
-b.nat.c.ab<-div4$beta.nat[div4$burn_trt=="Control" & div4$ab=="above"]
-b.nat.c.bl<-div4$beta.nat[div4$burn_trt=="Control" & div4$ab=="below"]
-b.nat.b.ab<-div4$beta.nat[div4$burn_trt=="Burn" & div4$ab=="above"]
-b.nat.b.bl<-div4$beta.nat[div4$burn_trt=="Burn" & div4$ab=="below"]
-b.nat.raw.lim<-c(b.nat.c.ab,b.nat.c.bl,b.nat.b.ab,b.nat.b.bl)
-
-b.exo.c.ab<-div4$beta.exo[div4$burn_trt=="Control" & div4$ab=="above"]
-b.exo.c.bl<-div4$beta.exo[div4$burn_trt=="Control" & div4$ab=="below"]
-b.exo.b.ab<-div4$beta.exo[div4$burn_trt=="Burn" & div4$ab=="above"]
-b.exo.b.bl<-div4$beta.nat[div4$burn_trt=="Burn" & div4$ab=="below"]
-b.exo.raw.lim<-c(b.exo.c.ab,b.exo.c.bl,b.exo.b.ab,b.exo.b.bl)
-
-b.ann.c.ab<-div4$beta.ann[div4$burn_trt=="Control" & div4$ab=="above"]
-b.ann.c.bl<-div4$beta.ann[div4$burn_trt=="Control" & div4$ab=="below"]
-b.ann.b.ab<-div4$beta.ann[div4$burn_trt=="Burn" & div4$ab=="above"]
-b.ann.b.bl<-div4$beta.ann[div4$burn_trt=="Burn" & div4$ab=="below"]
-b.ann.raw.lim<-c(b.ann.c.ab,b.ann.c.bl,b.ann.b.ab,b.ann.b.bl)
-
-b.per.c.ab<-div4$beta.per[div4$burn_trt=="Control" & div4$ab=="above"]
-b.per.c.bl<-div4$beta.per[div4$burn_trt=="Control" & div4$ab=="below"]
-b.per.b.ab<-div4$beta.per[div4$burn_trt=="Burn" & div4$ab=="above"]
-b.per.b.bl<-div4$beta.per[div4$burn_trt=="Burn" & div4$ab=="below"]
-b.per.raw.lim<-c(b.per.c.ab,b.per.c.bl,b.per.b.ab,b.per.b.bl)
-
-} # close jitter vectors
-
-
-dev.new(width=6,height=7.5,dpi=60,pointsize=18, noRStudioGD = T)
-par(mfrow=c(3,2),mar=c(3.5,4,1.5,1), mgp=c(2.2,1,0), oma=c(0,0,0,0))
-
-# all
-plot(c(1:4), srmod_beta.all$fit, xlim=c(0.5,4.5), pch=20, xaxt="n", ylim=c((min(c(b.all.raw.lim,srmod_beta.all$lci))), max(c(b.all.raw.lim,srmod_beta.all$uci))), ylab="Beta Diversity", xlab="", las=1, cex=2.5,type="n")
-title(xlab="Position", mgp=c(1.8,1,0))
-
-points(jitter(rep(1,length(b.all.c.ab)),factor=4),b.all.c.ab,col=alpha("chartreuse4",0.5), pch=20, cex=0.5)
-points(jitter(rep(2,length(b.all.c.bl)),factor=4),b.all.c.bl,col=alpha("chartreuse4",0.5), pch=20, cex=0.5)
-points(jitter(rep(3,length(b.all.b.ab)),factor=4),b.all.b.ab,col=alpha("orange",0.5), pch=20, cex=0.5)
-points(jitter(rep(4,length(b.all.b.bl)),factor=4),b.all.b.bl,col=alpha("orange",0.5), pch=20, cex=0.5)
-
-arrows(c(1:4), srmod_beta.all$lci, c(1:4), srmod_beta.all$uci, length=0.05, code=3, angle=90)
-axis(side=1, at=1:4, labels=x_labels2, tick=T, cex.axis=0.8, mgp=c(3,0.5,0))
-title(main = "(a) Total (interaction)", line = 0.5,adj=0, cex.main=0.95, font.main=1)
-points(c(1:4), srmod_beta.all$fit,col=c(rep("chartreuse4",2),rep("orange",2)), pch=20, cex=2.5)
-
-par(xpd=NA)
-legend(6.5,15, legend=c("Control", "Burn"), col = c("chartreuse4", "orange"),pch=c(20, 20), cex = (1),pt.cex=2, title = NULL,bty="n")
-par(xpd=F)
-
-plot(1:10,1:10, type="n",xaxt="n",yaxt="n", bty="n", ylab="",xlab="")
-
-# native
-plot(c(1:4), srmod_beta.nat$fit, xlim=c(0.5,4.5), pch=20, xaxt="n", ylim=c((min(c(b.nat.raw.lim,srmod_beta.nat$lci))), max(c(b.nat.raw.lim,srmod_beta.nat$uci))), ylab="Beta Diversity", xlab="", las=1, cex=2.5,type="n")
-title(xlab="Position", mgp=c(1.8,1,0))
-
-points(jitter(rep(1,length(b.nat.c.ab)),factor=4),b.nat.c.ab,col=alpha("chartreuse4",0.5), pch=20, cex=0.5)
-points(jitter(rep(2,length(b.nat.c.bl)),factor=4),b.nat.c.bl,col=alpha("chartreuse4",0.5), pch=20, cex=0.5)
-points(jitter(rep(3,length(b.nat.b.ab)),factor=4),b.nat.b.ab,col=alpha("orange",0.5), pch=20, cex=0.5)
-points(jitter(rep(4,length(b.nat.b.bl)),factor=4),b.nat.b.bl,col=alpha("orange",0.5), pch=20, cex=0.5)
-
-arrows(c(1:4), srmod_beta.nat$lci, c(1:4), srmod_beta.nat$uci, length=0.05, code=3, angle=90)
-axis(side=1, at=1:4, labels=x_labels2,  tick=T, cex.axis=0.8, mgp=c(3,0.5,0))
-title(main = "(b) Native", line = 0.5,adj=0, cex.main=0.95, font.main=1)
-points(c(1:4), srmod_beta.nat$fit,col=c(rep("chartreuse4",2),rep("orange",2)), pch=20, cex=2.5)
-
-# exotic
-plot(c(1:4), srmod_beta.exo$fit, xlim=c(0.5,4.5), pch=20, xaxt="n", ylim=c((min(c(b.exo.raw.lim,srmod_beta.exo$lci))), max(c(b.exo.raw.lim,srmod_beta.exo$uci))), ylab="Beta Diversity", xlab="", las=1, cex=2.5,type="n")
-title(xlab="Position", mgp=c(1.8,1,0))
-
-points(jitter(rep(1,length(b.exo.c.ab)),factor=4),b.exo.c.ab,col=alpha("chartreuse4",0.5), pch=20, cex=0.5)
-points(jitter(rep(2,length(b.exo.c.bl)),factor=4),b.exo.c.bl,col=alpha("chartreuse4",0.5), pch=20, cex=0.5)
-points(jitter(rep(3,length(b.exo.b.ab)),factor=4),b.exo.b.ab,col=alpha("orange",0.5), pch=20, cex=0.5)
-points(jitter(rep(4,length(b.exo.b.bl)),factor=4),b.exo.b.bl,col=alpha("orange",0.5), pch=20, cex=0.5)
-
-arrows(c(1:4), srmod_beta.exo$lci, c(1:4), srmod_beta.exo$uci, length=0.05, code=3, angle=90)
-axis(side=1, at=1:4, labels=x_labels2, tick=T, cex.axis=0.8, mgp=c(3,0.5,0))
-title(main = "(c) Exotic", line = 0.5,adj=0, cex.main=0.95, font.main=1)
-points(c(1:4), srmod_beta.exo$fit,col=c(rep("chartreuse4",2),rep("orange",2)), pch=20, cex=2.5)
-
-# annual
-plot(c(1:4), srmod_beta.ann$fit, xlim=c(0.5,4.5), pch=20, xaxt="n", ylim=c((min(c(b.ann.raw.lim,srmod_beta.ann$lci))), max(c(b.ann.raw.lim,srmod_beta.ann$uci))), ylab="Beta Diversity", xlab="", las=1, cex=2.5,type="n")
-title(xlab="Position", mgp=c(1.8,1,0))
-
-points(jitter(rep(1,length(b.ann.c.ab)),factor=4),b.ann.c.ab,col=alpha("chartreuse4",0.5), pch=20, cex=0.5)
-points(jitter(rep(2,length(b.ann.c.bl)),factor=4),b.ann.c.bl,col=alpha("chartreuse4",0.5), pch=20, cex=0.5)
-points(jitter(rep(3,length(b.ann.b.ab)),factor=4),b.ann.b.ab,col=alpha("orange",0.5), pch=20, cex=0.5)
-points(jitter(rep(4,length(b.ann.b.bl)),factor=4),b.ann.b.bl,col=alpha("orange",0.5), pch=20, cex=0.5)
-
-arrows(c(1:4), srmod_beta.ann$lci, c(1:4), srmod_beta.ann$uci, length=0.05, code=3, angle=90)
-axis(side=1, at=1:4, labels=x_labels2, tick=T, cex.axis=0.8, mgp=c(3,0.5,0))
-title(main = "(d) Annual (interaction)", line = 0.5,adj=0, cex.main=0.95, font.main=1)
-points(c(1:4), srmod_beta.ann$fit,col=c(rep("chartreuse4",2),rep("orange",2)), pch=20, cex=2.5)
-
-# perennial
-plot(c(1:4), srmod_beta.per$fit, xlim=c(0.5,4.5), pch=20, xaxt="n", ylim=c((min(srmod_beta.per$lci)), max(srmod_beta.per$uci)), ylab="Beta Diversity", xlab="", las=1, cex=2.5,type="n")
-title(xlab="Position", mgp=c(1.8,1,0))
-
-points(jitter(rep(1,length(b.per.c.ab)),factor=4),b.per.c.ab,col=alpha("chartreuse4",0.5), pch=20, cex=0.5)
-points(jitter(rep(2,length(b.per.c.bl)),factor=4),b.per.c.bl,col=alpha("chartreuse4",0.5), pch=20, cex=0.5)
-points(jitter(rep(3,length(b.per.b.ab)),factor=4),b.per.b.ab,col=alpha("orange",0.5), pch=20, cex=0.5)
-points(jitter(rep(4,length(b.per.b.bl)),factor=4),b.per.b.bl,col=alpha("orange",0.5), pch=20, cex=0.5)
-
-arrows(c(1:4), srmod_beta.per$lci, c(1:4), srmod_beta.per$uci, length=0.05, code=3, angle=90)
-axis(side=1, at=1:4, labels=x_labels2, tick=T, cex.axis=0.8, mgp=c(3,0.5,0))
-title(main = "(e) Perennial (interaction)", line = 0.5,adj=0, cex.main=0.95, font.main=1)
-points(c(1:4), srmod_beta.per$fit,col=c(rep("chartreuse4",2),rep("orange",2)), pch=20, cex=2.5)
-
-
-# Plot other functional groups in the SI
-
-dev.new(width=6,height=10,dpi=60,pointsize=18, noRStudioGD = T)
-par(mfrow=c(4,2),mar=c(3.5,4,1.5,1), mgp=c(2.4,1,0), oma=c(0,0,0,4))
-
-# forb
-plot(c(1:4), srmod_beta.for$fit, xlim=c(0.5,4.5), pch=20, xaxt="n", ylim=c((min(srmod_beta.for$lci)), max(srmod_beta.for$uci)), ylab="Beta Diversity", xlab="", las=1, cex=2.5,type="n")
-arrows(c(1:4), srmod_beta.for$lci, c(1:4), srmod_beta.for$uci, length=0.05, code=3, angle=90)
-axis(side=1, at=c(1:4), labels=x_labels, tick=T, cex.axis=0.8)
-title(main = "(a) Forb", line = 0.5,adj=0, cex.main=0.95, font.main=1)
-points(c(1:4), srmod_beta.for$fit,col=c(rep("chartreuse4",2),rep("orange",2)), pch=20, cex=2.5)
-
-# grass
-plot(c(1:4), srmod_beta.gra$fit, xlim=c(0.5,4.5), pch=20, xaxt="n", ylim=c((min(srmod_beta.gra$lci)), max(srmod_beta.gra$uci)), ylab="Beta Diversity", xlab="", las=1, cex=2.5,type="n")
-arrows(c(1:4), srmod_beta.gra$lci, c(1:4), srmod_beta.gra$uci, length=0.05, code=3, angle=90)
-axis(side=1, at=c(1:4), labels=x_labels, tick=T, cex.axis=0.8)
-title(main = "(b) Grass", line = 0.5,adj=0, cex.main=0.95, font.main=1)
-points(c(1:4), srmod_beta.gra$fit,col=c(rep("chartreuse4",2),rep("orange",2)), pch=20, cex=2.5)
-
-par(xpd=NA)
-legend(4.8,11, legend=c("Control", "Burn"), col = c("chartreuse4", "orange"),pch=c(20, 20), cex = (1),pt.cex=2, title = NULL,bty="n")
-par(xpd=F)
-
-# native grass
-plot(c(1:4), srmod_beta.natgra$fit, xlim=c(0.5,4.5), pch=20, xaxt="n", ylim=c((min(srmod_beta.natgra$lci)), max(srmod_beta.natgra$uci)), ylab="Beta Diversity", xlab="", las=1, cex=2.5,type="n")
-arrows(c(1:4), srmod_beta.natgra$lci, c(1:4), srmod_beta.natgra$uci, length=0.05, code=3, angle=90)
-axis(side=1, at=c(1:4), labels=x_labels, tick=T, cex.axis=0.8)
-title(main = "(c) Native Grass", line = 0.5,adj=0, cex.main=0.95, font.main=1)
-points(c(1:4), srmod_beta.natgra$fit,col=c(rep("chartreuse4",2),rep("orange",2)), pch=20, cex=2.5)
-
-# exotic grass
-plot(c(1:4), srmod_beta.exogra$fit, xlim=c(0.5,4.5), pch=20, xaxt="n", ylim=c((min(srmod_beta.exogra$lci)), max(srmod_beta.exogra$uci)), ylab="Beta Diversity", xlab="", las=1, cex=2.5,type="n")
-arrows(c(1:4), srmod_beta.exogra$lci, c(1:4), srmod_beta.exogra$uci, length=0.05, code=3, angle=90)
-axis(side=1, at=c(1:4), labels=x_labels, tick=T, cex.axis=0.8)
-title(main = "(d) Exotic Grass", line = 0.5,adj=0, cex.main=0.95, font.main=1)
-points(c(1:4), srmod_beta.exogra$fit,col=c(rep("chartreuse4",2),rep("orange",2)), pch=20, cex=2.5)
-
-# native forb
-plot(c(1:4), srmod_beta.natfor$fit, xlim=c(0.5,4.5), pch=20, xaxt="n", ylim=c((min(srmod_beta.natfor$lci)), max(srmod_beta.natfor$uci)), ylab="Beta Diversity", xlab="", las=1, cex=2.5,type="n")
-arrows(c(1:4), srmod_beta.natfor$lci, c(1:4), srmod_beta.natfor$uci, length=0.05, code=3, angle=90)
-axis(side=1, at=c(1:4), labels=x_labels, tick=T, cex.axis=0.8)
-title(main = "(e) Native Forb", line = 0.5,adj=0, cex.main=0.95, font.main=1)
-points(c(1:4), srmod_beta.natfor$fit,col=c(rep("chartreuse4",2),rep("orange",2)), pch=20, cex=2.5)
-
-# exotic forb
-plot(c(1:4), srmod_beta.exofor$fit, xlim=c(0.5,4.5), pch=20, xaxt="n", ylim=c((min(srmod_beta.exofor$lci)), max(srmod_beta.exofor$uci)), ylab="Beta Diversity", xlab="", las=1, cex=2.5,type="n")
-arrows(c(1:4), srmod_beta.exofor$lci, c(1:4), srmod_beta.exofor$uci, length=0.05, code=3, angle=90)
-axis(side=1, at=c(1:4), labels=x_labels, tick=T, cex.axis=0.8)
-title(main = "(f) Exotic Forb", line = 0.5,adj=0, cex.main=0.95, font.main=1)
-points(c(1:4), srmod_beta.exofor$fit,col=c(rep("chartreuse4",2),rep("orange",2)), pch=20, cex=2.5)
-
-# non-leg forb
-plot(c(1:4), srmod_beta.nlegfor$fit, xlim=c(0.5,4.5), pch=20, xaxt="n", ylim=c((min(srmod_beta.nlegfor$lci)), max(srmod_beta.nlegfor$uci)), ylab="Beta Diversity", xlab="", las=1, cex=2.5,type="n")
-arrows(c(1:4), srmod_beta.nlegfor$lci, c(1:4), srmod_beta.nlegfor$uci, length=0.05, code=3, angle=90)
-axis(side=1, at=c(1:4), labels=x_labels, tick=T, cex.axis=0.8)
-title(main = "(g) Non-leguminous Forb", line = 0.5,adj=0, cex.main=0.95, font.main=1)
-points(c(1:4), srmod_beta.nlegfor$fit,col=c(rep("chartreuse4",2),rep("orange",2)), pch=20, cex=2.5)
-
-# leguminous forbs 
-plot(c(1:4), srmod_beta.legfor$fit, xlim=c(0.5,4.5), pch=20, xaxt="n", ylim=c((min(srmod_beta.legfor$lci)), max(srmod_beta.legfor$uci)), ylab="Beta Diversity", xlab="", las=1, cex=2.5,type="n")
-arrows(c(1:4), srmod_beta.legfor$lci, c(1:4), srmod_beta.legfor$uci, length=0.05, code=3, angle=90)
-axis(side=1, at=c(1:4), labels=x_labels, tick=T, cex.axis=0.8)
-title(main = "(h) Leguminous Forb", line = 0.5,adj=0, cex.main=0.95, font.main=1)
-points(c(1:4), srmod_beta.legfor$fit,col=c(rep("chartreuse4",2),rep("orange",2)), pch=20, cex=2.5)
+for (i in 1:nrow(gr.df)){
+  
+  gr.thisrun<-gr.df$group[i]
+  beta.pred.thisrun<-beta.pred[[i]]
+  plot(c(1:4), beta.pred.thisrun$fit.resp, xlim=c(0.5,4.5), pch=20, xaxt="n", ylim=c((min(c(beta.pred.thisrun$lci.resp))), max(c(beta.pred.thisrun$uci.resp))), ylab="Beta Diversity", xlab="", las=1, cex=2.5,type="n")
+  title(xlab="Position", mgp=c(1.8,1,0))
+  
+  # Raw data jitters:
+  
+  raw.thisrun<-div7[,c(1:which(colnames(div7)=="ab"),which(colnames(div7)==gr.thisrun))]
+  head(raw.thisrun,3); dim(raw.thisrun)
+  
+  b.c.ab<-raw.thisrun[raw.thisrun$burn_trt=="Control" & raw.thisrun$ab=="above",which(colnames(raw.thisrun)==gr.thisrun)]
+  b.c.bl<-raw.thisrun[raw.thisrun$burn_trt=="Control" & raw.thisrun$ab=="below",which(colnames(raw.thisrun)==gr.thisrun)]
+  b.b.ab<-raw.thisrun[raw.thisrun$burn_trt=="Burn" & raw.thisrun$ab=="above",which(colnames(raw.thisrun)==gr.thisrun)]
+  b.b.bl<-raw.thisrun[raw.thisrun$burn_trt=="Burn" & raw.thisrun$ab=="below",which(colnames(raw.thisrun)==gr.thisrun)]
+  b.raw.lim<-c(b.c.ab,b.c.bl,b.b.ab,b.b.bl)
+  
+  points(jitter(rep(1,length(b.c.ab)),factor=4),b.c.ab,col=alpha("chartreuse4",0.5), pch=20, cex=0.5)
+  points(jitter(rep(2,length(b.c.bl)),factor=4),b.c.bl,col=alpha("chartreuse4",0.5), pch=20, cex=0.5)
+  points(jitter(rep(3,length(b.b.ab)),factor=4),b.b.ab,col=alpha("orange",0.5), pch=20, cex=0.5)
+  points(jitter(rep(4,length(b.b.bl)),factor=4),b.b.bl,col=alpha("orange",0.5), pch=20, cex=0.5)
+  
+  # Model estimates
+  arrows(c(1:4), beta.pred.thisrun$lci.resp, c(1:4), beta.pred.thisrun$uci.resp, length=0.05, code=3, angle=90)
+  axis(side=1, at=1:4, labels=x_labels2, tick=T, cex.axis=0.8, mgp=c(3,0.5,0))
+  title(main = paste("(a) ",gr.df$ylab[i],sep=""), line = 0.5,adj=0, cex.main=0.95, font.main=1)
+  points(c(1:4), beta.pred.thisrun$fit.resp,col=c(rep("chartreuse4",2),rep("orange",2)), pch=20, cex=2.5)
+  
+}
 
 # save.image("04_workspaces/seedbank_analysis.RData")
 
