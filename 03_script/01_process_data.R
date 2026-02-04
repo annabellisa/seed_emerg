@@ -21,7 +21,6 @@ load("04_workspaces/seedbank_analysis.RData")
 # Load functions:
 invisible(lapply(paste("02_functions/",dir("02_functions"),sep=""), function(x) source(x)))
 
-
 # ---- Import data ----
 
 #combined species list of above and below ground, including non identified
@@ -575,167 +574,67 @@ head(srmod_nonlegfor1)
 
 # Species richness: plot estimates ----
 
-# April 2025 update
-# Make new plot with total species richness only for the main document (because the responses are all the same). Remove total from the multi-group figure and put the multi-group in the SI. 
+# Feb 2026 update
+
+# plot total species richness separately (see below) for the main document (because the responses are all the same). Remove total from the multi-group figure and put the multi-group in the SI. 
 
 # Use x_labels2 and x_lab_at for Main Doc; x_labels for SI
 x_labels2 <- c("above", "below", "above", "below")
 x_labels <- c("AG", "BG", "AG", "BG")
 x_lab_at<-c(0.8,1.9,3.1,4.2)
 
-# define vectors to jitter raw data:
-head(div4,2); dim(div4)
-
-all.c.ab<-div4$all[div4$burn_trt=="Control" & div4$ab=="above"]
-all.c.bl<-div4$all[div4$burn_trt=="Control" & div4$ab=="below"]
-all.b.ab<-div4$all[div4$burn_trt=="Burn" & div4$ab=="above"]
-all.b.bl<-div4$all[div4$burn_trt=="Burn" & div4$ab=="below"]
-
-raw.lim<-c(all.c.ab,all.c.bl,all.b.ab,all.b.bl)
-
-
-dev.new(width=5,height=3.5,dpi=120,pointsize=16, noRStudioGD = T)
-par(mar=c(3.5,4,0.5,1), mgp=c(2.4,1,0), oma=c(0,0,0,4))
-
-# all sr
-plot(c(1:4), srmod_all1$fit, xlim=c(0.5,4.5), pch=20, xaxt="n", ylim=c((min(c(srmod_all1$lci,raw.lim))), max(c(srmod_all1$uci,raw.lim))), ylab="Species Richness", xlab="", las=1, cex=2.5,type="n")
-
-axis(side=1, at=x_lab_at, labels=x_labels2, tick=F, cex.axis=0.8, mgp=c(2,0.5,0))
-axis(side=1, at=1:4, labels=NA, tick=T, cex.axis=0.8, mgp=c(2,0.5,0))
-title(xlab="Position",mgp=c(2,1,0))
-title(main = "", line = 0.5,adj=0, cex.main=0.95)
-
-points(jitter(rep(1,length(all.c.ab)),factor=4),all.c.ab,col=alpha("chartreuse4",0.5), pch=20, cex=0.5)
-points(jitter(rep(2,length(all.c.bl)),factor=4),all.c.bl,col=alpha("chartreuse4",0.5), pch=20, cex=0.5)
-points(jitter(rep(3,length(all.b.ab)),factor=4),all.b.ab,col=alpha("orange",0.5), pch=20, cex=0.5)
-points(jitter(rep(4,length(all.b.bl)),factor=4),all.b.bl,col=alpha("orange",0.5), pch=20, cex=0.5)
-
-arrows(c(1:4), srmod_all1$lci, c(1:4), srmod_all1$uci, length=0.05, code=3, angle=90)
-points(c(1:4), srmod_all1$fit,col=c(rep("chartreuse4",2),rep("orange",2)), pch=20, cex=2.5)
-
-par(xpd=NA)
-legend(4.8,33, legend=c("Control", "Burn"), col = c("chartreuse4", "orange"),pch=c(20, 20), cex = (1),pt.cex=2, title = NULL,bty="n")
-par(xpd=F)
-
 # Functional groups species richness for SI:
 
-head(srmod_all1)
-head(srmod_nat1)
-head(srmod_exo1)
-head(srmod_ann1)
-head(srmod_per1)
-head(srmod_tree1)
-head(srmod_shr1)
-head(srmod_for1)
-head(srmod_gra1)
-head(srmod_sed1)
-head(srmod_natgra1)
-head(srmod_exogra1)
+func.list<-list(srmod_all1,srmod_nat1,srmod_exo1,srmod_ann1,srmod_per1,srmod_for1,srmod_gra1,srmod_natgra1,srmod_exogra1,srmod_natfor1,srmod_exofor1,srmod_legfor1,srmod_nonlegfor1)
 
-gdf
+gr.df
 
 dev.new(width=9,height=10,dpi=60,pointsize=18, noRStudioGD = T)
 par(mfrow=c(4,3),mar=c(3.5,4,1.5,1), mgp=c(2.4,1,0), oma=c(0,0,0,6))
 
-# native
-plot(c(1:4), srmod_nat1$fit, xlim=c(0.5,4.5), pch=20, xaxt="n", ylim=c((min(srmod_nat1$lci)), max(srmod_nat1$uci)), ylab="Species Richness", xlab="", las=1, cex=2.5)
-arrows(c(1:4), srmod_nat1$lci, c(1:4), srmod_nat1$uci, length=0.05, code=3, angle=90)
-axis(side=1, at=c(1:4), labels=x_labels, tick=T, cex.axis=0.8, mgp=c(3,0.5,0))
-title(main = "(a) Native", line = 0.5,adj=0, cex.main=0.95, font.main=1)
-title(xlab="Position",mgp=c(1.8,1,0))
-points(c(1:4), srmod_nat1$fit,col=c(rep("chartreuse4",2),rep("orange",2)), pch=20, cex=2.5)
+for (i in 2:nrow(gr.df)){
+  
+  gr.thisrun<-gr.df$group[i]
+  est.thisrun<-func.list[[i]]
+  
+  # define vectors to jitter raw data:
+  raw.thisrun<-div4[,c(1:which(colnames(div4)=="ab"),which(colnames(div4)==gr.thisrun))]
+  head(raw.thisrun,3); dim(raw.thisrun)
+  
+  # Raw data jitters:
+  
+  b.c.ab<-raw.thisrun[raw.thisrun$burn_trt=="Control" & raw.thisrun$ab=="above",which(colnames(raw.thisrun)==gr.thisrun)]
+  b.c.bl<-raw.thisrun[raw.thisrun$burn_trt=="Control" & raw.thisrun$ab=="below",which(colnames(raw.thisrun)==gr.thisrun)]
+  b.b.ab<-raw.thisrun[raw.thisrun$burn_trt=="Burn" & raw.thisrun$ab=="above",which(colnames(raw.thisrun)==gr.thisrun)]
+  b.b.bl<-raw.thisrun[raw.thisrun$burn_trt=="Burn" & raw.thisrun$ab=="below",which(colnames(raw.thisrun)==gr.thisrun)]
+  b.raw.lim<-c(b.c.ab,b.c.bl,b.b.ab,b.b.bl)
+  
+  # Plot
+  plot(c(1:4), est.thisrun$fit, xlim=c(0.5,4.5), pch=20, xaxt="n", ylim=c(min(c(b.raw.lim,est.thisrun$lci),na.rm=T), max(c(b.raw.lim,est.thisrun$uci),na.rm=T)), ylab="Species Richness", xlab="", las=1, cex=2.5,type="n")
+  title(xlab="Position", mgp=c(1.8,1,0))
+  
+  # Add raw points
+  points(jitter(rep(1,length(b.c.ab)),factor=4),b.c.ab,col=alpha("chartreuse4",0.5), pch=20, cex=0.5)
+  points(jitter(rep(2,length(b.c.bl)),factor=4),b.c.bl,col=alpha("chartreuse4",0.5), pch=20, cex=0.5)
+  points(jitter(rep(3,length(b.b.ab)),factor=4),b.b.ab,col=alpha("orange",0.5), pch=20, cex=0.5)
+  points(jitter(rep(4,length(b.b.bl)),factor=4),b.b.bl,col=alpha("orange",0.5), pch=20, cex=0.5)
+  
+  # Model estimates
+  arrows(c(1:4), est.thisrun$lci, c(1:4), est.thisrun$uci, length=0.05, code=3, angle=90)
 
-# exotic
-plot(c(1:4), srmod_exo1$fit, xlim=c(0.5,4.5), pch=20, xaxt="n", ylim=c((min(srmod_exo1$lci)), max(srmod_exo1$uci)), ylab="Species Richness", xlab="", las=1, cex=2.5)
-arrows(c(1:4), srmod_exo1$lci, c(1:4), srmod_exo1$uci, length=0.05, code=3, angle=90)
-axis(side=1, at=c(1:4), labels=x_labels, tick=T, cex.axis=0.8, mgp=c(3,0.5,0))
-title(main = "(b) Exotic", line = 0.5,adj=0, cex.main=0.95, font.main=1)
-title(xlab="Position",mgp=c(1.8,1,0))
-points(c(1:4), srmod_exo1$fit,col=c(rep("chartreuse4",2),rep("orange",2)), pch=20, cex=2.5)
-
-# annual
-plot(c(1:4), srmod_ann1$fit, xlim=c(0.5,4.5), pch=20, xaxt="n", ylim=c((min(srmod_ann1$lci)), max(srmod_ann1$uci)), ylab="Species Richness", xlab="", las=1, cex=2.5)
-arrows(c(1:4), srmod_ann1$lci, c(1:4), srmod_ann1$uci, length=0.05, code=3, angle=90)
-axis(side=1, at=c(1:4), labels=x_labels, tick=T, cex.axis=0.8, mgp=c(3,0.5,0))
-title(main = "(c) Annual", line = 0.5,adj=0, cex.main=0.95, font.main=1)
-title(xlab="Position",mgp=c(1.8,1,0))
-points(c(1:4), srmod_ann1$fit,col=c(rep("chartreuse4",2),rep("orange",2)), pch=20, cex=2.5)
-
-par(xpd=NA)
-legend(5.2,8.2, legend=c("Control", "Burn"), col = c("chartreuse4", "orange"),pch=c(20, 20), cex = (1),pt.cex=2, title = NULL,bty="o")
-par(xpd=F)
-
-# perennial
-plot(c(1:4), srmod_per1$fit, xlim=c(0.5,4.5), pch=20, xaxt="n", ylim=c((min(srmod_per1$lci)), max(srmod_per1$uci)), ylab="Species Richness", xlab="", las=1, cex=2.5)
-arrows(c(1:4), srmod_per1$lci, c(1:4), srmod_per1$uci, length=0.05, code=3, angle=90)
-axis(side=1, at=c(1:4), labels=x_labels, tick=T, cex.axis=0.8, mgp=c(3,0.5,0))
-title(main = "(d) Perennial", line = 0.5,adj=0, cex.main=0.95, font.main=1)
-title(xlab="Position",mgp=c(1.8,1,0))
-points(c(1:4), srmod_per1$fit,col=c(rep("chartreuse4",2),rep("orange",2)), pch=20, cex=2.5)
-
-# forb
-plot(c(1:4), srmod_for1$fit, xlim=c(0.5,4.5), pch=20, xaxt="n", ylim=c((min(srmod_for1$lci)), max(srmod_for1$uci)), ylab="Species Richness", xlab="", las=1, cex=2.5)
-arrows(c(1:4), srmod_for1$lci, c(1:4), srmod_for1$uci, length=0.05, code=3, angle=90)
-axis(side=1, at=c(1:4), labels=x_labels, tick=T, cex.axis=0.8, mgp=c(3,0.5,0))
-title(main = "(e) Forb", line = 0.5,adj=0, cex.main=0.95, font.main=1)
-title(xlab="Position",mgp=c(1.8,1,0))
-points(c(1:4), srmod_for1$fit,col=c(rep("chartreuse4",2),rep("orange",2)), pch=20, cex=2.5)
-
-# grass
-plot(c(1:4), srmod_gra1$fit, xlim=c(0.5,4.5), pch=20, xaxt="n", ylim=c((min(srmod_gra1$lci)), max(srmod_gra1$uci)), ylab="Species Richness", xlab="", las=1, cex=2.5)
-arrows(c(1:4), srmod_gra1$lci, c(1:4), srmod_gra1$uci, length=0.05, code=3, angle=90)
-axis(side=1, at=c(1:4), labels=x_labels, tick=T, cex.axis=0.8, mgp=c(3,0.5,0))
-title(main = "(f) Grass", line = 0.5,adj=0, cex.main=0.95, font.main=1)
-title(xlab="Position",mgp=c(1.8,1,0))
-points(c(1:4), srmod_gra1$fit,col=c(rep("chartreuse4",2),rep("orange",2)), pch=20, cex=2.5)
-
-# native grass
-plot(c(1:4), srmod_natgra1$fit, xlim=c(0.5,4.5), pch=20, xaxt="n", ylim=c((min(srmod_natgra1$lci)), max(srmod_natgra1$uci)), ylab="Species Richness", xlab="", las=1, cex=2.5)
-arrows(c(1:4), srmod_natgra1$lci, c(1:4), srmod_natgra1$uci, length=0.05, code=3, angle=90)
-axis(side=1, at=c(1:4), labels=x_labels, tick=T, cex.axis=0.8, mgp=c(3,0.5,0))
-title(main = "(g) Native Grass", line = 0.5,adj=0, cex.main=0.95, font.main=1)
-title(xlab="Position",mgp=c(1.8,1,0))
-points(c(1:4), srmod_natgra1$fit,col=c(rep("chartreuse4",2),rep("orange",2)), pch=20, cex=2.5)
-
-# exotic grass
-plot(c(1:4), srmod_exogra1$fit, xlim=c(0.5,4.5), pch=20, xaxt="n", ylim=c((min(srmod_exogra1$lci)), max(srmod_exogra1$uci)), ylab="Species Richness", xlab="", las=1, cex=2.5)
-arrows(c(1:4), srmod_exogra1$lci, c(1:4), srmod_exogra1$uci, length=0.05, code=3, angle=90)
-axis(side=1, at=c(1:4), labels=x_labels, tick=T, cex.axis=0.8, mgp=c(3,0.5,0))
-title(main = "(h) Exotic Grass", line = 0.5,adj=0, cex.main=0.95, font.main=1)
-title(xlab="Position",mgp=c(1.8,1,0))
-points(c(1:4), srmod_exogra1$fit,col=c(rep("chartreuse4",2),rep("orange",2)), pch=20, cex=2.5)
-
-# native forbs
-plot(c(1:4), srmod_natfor1$fit, xlim=c(0.5,4.5), pch=20, xaxt="n", ylim=c((min(srmod_natfor1$lci)), max(srmod_natfor1$uci)), ylab="Species Richness", xlab="", las=1, cex=2.5,type="n")
-arrows(c(1:4), srmod_natfor1$lci, c(1:4), srmod_natfor1$uci, length=0.05, code=3, angle=90)
-axis(side=1, at=c(1:4), labels=x_labels, tick=T, cex.axis=0.8, mgp=c(3,0.5,0))
-title(main = "(i) Native Forb", line = 0.5,adj=0, cex.main=0.95, font.main=1)
-title(xlab="Position",mgp=c(1.8,1,0))
-points(c(1:4), srmod_natfor1$fit,col=c(rep("chartreuse4",2),rep("orange",2)), pch=20, cex=2.5)
-
-# exotic forbs
-plot(c(1:4), srmod_exofor1$fit, xlim=c(0.5,4.5), pch=20, xaxt="n", ylim=c((min(srmod_exofor1$lci)), max(srmod_exofor1$uci)), ylab="Species Richness", xlab="", las=1, cex=2.5,type="n")
-arrows(c(1:4), srmod_exofor1$lci, c(1:4), srmod_exofor1$uci, length=0.05, code=3, angle=90)
-axis(side=1, at=c(1:4), labels=x_labels, tick=T, cex.axis=0.8, mgp=c(3,0.5,0))
-title(main = "(j) Exotic Forb", line = 0.5,adj=0, cex.main=0.95, font.main=1)
-title(xlab="Position",mgp=c(1.8,1,0))
-points(c(1:4), srmod_exofor1$fit,col=c(rep("chartreuse4",2),rep("orange",2)), pch=20, cex=2.5)
-
-# non-leguminous forbs
-plot(c(1:4), srmod_legfor1$fit, xlim=c(0.5,4.5), pch=20, xaxt="n", ylim=c((min(srmod_nonlegfor1$lci)), max(srmod_nonlegfor1$uci)), ylab="Species Richness", xlab="", las=1, cex=2.5,type="n")
-arrows(c(1:4), srmod_nonlegfor1$lci, c(1:4), srmod_nonlegfor1$uci, length=0.05, code=3, angle=90)
-axis(side=1, at=c(1:4), labels=x_labels, tick=T, cex.axis=0.8, mgp=c(3,0.5,0))
-title(main = "(k) Non-leguminous Forb", line = 0.5,adj=0, cex.main=0.9, font.main=1)
-title(xlab="Position",mgp=c(1.8,1,0))
-points(c(1:4), srmod_nonlegfor1$fit,col=c(rep("chartreuse4",2),rep("orange",2)), pch=20, cex=2.5)
-
-# leguminous forbs
-plot(c(1:4), srmod_legfor1$fit, xlim=c(0.5,4.5), pch=20, xaxt="n", ylim=c((min(srmod_legfor1$lci)), max(srmod_legfor1$uci)), ylab="Species Richness", xlab="", las=1, cex=2.5,type="n")
-arrows(c(1:4), srmod_legfor1$lci, c(1:4), srmod_legfor1$uci, length=0.05, code=3, angle=90)
-axis(side=1, at=c(1:4), labels=x_labels, tick=T, cex.axis=0.8, mgp=c(3,0.5,0))
-title(main = "(l) Leguminous Forb", line = 0.5,adj=0, cex.main=0.95, font.main=1)
-title(xlab="Position",mgp=c(1.8,1,0))
-points(c(1:4), srmod_legfor1$fit,col=c(rep("chartreuse4",2),rep("orange",2)), pch=20, cex=2.5)
+  axis(side=1, at=x_lab_at, labels=x_labels2, tick=F, cex.axis=0.7, mgp=c(2,0.5,0))
+  axis(side=1, at=1:4, labels=NA, tick=T, cex.axis=0.8, mgp=c(2,0.5,0))
+  
+  title(main = paste("(",letters[i],") ",gr.df$ylab[i],sep=""), line = 0.5,adj=0, cex.main=0.95, font.main=1)
+  points(c(1:4), est.thisrun$fit,col=c(rep("chartreuse4",2),rep("orange",2)), pch=20, cex=2.5)
+  
+  if (i==4){
+    par(xpd=NA)
+    legend(5.2,10, legend=c("Control", "Burn"), col = c("chartreuse4", "orange"),pch=c(20, 20), cex = (1),pt.cex=2, title = NULL,bty="n")
+    par(xpd=F)
+  } # close add legend
+  
+} # close plot
 
 # save.image("04_workspaces/seedbank_analysis.RData")
 
@@ -921,7 +820,7 @@ mtext("(d)",3,0.4,F,adj=0)
 
 # ----
 
-# Explore distance-based ordination ----
+# Explore distance-based ordination (not in paper) ----
 
 # Is nMDS better for presence / absence data? According to Bolker on this page, yes. 
 # https://stats.stackexchange.com/questions/623005/can-i-conduct-a-pca-on-binary-presence-absence-data
@@ -929,7 +828,7 @@ mtext("(d)",3,0.4,F,adj=0)
 # However, the nMDS doesn't have 'axes' like a PCA and can not be used in downstream analyses:
 # https://www.researchgate.net/post/Can_you_use_NMDS_site_scores_in_a_regression
 
-# So let's have a look and see how the results compare to PCA
+# So have a look and see how the results compare to PCA
 # The figure below shows the nMDS produces a very similar outcome to PCA: almost all of the dissimilarity is captured by the above/below differences, and very little by the burn treatment. As with the PCA, the first nMDS axis is capturing almost all of the dissimilarity between above and below ground, with the other two axes contributing little. 
 
 head(div6);dim(div6)
@@ -1050,14 +949,25 @@ rich.all <- comp.all$rich
 sim.all <- 1 - comp.all$D
 tri.all <- data.frame(cbind(rich.all, sim.all, repl.all))
 table(rowSums(tri.all))
-head(tri.all,3); dim(tri.all)
+head(tri.all,6); dim(tri.all)
+
+# For the all data comparison, make a column to indicate whether they are within position comparisons (i.e. above vs above and below vs below) or among position comparisons (above vs below):
+
+# For the all comparisons, there are 1770 points plotted
+
+head(comp.all$repl[,1:10],6); dim(comp.all$repl)
+length(comp.all$repl)
+
+names(comp.all$repl)[[1]]==names(comp.all$repl)[[2]]
+
 
 # Adding labels manually to control parameters, but they can be checked by adding the default: labeltriangle = T
 
 dev.new(width=9,height=3,dpi=60, pointsize=18, noRStudioGD = T)
 par(mfrow=c(1,3),mgp=c(2.2,1,0), mar=c(4,6,4,6),oma=c(0,0,0,0))
 
-triangle.plot(tri.ag,scale=F, show.position = F, labeltriangle = F)
+tp1<-triangle.plot(tri.ag,scale=F, show.position = F, labeltriangle = F, cpoint=0)
+points(tp1, pch=20, col="cornflowerblue")
 
 text(-0.45,0.25,labels="richness difference", col="black", srt=60)
 text(0,-0.52,labels="similarity", col="black", srt=0)
@@ -1065,7 +975,8 @@ text(0.45,0.25,labels="replacement", col="black", srt=300)
 
 mtext("(a) above ground", side=3, line=2.5, adj=0.5, cex=0.8)
 
-triangle.plot(tri.bg,scale=F, show.position = F, labeltriangle = F)
+tp2<-triangle.plot(tri.bg,scale=F, show.position = F, labeltriangle = F)
+points(tp2, pch=20, col="deepskyblue")
 
 text(-0.45,0.25,labels="richness difference", col="black", srt=60)
 text(0,-0.52,labels="similarity", col="black", srt=0)
@@ -1073,7 +984,10 @@ text(0.45,0.25,labels="replacement", col="black", srt=300)
 
 mtext("(b) below ground", side=3, line=2.5, adj=0.5, cex=0.8)
 
-triangle.plot(tri.all,scale=F, show.position = F, labeltriangle = F)
+tp3<-triangle.plot(tri.all,scale=F, show.position = F, labeltriangle = F)
+points(tp3, pch=20, col="black")
+points(tp1, pch=20, col="cornflowerblue")
+points(tp2, pch=20, col="deepskyblue")
 
 text(-0.45,0.25,labels="richness difference", col="black", srt=60)
 text(0,-0.52,labels="similarity", col="black", srt=0)
@@ -1149,6 +1063,8 @@ bd.dat$quadratID2<-paste(bd.dat$quadratID,bd.dat$ab,sep=".")
 head(bd.dat,3);dim(bd.dat)
 
 # Calculate beta diversity for all functional groups using the 117 quadrat by species matrix
+
+# Use Jaccard dissimilarity coefficient, so it aligns with the Podani and Schmera analysis above:
 
 head(div6[,1:10]);dim(div6)
 head(AGmat[,1:10], 3);dim(AGmat)
@@ -1357,8 +1273,23 @@ for (i in 1:length(beta.groups)){
   
 } # beta analysis
 
-head(gr.beta)
+# extract beta diversity coefficients for MS:
 
+beta.groups
+
+beta.coef.df<-data.frame(group=rep(beta.groups,unlist(lapply(beta.coef, FUN = nrow))),do.call(rbind,beta.coef))
+beta.coef.df$term<-rownames(beta.coef.df)
+rownames(beta.coef.df)<-1:nrow(beta.coef.df)
+beta.coef.df$term[grep("Intercept",beta.coef.df$term)]<-"Intercept"
+beta.coef.df$term[grep("abbelow.b",beta.coef.df$term)]<-"Position x burn"
+beta.coef.df$term[grep("abbelow",beta.coef.df$term)]<-"Position"
+beta.coef.df$term[grep("burn_trt",beta.coef.df$term)]<-"Burn treatment"
+colnames(beta.coef.df)<-c("Functional Group", "Estimate","Standard error", "z value", "P value", "Term")
+beta.coef.df<-beta.coef.df[,c("Functional Group", "Term", "Estimate","Standard error", "z value", "P value")]
+beta.coef.df[,3:ncol(beta.coef.df)]<-round(beta.coef.df[,3:ncol(beta.coef.df)],3)
+head(beta.coef.df)
+
+# write.table(beta.coef.df, file="beta.coef.df.txt", quote=F, sep="\t", row.names=F)
 # save.image("04_Workspaces/processed_data.RData")
 
 # ----
@@ -1367,17 +1298,16 @@ head(gr.beta)
 
 # June 2025: make plot for beta diversity, showing the variation for total, native, exotic, annual and perennial for the main document (to show the variation in responses). Plot all other functional groups with additive effects in the SI. 
 
-# Jan 2026: update with estimates from distance based beta diversity:
+# Jan 2026: update with estimates from distance based beta diversity. 
+# Feb 2026: plot all species beta separately (see below) and other responses in the SI (this code). Note that there were only 2 x exotic grass species below ground (BG.exotic_grass) causing the model to not fit very well. We will not place too much emphasis on this interaction.
 
 dev.new(width=8,height=10,dpi=60,pointsize=18, noRStudioGD = T)
-par(mfrow=c(5,3),mar=c(3.5,4,1.5,1), mgp=c(2.2,1,0), oma=c(0,0,0,0))
+par(mfrow=c(4,3),mar=c(3.5,4,1.5,1), mgp=c(3.0,0.6,0), oma=c(0,0,0,0))
 
-for (i in 1:nrow(gr.df)){
+for (i in 2:nrow(gr.df)){
   
   gr.thisrun<-gr.df$group[i]
   beta.pred.thisrun<-beta.pred[[i]]
-  plot(c(1:4), beta.pred.thisrun$fit.resp, xlim=c(0.5,4.5), pch=20, xaxt="n", ylim=c((min(c(beta.pred.thisrun$lci.resp))), max(c(beta.pred.thisrun$uci.resp))), ylab="Beta Diversity", xlab="", las=1, cex=2.5,type="n")
-  title(xlab="Position", mgp=c(1.8,1,0))
   
   # Raw data jitters:
   
@@ -1390,6 +1320,11 @@ for (i in 1:nrow(gr.df)){
   b.b.bl<-raw.thisrun[raw.thisrun$burn_trt=="Burn" & raw.thisrun$ab=="below",which(colnames(raw.thisrun)==gr.thisrun)]
   b.raw.lim<-c(b.c.ab,b.c.bl,b.b.ab,b.b.bl)
   
+  # Plot
+  plot(c(1:4), beta.pred.thisrun$fit.resp, xlim=c(0.5,4.5), pch=20, xaxt="n", ylim=c(min(c(b.raw.lim,beta.pred.thisrun$lci.resp),na.rm=T), max(c(b.raw.lim,beta.pred.thisrun$uci.resp),na.rm=T)), ylab="Beta Diversity", xlab="", las=1, cex=2.5,type="n")
+  title(xlab="Position", mgp=c(1.8,1,0))
+  
+  # Add raw points
   points(jitter(rep(1,length(b.c.ab)),factor=4),b.c.ab,col=alpha("chartreuse4",0.5), pch=20, cex=0.5)
   points(jitter(rep(2,length(b.c.bl)),factor=4),b.c.bl,col=alpha("chartreuse4",0.5), pch=20, cex=0.5)
   points(jitter(rep(3,length(b.b.ab)),factor=4),b.b.ab,col=alpha("orange",0.5), pch=20, cex=0.5)
@@ -1397,8 +1332,12 @@ for (i in 1:nrow(gr.df)){
   
   # Model estimates
   arrows(c(1:4), beta.pred.thisrun$lci.resp, c(1:4), beta.pred.thisrun$uci.resp, length=0.05, code=3, angle=90)
-  axis(side=1, at=1:4, labels=x_labels2, tick=T, cex.axis=0.8, mgp=c(3,0.5,0))
-  title(main = paste("(a) ",gr.df$ylab[i],sep=""), line = 0.5,adj=0, cex.main=0.95, font.main=1)
+
+  axis(side=1, at=x_lab_at, labels=x_labels2, tick=F, cex.axis=0.7, mgp=c(2,0.5,0))
+  axis(side=1, at=1:4, labels=NA, tick=T, cex.axis=0.8, mgp=c(2,0.5,0))
+  
+  if (gr.thisrun!="exotic_grass") title.thisrun<-paste("(",letters[i],") ",gr.df$ylab[i],sep="") else title.thisrun<-paste("(",letters[i],") ",gr.df$ylab[i],"*",sep="") 
+    title(main = title.thisrun, line = 0.5,adj=0, cex.main=0.95, font.main=1)
   points(c(1:4), beta.pred.thisrun$fit.resp,col=c(rep("chartreuse4",2),rep("orange",2)), pch=20, cex=2.5)
   
 }
@@ -1406,4 +1345,72 @@ for (i in 1:nrow(gr.df)){
 # save.image("04_workspaces/seedbank_analysis.RData")
 
 # ----
+
+# Plot species richness and beta diversity together ----
+
+dev.new(width=9,height=3.5,dpi=120,pointsize=16, noRStudioGD = T)
+par(mfrow=c(1,2),mar=c(3.3,4,1.2,1), mgp=c(2.4,0.8,0), oma=c(0,0,0,4))
+
+# all sr
+plot(c(1:4), srmod_all1$fit, xlim=c(0.5,4.5), pch=20, xaxt="n", ylim=c((min(c(srmod_all1$lci,raw.lim))), max(c(srmod_all1$uci,raw.lim))), ylab="Species Richness", xlab="", las=1, cex=2.5,type="n")
+
+axis(side=1, at=x_lab_at, labels=x_labels2, tick=F, cex.axis=0.8, mgp=c(2,0.5,0))
+axis(side=1, at=1:4, labels=NA, tick=T, cex.axis=0.8, mgp=c(2,0.5,0))
+title(xlab="Position",mgp=c(2,1,0))
+title(main = "", line = 0.5,adj=0, cex.main=0.95)
+
+points(jitter(rep(1,length(all.c.ab)),factor=4),all.c.ab,col=alpha("chartreuse4",0.5), pch=20, cex=0.5)
+points(jitter(rep(2,length(all.c.bl)),factor=4),all.c.bl,col=alpha("chartreuse4",0.5), pch=20, cex=0.5)
+points(jitter(rep(3,length(all.b.ab)),factor=4),all.b.ab,col=alpha("orange",0.5), pch=20, cex=0.5)
+points(jitter(rep(4,length(all.b.bl)),factor=4),all.b.bl,col=alpha("orange",0.5), pch=20, cex=0.5)
+
+arrows(c(1:4), srmod_all1$lci, c(1:4), srmod_all1$uci, length=0.05, code=3, angle=90)
+points(c(1:4), srmod_all1$fit,col=c(rep("chartreuse4",2),rep("orange",2)), pch=20, cex=2.5)
+
+mtext("(a)",3,0.2,F,adj=0)
+
+
+# all beta
+
+# Raw data jitters:
+
+raw.all.beta<-div7[,c(1:which(colnames(div7)=="ab"),which(colnames(div7)=="all"))]
+head(raw.all.beta,3); dim(raw.all.beta)
+
+b.c.ab.ball<-raw.all.beta[raw.all.beta$burn_trt=="Control" & raw.all.beta$ab=="above",which(colnames(raw.all.beta)=="all")]
+b.c.bl.ball<-raw.all.beta[raw.all.beta$burn_trt=="Control" & raw.all.beta$ab=="below",which(colnames(raw.all.beta)=="all")]
+b.b.ab.ball<-raw.all.beta[raw.all.beta$burn_trt=="Burn" & raw.all.beta$ab=="above",which(colnames(raw.all.beta)=="all")]
+b.b.bl.ball<-raw.all.beta[raw.all.beta$burn_trt=="Burn" & raw.all.beta$ab=="below",which(colnames(raw.all.beta)=="all")]
+b.raw.lim.ball<-c(b.c.ab.ball,b.c.bl.ball,b.b.ab.ball,b.b.bl.ball)
+
+# Plot
+par(mgp=c(3.2,0.8,0))
+beta.pred.ball<-beta.pred[[1]]
+
+plot(c(1:4), beta.pred.ball$fit.resp, xlim=c(0.5,4.5), pch=20, xaxt="n", ylim=c(min(c(b.raw.lim.ball,beta.pred.ball$lci.resp),na.rm=T), max(c(b.raw.lim.ball,beta.pred.ball$uci.resp),na.rm=T)), ylab="Beta Diversity", xlab="", las=1, cex=2.5,type="n")
+title(xlab="Position", mgp=c(1.8,1,0))
+
+# Add raw points
+points(jitter(rep(1,length(b.c.ab.ball)),factor=4),b.c.ab.ball,col=alpha("chartreuse4",0.5), pch=20, cex=0.5)
+points(jitter(rep(2,length(b.c.bl.ball)),factor=4),b.c.bl.ball,col=alpha("chartreuse4",0.5), pch=20, cex=0.5)
+points(jitter(rep(3,length(b.b.ab.ball)),factor=4),b.b.ab.ball,col=alpha("orange",0.5), pch=20, cex=0.5)
+points(jitter(rep(4,length(b.b.bl.ball)),factor=4),b.b.bl.ball,col=alpha("orange",0.5), pch=20, cex=0.5)
+
+# Model estimates
+arrows(c(1:4), beta.pred.ball$lci.resp, c(1:4), beta.pred.ball$uci.resp, length=0.05, code=3, angle=90)
+axis(side=1, at=x_lab_at, labels=x_labels2, tick=F, cex.axis=0.8, mgp=c(2,0.5,0))
+axis(side=1, at=1:4, labels=NA, tick=T, cex.axis=0.8, mgp=c(2,0.5,0))
+points(c(1:4), beta.pred.ball$fit.resp,col=c(rep("chartreuse4",2),rep("orange",2)), pch=20, cex=2.5)
+
+mtext("(b)",3,0.2,F,adj=0)
+
+par(xpd=NA)
+legend(4.8,0.024, legend=c("Control", "Burn"), col = c("chartreuse4", "orange"),pch=c(20, 20), cex = (1),pt.cex=2, title = NULL,bty="n")
+par(xpd=F)
+
+# save.image("04_workspaces/seedbank_analysis.RData")
+
+# ----
+
+
 
