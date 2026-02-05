@@ -10,9 +10,9 @@ library(AICcmodavg)
 library(lmerTest)
 library(ecodist)
 library(ape)
-library(scales)
-library(adespatial)
-library(ade4)
+library(scales) # colour transparency
+library(adespatial) # beta diversity partitioning
+library(ade4) # triangle plot
 library(glmmADMB)
 
 # ---- load workspace:
@@ -955,11 +955,22 @@ head(tri.all,6); dim(tri.all)
 
 # For the all comparisons, there are 1770 points plotted
 
-head(comp.all$repl[,1:10],6); dim(comp.all$repl)
-length(comp.all$repl)
+head(repl.all,6); length(repl.all)
+attr(repl.all,"Labels")
 
-names(comp.all$repl)[[1]]==names(comp.all$repl)[[2]]
+row <- unlist(lapply(2:60, function(i) attr(repl.all,"Labels")[i:60])) # chatgtp helped with this line but I've checked it
+col<-rep(attr(repl.all,"Labels")[1:59],times=59:1)
 
+head(row); length(row); tail(row)
+head(col); length(col); tail(col)
+
+n.df<-data.frame(row, col)
+n.df$row<-substr(n.df$row,8,nchar(n.df$row))
+n.df$col<-substr(n.df$col,8,nchar(n.df$col))
+n.df$indic<-paste(n.df$row,n.df$col,sep=".")
+head(n.df); tail(n.df); dim(n.df)
+
+# triangle.plot won't work with the additional data. But can use the index in n.df$indic directly on the triangle data
 
 # Adding labels manually to control parameters, but they can be checked by adding the default: labeltriangle = T
 
@@ -967,7 +978,7 @@ dev.new(width=9,height=3,dpi=60, pointsize=18, noRStudioGD = T)
 par(mfrow=c(1,3),mgp=c(2.2,1,0), mar=c(4,6,4,6),oma=c(0,0,0,0))
 
 tp1<-triangle.plot(tri.ag,scale=F, show.position = F, labeltriangle = F, cpoint=0)
-points(tp1, pch=20, col="cornflowerblue")
+points(tp1, pch=20,cex=0.8, col="cornflowerblue")
 
 text(-0.45,0.25,labels="richness difference", col="black", srt=60)
 text(0,-0.52,labels="similarity", col="black", srt=0)
@@ -976,7 +987,7 @@ text(0.45,0.25,labels="replacement", col="black", srt=300)
 mtext("(a) above ground", side=3, line=2.5, adj=0.5, cex=0.8)
 
 tp2<-triangle.plot(tri.bg,scale=F, show.position = F, labeltriangle = F)
-points(tp2, pch=20, col="deepskyblue")
+points(tp2, pch=20, cex=0.8,col="deepskyblue")
 
 text(-0.45,0.25,labels="richness difference", col="black", srt=60)
 text(0,-0.52,labels="similarity", col="black", srt=0)
@@ -984,16 +995,23 @@ text(0.45,0.25,labels="replacement", col="black", srt=300)
 
 mtext("(b) below ground", side=3, line=2.5, adj=0.5, cex=0.8)
 
-tp3<-triangle.plot(tri.all,scale=F, show.position = F, labeltriangle = F)
-points(tp3, pch=20, col="black")
-points(tp1, pch=20, col="cornflowerblue")
-points(tp2, pch=20, col="deepskyblue")
+head(tri.all,6); dim(tri.all)
+head(n.df); dim(n.df)
+
+tp3<-triangle.plot(tri.all,scale=F, show.position = F, labeltriangle = F, cpoint = 0)
+
+points(tp3[which(n.df$indic=="above.above"),], pch=20, col="cornflowerblue",cex=0.8)
+points(tp3[which(n.df$indic=="below.below"),], pch=20, col="deepskyblue",cex=0.8)
+
+points(tp3[which(n.df$indic=="below.above"),], pch=20, col="black",cex=0.8)
 
 text(-0.45,0.25,labels="richness difference", col="black", srt=60)
 text(0,-0.52,labels="similarity", col="black", srt=0)
 text(0.45,0.25,labels="replacement", col="black", srt=300)
 
 mtext("(c) above and below", side=3, line=2.5, adj=0.5, cex=0.8)
+
+# save.image("04_workspaces/seedbank_analysis.RData")
 
 # Re-calculate beta diversity using a distance-based method (beta.div adespatial)
 
