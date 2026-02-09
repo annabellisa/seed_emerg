@@ -105,9 +105,13 @@ predCI<-function(model, new.data, se.fit=T)
 
 # PREDICT function
 # extends predictSE to calculate CIs and dataframe-ise predictions with 'new data'
+# updated Feb 2026 for glmmTMB; haven't re-tested for glmerMod after update
+
 pred<-function(model,new.data,se.fit=T,type="response"){
   
-  if(class(model)!="glmmadmb"){
+  library("arm")
+  
+  if(class(model)[1]=="glmerMod"){
     pr1<-predictSE(model,new.data,se.fit=se.fit, type=type)
     df1<-data.frame(new.data,fit=pr1$fit,se=pr1$se.fit, lci=pr1$fit-(1.96*pr1$se.fit), uci=pr1$fit+(1.96*pr1$se.fit))
   } # close lme4 models
@@ -129,6 +133,11 @@ pred<-function(model,new.data,se.fit=T,type="response"){
     } # close logit 
     
   } # close admb models
+  
+  if(class(model)=="glmmTMB"){
+    pr1<-predict(model, new.data, se.fit = se.fit, re.form=NA, type=type)
+    df1<-data.frame(new.data,fit=pr1$fit,se=pr1$se.fit, lci=pr1$fit-(1.96*pr1$se.fit), uci=pr1$fit+(1.96*pr1$se.fit))
+  } # close TMB models
   
   return(df1)
   

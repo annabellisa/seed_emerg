@@ -13,7 +13,7 @@ library(ape)
 library(scales) # colour transparency
 library(adespatial) # beta diversity partitioning
 library(ade4) # triangle plot
-library(glmmADMB)
+library(glmmTMB) # beta regression (for LCBD)
 
 # ---- load workspace:
 load("04_workspaces/seedbank_analysis.RData")
@@ -626,7 +626,7 @@ for (i in 2:nrow(gr.df)){
   axis(side=1, at=1:4, labels=NA, tick=T, cex.axis=0.8, mgp=c(2,0.5,0))
   
   title(main = paste("(",letters[i],") ",gr.df$ylab[i],sep=""), line = 0.5,adj=0, cex.main=0.95, font.main=1)
-  points(c(1:4), est.thisrun$fit,col=c(rep("chartreuse4",2),rep("orange",2)), pch=20, cex=2.5)
+  points(c(1:4), est.thisrun$fit,col=c(rep("chartreuse4",2),rep("orange",2)), pch=20, cex=2)
   
   if (i==4){
     par(xpd=NA)
@@ -1232,12 +1232,11 @@ head(gr.df); dim(gr.df)
 
 gr.df$ylab<-c("All species","Native", "Exotic", "Annual", "Perennial", "Forb", "Grass", "Native Grass", "Exotic Grass", "Native Forb", "Exotic Forb", "Leguminous Forb", "Non-leguminous Forb")
 
-# The data are positive numeric. 
-# Positive, continuous, numeric, non-integer, bounded by zero. 
+# The data are continuous, numeric, bounded by zero and 1. 
 range(div7[,which(colnames(div7)=="all"):ncol(div7)], na.rm=T)
 # hist(unlist(div7[,which(colnames(div7)=="all"):ncol(div7)]))
 
-# So this should be a gamma distribution, which can be stably implemented in glmmadmb with random effects
+# So this should be a beta regression, which can be implemented in glmmTMG with random effects (initially run with glmmADMB, but wasn't running for exotic grasses)
 
 beta.mod<-list()
 beta.sum<-list()
@@ -1263,18 +1262,20 @@ for (i in 1:length(beta.groups)){
     }
   
   form.int.thisrun<-paste(group.thisrun,"~ab*burn_trt+(1|transect)",sep="")
-  mod.int.thisrun<-glmmadmb(formula=as.formula(form.int.thisrun), family="gamma", data=dat.thisrun)
+  # mod.int.thisrun<-glmmadmb(formula=as.formula(form.int.thisrun), family="beta", data=dat.thisrun)
+   mod.int.thisrun<-glmmTMB(formula=as.formula(form.int.thisrun), family=beta_family(link = "logit"), data=dat.thisrun)
   
   form.add.thisrun<-paste(group.thisrun,"~ab+burn_trt+(1|transect)",sep="")
-  mod.add.thisrun<-glmmadmb(formula=as.formula(form.add.thisrun), family="gamma", data=dat.thisrun)
+  # mod.add.thisrun<-glmmadmb(formula=as.formula(form.add.thisrun), family="beta", data=dat.thisrun)
+  mod.add.thisrun<-glmmTMB(formula=as.formula(form.add.thisrun), family=beta_family(link = "logit"), data=dat.thisrun)
   
   # Interaction P value: if the P value is < 0.05 the interaction model is better: 
-  int.coef<-data.frame(summary(mod.int.thisrun)$coefficients)
+  int.coef<-data.frame(summary(mod.int.thisrun)$coefficients$cond)
   int.p<-int.coef[grep(":", rownames(int.coef)),grep("Pr", colnames(int.coef))]
   gr.df$beta.int.p[i]<-int.p
   
   if(int.p>0.05){
-  add.coef<-data.frame(summary(mod.add.thisrun)$coefficients)
+  add.coef<-data.frame(summary(mod.add.thisrun)$coefficients$cond)
   gr.df$beta.add.fire.p[i]<-add.coef[grep("burn", rownames(add.coef)),grep("Pr", colnames(add.coef))]
   gr.df$beta.add.position.p[i]<-add.coef[grep("abbelow", rownames(add.coef)),grep("Pr", colnames(add.coef))]
 }
@@ -1283,9 +1284,9 @@ for (i in 1:length(beta.groups)){
   
   beta.mod[[i]]<-mod.thisrun 
   beta.sum[[i]]<-summary(mod.thisrun)
-  beta.coef[[i]]<-summary(mod.thisrun)$coefficients
+  beta.coef[[i]]<-summary(mod.thisrun)$coefficients$cond
   
-  pred.thisrun<-pred(model=mod.thisrun, new.data = nd1, se.fit = T)
+  pred.thisrun<-pred(mod.thisrun, new.data = nd1, se.fit = T, type="response")
   
   beta.pred[[i]]<-pred.thisrun
   
@@ -1339,7 +1340,8 @@ for (i in 2:nrow(gr.df)){
   b.raw.lim<-c(b.c.ab,b.c.bl,b.b.ab,b.b.bl)
   
   # Plot
-  plot(c(1:4), beta.pred.thisrun$fit.resp, xlim=c(0.5,4.5), pch=20, xaxt="n", ylim=c(min(c(b.raw.lim,beta.pred.thisrun$lci.resp),na.rm=T), max(c(b.raw.lim,beta.pred.thisrun$uci.resp),na.rm=T)), ylab="Beta Diversity", xlab="", las=1, cex=2.5,type="n")
+  plot(c(1:4), beta.pred.thisrun$fit.resp, xlim=c(0.5,4.5), pch=20, xaxt="n", ylim=c(min(c(b.raw.lim,beta.pred.thisrun$lci.resp),na.rm=T), max(c(b.raw.lim,beta.pred.thisrun$uci.resp),na.rm=T)), ylab="", xlab="", las=1, cex=2.5,type="n")
+  title(ylab=as.expression(bquote("LC "~beta~"diversity")), mgp=c(2.7,0.6,0))
   title(xlab="Position", mgp=c(1.8,1,0))
   
   # Add raw points
@@ -1349,14 +1351,14 @@ for (i in 2:nrow(gr.df)){
   points(jitter(rep(4,length(b.b.bl)),factor=4),b.b.bl,col=alpha("orange",0.5), pch=20, cex=0.5)
   
   # Model estimates
-  arrows(c(1:4), beta.pred.thisrun$lci.resp, c(1:4), beta.pred.thisrun$uci.resp, length=0.05, code=3, angle=90)
+  arrows(c(1:4), beta.pred.thisrun$lci, c(1:4), beta.pred.thisrun$uci, length=0.05, code=3, angle=90)
 
   axis(side=1, at=x_lab_at, labels=x_labels2, tick=F, cex.axis=0.7, mgp=c(2,0.5,0))
   axis(side=1, at=1:4, labels=NA, tick=T, cex.axis=0.8, mgp=c(2,0.5,0))
   
   if (gr.thisrun!="exotic_grass") title.thisrun<-paste("(",letters[i],") ",gr.df$ylab[i],sep="") else title.thisrun<-paste("(",letters[i],") ",gr.df$ylab[i],"*",sep="") 
     title(main = title.thisrun, line = 0.5,adj=0, cex.main=0.95, font.main=1)
-  points(c(1:4), beta.pred.thisrun$fit.resp,col=c(rep("chartreuse4",2),rep("orange",2)), pch=20, cex=2.5)
+  points(c(1:4), beta.pred.thisrun$fit,col=c(rep("chartreuse4",2),rep("orange",2)), pch=20, cex=2)
   
 }
 
@@ -1405,8 +1407,9 @@ b.raw.lim.ball<-c(b.c.ab.ball,b.c.bl.ball,b.b.ab.ball,b.b.bl.ball)
 par(mgp=c(3.2,0.8,0))
 beta.pred.ball<-beta.pred[[1]]
 
-plot(c(1:4), beta.pred.ball$fit.resp, xlim=c(0.5,4.5), pch=20, xaxt="n", ylim=c(min(c(b.raw.lim.ball,beta.pred.ball$lci.resp),na.rm=T), max(c(b.raw.lim.ball,beta.pred.ball$uci.resp),na.rm=T)), ylab="Beta Diversity", xlab="", las=1, cex=2.5,type="n")
+plot(c(1:4), beta.pred.ball$fit, xlim=c(0.5,4.5), pch=20, xaxt="n", ylim=c(min(c(b.raw.lim.ball,beta.pred.ball$lci),na.rm=T), max(c(b.raw.lim.ball,beta.pred.ball$uci),na.rm=T)), ylab="", xlab="", las=1, cex=2.5,type="n")
 title(xlab="Position", mgp=c(1.8,1,0))
+title(ylab=as.expression(bquote("LC "~beta~"diversity")), mgp=c(3,0.6,0))
 
 # Add raw points
 points(jitter(rep(1,length(b.c.ab.ball)),factor=4),b.c.ab.ball,col=alpha("chartreuse4",0.5), pch=20, cex=0.5)
@@ -1415,10 +1418,10 @@ points(jitter(rep(3,length(b.b.ab.ball)),factor=4),b.b.ab.ball,col=alpha("orange
 points(jitter(rep(4,length(b.b.bl.ball)),factor=4),b.b.bl.ball,col=alpha("orange",0.5), pch=20, cex=0.5)
 
 # Model estimates
-arrows(c(1:4), beta.pred.ball$lci.resp, c(1:4), beta.pred.ball$uci.resp, length=0.05, code=3, angle=90)
+arrows(c(1:4), beta.pred.ball$lci, c(1:4), beta.pred.ball$uci, length=0.05, code=3, angle=90)
 axis(side=1, at=x_lab_at, labels=x_labels2, tick=F, cex.axis=0.8, mgp=c(2,0.5,0))
 axis(side=1, at=1:4, labels=NA, tick=T, cex.axis=0.8, mgp=c(2,0.5,0))
-points(c(1:4), beta.pred.ball$fit.resp,col=c(rep("chartreuse4",2),rep("orange",2)), pch=20, cex=2.5)
+points(c(1:4), beta.pred.ball$fit,col=c(rep("chartreuse4",2),rep("orange",2)), pch=20, cex=2.5)
 
 mtext("(b)",3,0.2,F,adj=0)
 
