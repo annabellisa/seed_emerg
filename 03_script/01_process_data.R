@@ -778,7 +778,7 @@ summary(comp3_lmer)
 # plot PCA ----
 shapes<-c(15,17)
 shapes<-shapes[as.factor(pcadata2$ab)]
-col.1<-c("grey60","grey20")
+col.1<-c("chartreuse4","orange")
 col.1<-col.1[as.factor(pcadata2$burn_trt)]
 
 dev.new(height=6,width=8,dpi=80,pointsize=14,noRStudioGD = T)
@@ -790,31 +790,23 @@ lines(x=1:length(pov1),y=pov1)
 title(ylab="Propotion Variance Explained", mgp=c(3,1,0))
 mtext("(a)",3,0.7,F,0)
 
-#biplot(pca1, xlab="Component 1", ylab="Component 2", col=c("grey40","black"), var.axes=TRUE, arrow.len=0.1, choices=c(3, 4))
-#mtext("(b)",3,0.7,F,adj = 0)
-
 # 1 vs 2
-plot(pcadata2$pca.comp1,pcadata2$pca.comp2,pch=shapes, xlab="PC1",ylab="PC2",cex=2,col=alpha(col.1,1), las=1)
+plot(pcadata2$pca.comp1,pcadata2$pca.comp2,pch=shapes, xlab="PC1 (28.7%)",ylab="PC2 (6.3%)",cex=1.5,col=alpha(col.1,1), las=1)
 mtext("(b)",3,0.4,F,adj=0)
-# text(x=c(-0.61888015), y=c(-7.32836938), labels= c("T26_20"), pos=4)
-# text(x=c(14.84107197), y=c(-0.54987242), labels= c("T06_57"), pos=2)
 
 # Add legend
 par(xpd=NA)
-legend(3.5,2, legend=c("Control Above", "Control Below", "Burnt Above", "Burnt Below"), col = c("grey60", "grey60", "grey20", "grey20"),pch=c(15, 17, 15, 17))
+legend(3.5,2, legend=c("Control Above", "Control Below", "Burnt Above", "Burnt Below"), col = c("chartreuse4", "chartreuse4", "orange", "orange"),pch=c(15, 17, 15, 17))
 par(xpd=F)
 
 # 1 vs 3
-plot(pcadata2$pca.comp1,pcadata2$pca.comp3,pch=shapes, xlab="PC1",ylab="PC3",cex=2,col=alpha(col.1,1), las=1)
+plot(pcadata2$pca.comp1,pcadata2$pca.comp3,pch=shapes, xlab="PC1 (28.7%)",ylab="PC3 (4.1%)",cex=1.5,col=alpha(col.1,1), las=1)
 mtext("(c)",3,0.4,F,adj=0)
-# text(x=c(0.49994222), y=c(-6.582940182), labels= c("T10_06"), pos=4)
-# text(x=c(14.84107197), y=c(0.614645118), labels= c("T06_57"), pos=2)
 
 # 2 vs 3
-plot(pcadata2$pca.comp2,pcadata2$pca.comp3,pch=shapes, xlab="PC2",ylab="PC3",cex=2,col=alpha(col.1,1), las=1)
+plot(pcadata2$pca.comp2,pcadata2$pca.comp3,pch=shapes, xlab="PC2 (6.3%)",ylab="PC3 (4.1%)",cex=1.5,col=alpha(col.1,1), las=1)
 mtext("(d)",3,0.4,F,adj=0)
-# text(x=c(0.69979374), y=c(-6.582940182), labels= c("T10_06"), pos=2)
-# text(x=c(-7.32836938), y=c(1.416516483), labels= c("T26_20"), pos=4)
+
 
 # save.image("04_workspaces/seedbank_analysis.RData")
 
