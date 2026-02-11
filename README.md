@@ -8,9 +8,13 @@ Data and code for analysing soil seedbanks post-fire
 ## Content Description
 
 01_data: Plant community data and associated site data
+
 02_functions: Functions used in processing and analysis
+
 03_script: Scripts for processing and analysis
+
 04_workspaces: Saved workspaces
+
 05_results: Results tables and figures from analysis output
 
 ## Code Authors
