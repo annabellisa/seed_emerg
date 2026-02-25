@@ -1312,8 +1312,8 @@ head(beta.coef.df)
 # Jan 2026: update with estimates from distance based beta diversity. 
 # Feb 2026: plot all species beta separately (see below) and other responses in the SI (this code). Note that there were only 2 x exotic grass species below ground (BG.exotic_grass) causing the model to not fit very well. We will not place too much emphasis on this interaction.
 
-dev.new(width=8,height=10,dpi=60,pointsize=18, noRStudioGD = T)
-par(mfrow=c(4,3),mar=c(3.5,4,1.5,1), mgp=c(3.0,0.6,0), oma=c(0,0,0,0))
+dev.new(width=9,height=10,dpi=60,pointsize=18, noRStudioGD = T)
+par(mfrow=c(4,3),mar=c(3.5,4,1.5,1), mgp=c(3.0,0.6,0), oma=c(0,0,0,6))
 
 for (i in 2:nrow(gr.df)){
   
@@ -1352,7 +1352,13 @@ for (i in 2:nrow(gr.df)){
     title(main = title.thisrun, line = 0.5,adj=0, cex.main=0.95, font.main=1)
   points(c(1:4), beta.pred.thisrun$fit,col=c(rep("chartreuse4",2),rep("orange",2)), pch=20, cex=2)
   
-}
+  if (i==4){
+    par(xpd=NA)
+    legend(5.2,0.03, legend=c("Control", "Burn"), col = c("chartreuse4", "orange"),pch=c(20, 20), cex = (1),pt.cex=2, title = NULL,bty="n")
+    par(xpd=F)
+  } # close add legend
+  
+} # close plot
 
 # save.image("04_workspaces/seedbank_analysis.RData")
 
