@@ -23,7 +23,7 @@ Caitlin Gaskell and Annabel Smith (unless otherwise stated within script)
 
 ## Manuscript
 
-Gaskell C, Campbell SD, Wolff D, Lebbink G, Smith AL (under review). Diverse soil seedbanks are resilient to reintroducing low-intensity fire in a subtropical grassy woodland.
+Gaskell C, Campbell SD, Wolff D, Lebbink G, Smith AL (2026). Diverse soil seedbanks are resilient to reintroducing low-intensity fire in a subtropical grassy woodland. Journal of Applied Ecology. Accepted 13 April 2026. 
 
 ## License
 
