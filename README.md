@@ -3,7 +3,7 @@
 Data and code for analysing soil seedbanks post-fire
 
 # Latest Release (Archived) 
-[![DOI](https://zenodo.org/badge/604401015.svg)](https://zenodo.org/records/19561921)
+[![DOI](https://zenodo.org/badge/757196790.svg)](https://zenodo.org/records/19561921/757196790)
 
 ## Content Description
 
@@ -23,7 +23,7 @@ Caitlin Gaskell and Annabel Smith (unless otherwise stated within script)
 
 ## Manuscript
 
-Gaskell C, Campbell SD, Wolff D, Lebbink G, Smith AL (2026). Diverse soil seedbanks are resilient to reintroducing low-intensity fire in a subtropical grassy woodland. Journal of Applied Ecology. Accepted 13 April 2026. 
+Gaskell C, Campbell SD, Wolff D, Lebbink G, Smith AL (2026). Diverse soil seedbanks are resilient to reintroducing low-intensity fire in a subtropical grassy woodland. Journal of Applied Ecology. 63, e70409. https://doi.org/10.1111/1365-2664.70409
 
 ## License
 
