@@ -3,7 +3,7 @@
 Data and code for analysing soil seedbanks post-fire
 
 # Latest Release (Archived) 
-[![DOI](https://zenodo.org/badge/757196790.svg)](https://zenodo.org/records/19561921/757196790)
+[![DOI](https://zenodo.org/badge/757196790.svg)](https://zenodo.org/badge/latestdoi/757196790)
 
 ## Content Description
 
